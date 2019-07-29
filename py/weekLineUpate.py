@@ -32,18 +32,37 @@ class WeekKLineUpdate:
             else:
                 return False
 
+    def getStockList(self, curTime):
+        orgUrl = 'https://xueqiu.com/service/v5/stock/screener/quote/list?page={pageNo}&size=90&order=asc&orderby=code&order_by=symbol&market=CN&type=sh_sz&_={curTime}'
+        for k in range(1, 50):
+            url = orgUrl.format(pageNo=k, curTime = curTime)
+            try:
+                respone = self.session.get(url, verify=False, headers = self.headers)
+            except (ReadTimeout, ConnectTimeout, ConnectionError):
+                break
+            else:
+                if (response.status_code == 200):
+                    return response.json()
+                else:
+                    break
+            
     def getWeekKLine(self, stockNo, ticksStartMs, ticksEndMs):
+        stockList = []
         orgUrl = 'https://xueqiu.com/stock/forchartk/stocklist.json?symbol={stockNo}&period=1week&type=before&begin={beginMs}&end={endMs}'
         url = orgUrl.format(stockNo=stockNo, beginMs=ticksStartMs, endMs=ticksEndMs)
         try:
             response = self.session.get(url, verify=False, headers = self.headers)
         except (ReadTimeout, ConnectTimeout, ConnectionError):
-            return None
+            break;
         else:
             if (response.status_code == 200):
-                return response.json()
+                orgList = response.json().get('data').get('list')
+                if (orgList):
+                    dfPage = DataFrame(orgList)
+                else:
+                    break;
             else:
-                return None
+                break;
 
     def updateWeekKLine(self, data):
         df = DataFrame(data.get('chartlist'))
