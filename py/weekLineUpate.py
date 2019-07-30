@@ -16,11 +16,7 @@ class WeekKLineUpdate:
         self.headers = {"Accept":"text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3",
                         "Accept-Encoding":"gzip, deflate, br",
                         "Host": "xueqiu.com",
-                        "User-Agent":"Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.142 Safari/537.36",
-                        "Cookie": "_ga=GA1.2.1914090483.1551762674; device_id=a9e2d76ee0e6160e8ba604a7e2cdc7bc; s=cp12g5xoxo; __utmz=1.1560230558.1.1.utmcsr=(direct)|utmccn=(direct)|utmcmd=(none);\
-                        Hm_lvt_1db88642e346389874251b5a1eded6e3=1564039732,1564384833; _gid=GA1.2.1561277100.1564389468; __utma=1.1914090483.1551762674.1564390710.1564466946.6;\
-                        aliyungf_tc=AQAAACz0rmxBtAUAgn1Tq2V9/bh64GgV;xq_a_token=d795cb8533055e91fb68a4a16905a27ccab77258; xqat=d795cb8533055e91fb68a4a16905a27ccab77258;\
-                        xq_r_token=8edd6c2dc7ff85ed2113c6a92f853cd7641c9eb5; u=211564472697042"
+                        "User-Agent":"Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.142 Safari/537.36"
                     }
         self.hostUrl = 'https://xueqiu.com'
         self.saveDir = saveDir
@@ -71,6 +67,7 @@ class WeekKLineUpdate:
         orgUrl = 'https://stock.xueqiu.com/v5/stock/chart/kline.json?symbol={stockNo}&begin={beginTime}&period=week&type=before&count={counts}&indicator=kline,ma'
         url = orgUrl.format(stockNo=stockNo, beginTime = beginTime, counts=counts)
         self.headers["Host"] = "stock.xueqiu.com"
+  
         try:
             response = self.session.get(url, verify=False, headers = self.headers)
         except (ReadTimeout, ConnectTimeout, ConnectionError):
@@ -112,7 +109,7 @@ class WeekKLineUpdate:
 
 
 if __name__ == '__main__':
-    weekKLine =   WeekKLineUpdate('E:\\self\\stock\\data')
+    weekKLine =   WeekKLineUpdate('E:\\work\\stock\\StockAuto\\data')
     if (weekKLine.prepareUpdate()):
         '''
         dfList = weekKLine.getStockList(1564560000000)
