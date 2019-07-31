@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/CStockAutoWindow">
+        <file>stockAuto.qss</file>
+    </qresource>
+</RCC>

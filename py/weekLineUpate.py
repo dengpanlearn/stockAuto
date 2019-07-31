@@ -12,19 +12,20 @@ from requests.exceptions import ConnectionError
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
 
 class WeekKLineUpdate:
-    def __init__(self, saveDir):
+    def __init__(self):
         self.headers = {"Accept":"text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3",
                         "Accept-Encoding":"gzip, deflate, br",
                         "Host": "xueqiu.com",
                         "User-Agent":"Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.142 Safari/537.36"
                     }
         self.hostUrl = 'https://xueqiu.com'
-        self.saveDir = saveDir
         
-    def prepareUpdate(self):
+        
+    def prepareUpdate(self, saveDir):
         requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
         self.session = requests.session()
         self.headers["Host"] = "xueqiu.com"
+        self.saveDir = saveDir
         try:
             response = self.session.get(self.hostUrl,verify=False, headers= self.headers)
         except (ReadTimeout, ConnectTimeout, ConnectionError):
@@ -35,6 +36,14 @@ class WeekKLineUpdate:
             else:
                 return False
 
+    def getAndUpdateStockList(self, curTime):
+        dfList = self.getStockList(curTime*100)
+        if (dfList.empty):
+            return -1
+        else :
+            self.updateStockList(dfList)
+            return 0
+            
     def getStockList(self, curTime):
         outDf = DataFrame(columns=['symbol','name'])
         self.headers["Host"] = "xueqiu.com"
@@ -62,6 +71,16 @@ class WeekKLineUpdate:
     def updateStockList(self, df):
         con=sqlite3.connect(self.saveDir+'\\stockList.db')
         pandas.io.sql.to_sql(df, 'code', con = con, if_exists='replace')
+
+
+    def getAndUpdateWeekKLine(self, stockNo, beginTime, counts):
+        stockKLine = self.getWeekKLine(stockNo, beginTime*1000, counts)
+        
+        if (stockKLine.get('error_code', 1)):
+            return -1
+        else :
+            self.updateWeekKLine(stockKLine.get('data'))
+            return 0
             
     def getWeekKLine(self, stockNo, beginTime, counts):
         orgUrl = 'https://stock.xueqiu.com/v5/stock/chart/kline.json?symbol={stockNo}&begin={beginTime}&period=week&type=before&count={counts}&indicator=kline,ma'
@@ -109,13 +128,10 @@ class WeekKLineUpdate:
 
 
 if __name__ == '__main__':
-    weekKLine =   WeekKLineUpdate('E:\\work\\stock\\StockAuto\\data')
-    if (weekKLine.prepareUpdate()):
+    weekKLine =   WeekKLineUpdate()
+    if (weekKLine.prepareUpdate('E:\\self\\stock\\data')):
         '''
-        dfList = weekKLine.getStockList(1564560000000)
-        if (not dfList.empty):
-            weekKLine.updateStockList(dfList)
+        ret = weekKLine.getAndUpdateStockList(int(time.time()))
         '''
-        stockKLine = weekKLine.getWeekKLine('SZ000004', int(time.time()*1000), -82)
-        if (stockKLine):
-            weekKLine.updateWeekKLine(stockKLine.get('data'))
+        ret = weekKLine.getAndUpdateWeekKLine('SZ000004', int(time.time()), -82)
+

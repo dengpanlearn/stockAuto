@@ -1,0 +1,35 @@
+/*
+* python 脚本调用接口
+*/
+
+#ifndef __STOCK_PYTHON_H__
+#define __STOCK_PYTHON_H__
+
+#include <dp.h>
+#include <Python.h>
+
+class CStockPython
+{
+public:
+	CStockPython();
+	~CStockPython();
+
+	BOOL Init(char const* pPyDir, char const* pDataDir, int weekCounts);
+	void Release();
+
+public:
+	BOOL UpdateLatestStockList();
+
+	BOOL UpdateLatestKLine(char const* pStockCode, int counts);
+
+private:
+	PyObject*	m_pModuleKLine;
+	PyObject*	m_pDictKLine;
+	PyObject*	m_pClassKLine;
+	PyObject*	m_pInstanceKLine;
+};
+
+#endif // !__STOCK_PYTHON_H__
+
+
+
