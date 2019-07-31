@@ -1,3 +1,4 @@
 # Windows
 *.bak
+__pycache__
 

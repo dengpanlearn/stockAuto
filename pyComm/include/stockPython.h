@@ -14,7 +14,7 @@ public:
 	CStockPython();
 	~CStockPython();
 
-	BOOL Init(char const* pPyDir, char const* pDataDir, int weekCounts);
+	BOOL Init(char const* pPyDir, char const* pDataDir);
 	void Release();
 
 public:

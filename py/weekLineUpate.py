@@ -129,7 +129,7 @@ class WeekKLineUpdate:
 
 if __name__ == '__main__':
     weekKLine =   WeekKLineUpdate()
-    if (weekKLine.prepareUpdate('E:\\self\\stock\\data')):
+    if (weekKLine.prepareUpdate('E:\work\stock\StockAuto\data')):
         '''
         ret = weekKLine.getAndUpdateStockList(int(time.time()))
         '''

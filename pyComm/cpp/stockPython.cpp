@@ -18,14 +18,17 @@ CStockPython::~CStockPython()
 	Release();
 }
 
-BOOL CStockPython::Init(char const* pPyDir, char const* pDataDir, int weekCounts)
+BOOL CStockPython::Init(char const* pPyDir, char const* pDataDir)
 {
 	Py_Initialize();
 	if (!Py_IsInitialized())
 		return FALSE;
 
 	PyRun_SimpleString("import sys");
-	PyRun_SimpleString("sys.path.append(pPyDir)");
+
+	char szTmp[64] = { 0 };
+	sprintf_s(szTmp, sizeof(szTmp)-1, "sys.path.append('%s')", pPyDir);
+	PyRun_SimpleString(szTmp);
 
 	do
 	{
@@ -47,6 +50,8 @@ BOOL CStockPython::Init(char const* pPyDir, char const* pDataDir, int weekCounts
 
 		PyObject* pRet = PyObject_CallMethod(m_pClassKLine, PYTHON_CLASS_WEEK_KLINE_METHOD_PREPARE_UPDATE, "s",
 			pPyDir, m_pInstanceKLine);
+		if (pRet == NULL)
+			break;
 
 		int result = -1;
 		PyArg_Parse(pRet, "i", &result);
@@ -94,5 +99,29 @@ void CStockPython::Release()
 
 BOOL CStockPython::UpdateLatestStockList()
 {
-	PyObject* pRet = PyObject_CallMethod(m_pClassKLine, "add", "10", "10", m_pInstanceKLine);
+	time_t curTime = time(NULL);
+	PyObject* pRet = PyObject_CallMethod(m_pClassKLine, PYTHON_CLASS_WEEK_KLINE_METHOD_UPDATE_STOCK_LIST, "L", curTime, m_pInstanceKLine);
+	if (pRet == NULL)
+		return FALSE;
+
+	int result = -1;
+	PyArg_Parse(pRet, "i", &result);
+	Py_DECREF(pRet);
+
+	return result == 0;
+}
+
+BOOL CStockPython::UpdateLatestKLine(char const* pStockCode, int counts)
+{
+	time_t curTime = time(NULL);
+	PyObject* pRet = PyObject_CallMethod(m_pClassKLine, PYTHON_CLASS_WEEK_KLINE_METHOD_UPDATE_STOCK_KLINE, "Li", curTime, counts,
+		m_pInstanceKLine);
+	if (pRet == NULL)
+		return FALSE;
+
+	int result = -1;
+	PyArg_Parse(pRet, "i", &result);
+	Py_DECREF(pRet);
+
+	return result == 0;
 }
