@@ -1,4 +1,5 @@
 import requests
+import numpy
 import pandas
 import json
 import sqlite3
@@ -29,12 +30,12 @@ class WeekKLineUpdate:
         try:
             response = self.session.get(self.hostUrl,verify=False, headers= self.headers)
         except (ReadTimeout, ConnectTimeout, ConnectionError):
-            return False
+            return -1
         else:
             if (response.status_code == 200):
-                return True
+                return 0
             else:
-                return False
+                return -1
 
     def getAndUpdateStockList(self, curTime):
         dfList = self.getStockList(curTime*100)
@@ -129,7 +130,7 @@ class WeekKLineUpdate:
 
 if __name__ == '__main__':
     weekKLine =   WeekKLineUpdate()
-    if (weekKLine.prepareUpdate('E:\work\stock\StockAuto\data')):
+    if (weekKLine.prepareUpdate('E:\\self\\stock\\data')):
         '''
         ret = weekKLine.getAndUpdateStockList(int(time.time()))
         '''
