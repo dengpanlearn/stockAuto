@@ -19,6 +19,7 @@ CStockUpdateBase::~CStockUpdateBase()
 BOOL CStockUpdateBase::Create(char const* pUpdateDir)
 {
 	strncpy(m_szUpdateDir, pUpdateDir, sizeof(m_szUpdateDir) - 1);
+	return TRUE;
 }
 
 void CStockUpdateBase::Close()
