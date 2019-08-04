@@ -18,13 +18,13 @@ public:
 	CStockXiuQiuUpdate();
 	~CStockXiuQiuUpdate();
 
-	BOOL Create(char const* pUpdateDir, char const* pModuleDir);
+	BOOL Create(char const* pUpdateDir, char const* pStockListDb, char const* pStockKLineDb,  char const* pModuleDir, char const* pModule);
 	void Close();
 
 	// 接口定义
 public:
-	virtual BOOL UpdateLatestStockList() = 0;
-	virtual BOOL UpdateLatestKLine(char const* pStockCode, int counts) = 0;
+	virtual BOOL UpdateLatestStockList();
+	virtual BOOL UpdateLatestKLine(char const* pStockCode, int counts);
 
 private:
 	char m_szModuleDir[STOCK_AUTO_SAVE_DIR_MAX_SIZE];

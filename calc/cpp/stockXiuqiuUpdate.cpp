@@ -17,7 +17,7 @@ CStockXiuQiuUpdate::~CStockXiuQiuUpdate()
 	Close();
 }
 
-BOOL CStockXiuQiuUpdate::Create(char const* pUpdateDir,  char const* pModuleDir)
+BOOL CStockXiuQiuUpdate::Create(char const* pUpdateDir, char const* pStockListDb, char const* pStockKLineDb, char const* pModuleDir, char const* pModule)
 {
 	if (!CStockUpdateBase::Create(pUpdateDir))
 		return FALSE;
@@ -26,14 +26,14 @@ BOOL CStockXiuQiuUpdate::Create(char const* pUpdateDir,  char const* pModuleDir)
 	if (pStockPython == NULL)
 		return FALSE;
 
-	if (!pStockPython->Init(pModuleDir, pUpdateDir))
+	if (!pStockPython->Init(pModuleDir, pModule, pUpdateDir, pStockListDb, pStockKLineDb))
 	{
 		delete pStockPython;
 		pStockPython = NULL;
 		return FALSE;
 	}
 
-	strncpy(m_szModuleDir, pUpdateDir, sizeof(pModuleDir) - 1);
+	strncpy(m_szModuleDir, pModuleDir, sizeof(pModuleDir) - 1);
 	return TRUE;
 }
 

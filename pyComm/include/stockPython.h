@@ -14,7 +14,7 @@ public:
 	CStockPython();
 	~CStockPython();
 
-	BOOL Init(char const* pPyDir, char const* pDataDir);
+	BOOL Init(char const* pPyDir, char const* pModule, char const* pDataDir, char const* pStockListDb, char const* pStockKLineDb);
 	void Release();
 
 public:

@@ -19,7 +19,7 @@ CStockPython::~CStockPython()
 	Release();
 }
 
-BOOL CStockPython::Init(char const* pPyDir, char const* pDataDir)
+BOOL CStockPython::Init(char const* pPyDir, char const* pModule, char const* pDataDir, char const* pStockListDb, char const* pStockKLineDb)
 {
 	Py_Initialize();
 	if (!Py_IsInitialized())
@@ -32,7 +32,7 @@ BOOL CStockPython::Init(char const* pPyDir, char const* pDataDir)
 
 	do
 	{
-		m_pModuleKLine = PyImport_ImportModule(PYTHON_MOUDLE_WEEK_KLINE);
+		m_pModuleKLine = PyImport_ImportModule(pModule);
 		if (m_pModuleKLine == NULL)
 			break;
 
@@ -48,8 +48,8 @@ BOOL CStockPython::Init(char const* pPyDir, char const* pDataDir)
 		if (m_pInstanceKLine == NULL)
 			break;
 
-		PyObject* pRet = PyObject_CallMethod(m_pInstanceKLine, PYTHON_CLASS_WEEK_KLINE_METHOD_PREPARE_UPDATE, "s",
-			pDataDir);
+		PyObject* pRet = PyObject_CallMethod(m_pInstanceKLine, PYTHON_CLASS_WEEK_KLINE_METHOD_PREPARE_UPDATE, "sss",
+			pDataDir, pStockListDb, pStockKLineDb);
 		if (pRet == NULL)
 			break;
 

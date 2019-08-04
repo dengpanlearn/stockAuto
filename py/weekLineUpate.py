@@ -20,13 +20,14 @@ class WeekKLineUpdate:
                         "User-Agent":"Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.142 Safari/537.36"
                     }
         self.hostUrl = 'https://xueqiu.com'
-        
-        
-    def prepareUpdate(self, saveDir):
         requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
         self.session = requests.session()
+        
+    def prepareUpdate(self, saveDir, dbStockList, dbStockKLine):
         self.headers["Host"] = "xueqiu.com"
         self.saveDir = saveDir
+        self.dbStockList = dbStockList
+        self.dbStockKLine = dbStockKLine
         try:
             response = self.session.get(self.hostUrl,verify=False, headers= self.headers)
         except (ReadTimeout, ConnectTimeout, ConnectionError):
@@ -70,7 +71,7 @@ class WeekKLineUpdate:
         return outDf
 
     def updateStockList(self, df):
-        con=sqlite3.connect(self.saveDir+'\\stockList.db')
+        con=sqlite3.connect(self.saveDir+'\\'+self.dbStockList)
         pandas.io.sql.to_sql(df, 'code', con = con, if_exists='replace')
 
 
@@ -124,15 +125,13 @@ class WeekKLineUpdate:
             
         df = DataFrame(itemList, columns=columns)
         stockCode = data.get('symbol')
-        con=sqlite3.connect(self.saveDir+'\\kline.db')
+        con=sqlite3.connect(self.saveDir+'\\'+self.dbStockKLine)
         pandas.io.sql.to_sql(df[['open','high', 'close', 'low', 'volume', 'rsi', 'ma10', 'chg', 'percent', 'timestamp', 'time']], stockCode, con = con, if_exists='replace')
 
 
 if __name__ == '__main__':
     weekKLine =   WeekKLineUpdate()
-    if (weekKLine.prepareUpdate('E:\\self\\stock\\data')):
-        '''
+    if (not weekKLine.prepareUpdate('E:\\work\\stock\\StockAuto\\data', 'stockList.db', 'kline.db')):
         ret = weekKLine.getAndUpdateStockList(int(time.time()))
-        '''
         ret = weekKLine.getAndUpdateWeekKLine('SZ000004', int(time.time()), -82)
 
