@@ -7,7 +7,7 @@
 
 #include <SyncObj.h>
 #include <multiEventsTask.h>
-
+#include "stockCalcDef.h"
 #include "stockUpdateTask.h"
 
 class CStockAutoManager :public CMultiEventsTask
@@ -32,12 +32,13 @@ protected:
 	};
 
 private:
-	BOOL OnStockAutoManagerInit();
+	UINT OnStockAutoManagerInit();
 
 private:
 	CStockUpdateTask*	m_pUpdateTask;
 	CCriticalSection	m_cs;
 	UINT				m_managerStep;
+	STOCK_MANAGER_JOB_LIST*		m_pJobList;
 };
 
 #endif // !__STOCK_AUTO_MANAGER_H__
