@@ -9,7 +9,7 @@
 CStockUpdateTask::CStockUpdateTask()
 {
 	m_pStockUpdate = NULL;
-	memset(&m_configPython, 0, sizeof(m_configPython);
+	memset(&m_configPython, 0, sizeof(m_configPython));
 }
 
 CStockUpdateTask::~CStockUpdateTask()
@@ -53,6 +53,32 @@ void CStockUpdateTask::Close()
 		delete m_pStockUpdate;
 		m_pStockUpdate = NULL;
 	}
+}
+
+void CStockUpdateTask::OnActive()
+{
+	CMultiEventsTask::OnActive();
+}
+
+int CStockUpdateTask::OnEventActive(UINT cmd, void* param)
+{
+	BOOL result = TRUE;
+	
+
+	switch (cmd)
+	{
+	case STOCK_CALC_EVENT_UPDATE_STOCK_LIST:
+		result = m_pStockUpdate->UpdateLatestStockList();
+		break;
+
+	case STOCK_CALC_EVENT_UPDATE_STOCK_KLINE:
+		STOCK_CALC_UPDATE_KLINE* pKLineParam = (STOCK_CALC_UPDATE_KLINE*)param;
+		result = m_pStockUpdate->UpdateLatestKLine(pKLineParam->codeName, pKLineParam->updateCycles);
+		break;
+	}
+
+
+	return result? EVENT_COMPLETE_OK: EVENT_COMPLETE_FAIL;
 }
 
 void CStockUpdateTask::InitConfig(STOCKAUTO_CONFIG_PYTHON* pConfigPython)
