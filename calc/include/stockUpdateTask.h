@@ -13,7 +13,7 @@ class CStockUpdateTask : public CMultiEventsTask
 {
 public: 
 	CStockUpdateTask();
-	~CStockUpdateTask();
+	virtual~CStockUpdateTask();
 
 	BOOL Create(LPCTSTR pNameTask, int stackSize, int priTask, int optTask, int timeoutMs, int maxEvents);
 	void Close();

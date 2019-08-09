@@ -5,12 +5,13 @@
 #ifndef __STOCK_CALC_DEF_H__
 #define __STOCK_CALC_DEF_H__
 
+#include <taskDef.h>
 #define	STOCK_CODE_NAME_MAX				32
 #define	STOCK_AUTO_COUNTS_MAX			3700
 struct STOCK_CODE_NAME
 {
 	char	code[STOCK_CODE_NAME_MAX];
-	TCHAR	name[STOCK_CODE_NAME_MAX];
+	char	name[STOCK_CODE_NAME_MAX];
 };
 
 struct STOCK_MANAGER_JOB_LIST
