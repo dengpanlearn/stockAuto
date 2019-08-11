@@ -17,12 +17,12 @@ public:
 	CStockDataTask();
 	virtual~CStockDataTask();
 
-	BOOL Create(LPCTSTR pNameTask, int stackSize, int priTask, int optTask, int timeoutMs, int maxEvents);
+	BOOL Create(LPCTSTR pNameTask, int stackSize, int priTask, int optTask, int timeoutMs, int maxEvents, int maxEventParamSize);
 	void Close();
 
 protected:
 	virtual void OnActive();
-	virtual int OnEventActive(UINT cmd, void* param);
+	virtual int OnEventActive(UINT cmd, void* param, int paramLen);
 
 private:
 	void InitConfig(STOCKAUTO_CONFIG_DATA* pConfigData);

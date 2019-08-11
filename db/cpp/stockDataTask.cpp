@@ -19,7 +19,7 @@ CStockDataTask::~CStockDataTask()
 	Close();
 }
 
-BOOL CStockDataTask::Create(LPCTSTR pNameTask, int stackSize, int priTask, int optTask, int timeoutMs, int maxEvents)
+BOOL CStockDataTask::Create(LPCTSTR pNameTask, int stackSize, int priTask, int optTask, int timeoutMs, int maxEvents, int maxEventParamSize)
 {
 	InitConfig(&m_configData);
 	CStockDataSqlite* pStockSqlite = new CStockDataSqlite();
@@ -31,7 +31,7 @@ BOOL CStockDataTask::Create(LPCTSTR pNameTask, int stackSize, int priTask, int o
 		if (!pStockSqlite->Init(m_configData.dataDir, m_configData.listFileName, m_configData.klineFileName))
 			break;
 
-		if (!CMultiEventsTask::Create(pNameTask, stackSize, priTask, optTask, timeoutMs, maxEvents))
+		if (!CMultiEventsTask::Create(pNameTask, stackSize, priTask, optTask, timeoutMs, maxEvents, maxEventParamSize))
 			break;
 
 		m_pStockData = pStockSqlite;
@@ -57,12 +57,34 @@ void CStockDataTask::Close()
 
 void CStockDataTask::OnActive()
 {
-
+	CMultiEventsTask::OnActive();
 }
 
-int CStockDataTask::OnEventActive(UINT cmd, void* param)
+int CStockDataTask::OnEventActive(UINT cmd, void* param, int paramLen)
 {
+	int result = EVENT_COMPLETE_OK;
 
+
+	switch (cmd)
+	{
+	case STOCK_CALC_EVENT_GET_STOCK_LIST:
+		STOCK_CALC_GET_LIST * pGetList = (STOCK_CALC_GET_LIST*)param;
+		if (!m_pStockData->StockListIsOn())
+		{
+			result = EVENT_COMPLETE_FAIL;
+		}
+		else
+		{
+			result = m_pStockData->GetStockList(pGetList->pListBuf, pGetList->bufCounts);
+		}
+		break;
+
+	default:
+		result = EVENT_COMPLETE_FAIL;
+	}
+
+
+	return result;
 }
 
 void CStockDataTask::InitConfig(STOCKAUTO_CONFIG_DATA* pConfigData)

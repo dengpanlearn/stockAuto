@@ -17,7 +17,7 @@ CStockUpdateTask::~CStockUpdateTask()
 	Close();
 }
 
-BOOL CStockUpdateTask::Create(LPCTSTR pNameTask, int stackSize, int priTask, int optTask, int timeoutMs, int maxEvents)
+BOOL CStockUpdateTask::Create(LPCTSTR pNameTask, int stackSize, int priTask, int optTask, int timeoutMs, int maxEvents, int maxEventParamSize)
 {
 	InitConfig(&m_configPython);
 	CStockXiuQiuUpdate* pXueQiuUpdate = new CStockXiuQiuUpdate();
@@ -30,7 +30,7 @@ BOOL CStockUpdateTask::Create(LPCTSTR pNameTask, int stackSize, int priTask, int
 			m_configPython.moduleDir, m_configPython.klineModule))
 			break;
 
-		if (!CMultiEventsTask::Create(pNameTask, stackSize, priTask, optTask, timeoutMs, maxEvents))
+		if (!CMultiEventsTask::Create(pNameTask, stackSize, priTask, optTask, timeoutMs, maxEvents, maxEventParamSize))
 			break;
 
 		m_pStockUpdate = pXueQiuUpdate;
@@ -60,7 +60,7 @@ void CStockUpdateTask::OnActive()
 	CMultiEventsTask::OnActive();
 }
 
-int CStockUpdateTask::OnEventActive(UINT cmd, void* param)
+int CStockUpdateTask::OnEventActive(UINT cmd, void* param, int paramLen)
 {
 	BOOL result = TRUE;
 	
@@ -91,12 +91,12 @@ void CStockUpdateTask::InitConfig(STOCKAUTO_CONFIG_PYTHON* pConfigPython)
 		memcpy(pConfigPython->klineModule, STOCKAUTO_CONFIG_PYTHON_KLINE_MODULE_DFT, sizeof(STOCKAUTO_CONFIG_PYTHON_KLINE_MODULE_DFT));
 
 	if (pConfigPython->updateDir[0] == '\0')
-		memcpy(pConfigPython->updateDir, STOCKAUTO_CONFIG_PYTHON_UPDATE_DIR, sizeof(STOCKAUTO_CONFIG_PYTHON_UPDATE_DIR));
+		memcpy(pConfigPython->updateDir, STOCKAUTO_CONFIG_PYTHON_UPDATE_DIR_DFT, sizeof(STOCKAUTO_CONFIG_PYTHON_UPDATE_DIR_DFT));
 
 	if (pConfigPython->dbStockList[0] == '\0')
-		memcpy(pConfigPython->dbStockList, STOCKAUTO_CONFIG_PYTHON_DB_STOCKLIST, sizeof(STOCKAUTO_CONFIG_PYTHON_DB_STOCKLIST));
+		memcpy(pConfigPython->dbStockList, STOCKAUTO_CONFIG_PYTHON_DB_STOCKLIST_DFT, sizeof(STOCKAUTO_CONFIG_PYTHON_DB_STOCKLIST_DFT));
 
 
 	if (pConfigPython->dbStockKLine[0] == '\0')
-		memcpy(pConfigPython->dbStockKLine, STOCKAUTO_CONFIG_PYTHON_DB_STOCKKLINE, sizeof(STOCKAUTO_CONFIG_PYTHON_DB_STOCKKLINE));
+		memcpy(pConfigPython->dbStockKLine, STOCKAUTO_CONFIG_PYTHON_DB_STOCKKLINE_DFT, sizeof(STOCKAUTO_CONFIG_PYTHON_DB_STOCKKLINE_DFT));
 }

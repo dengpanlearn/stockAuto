@@ -13,7 +13,7 @@ public:
 	CStockDataBase() {}
 	~CStockDataBase() {}
 
-protected:
+public:
 	virtual BOOL StockListIsOn()=0;
 	virtual int GetStockList(STOCK_CODE_NAME* pListBuf, int bufCounts)=0;
 

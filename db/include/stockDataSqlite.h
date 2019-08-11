@@ -19,7 +19,7 @@ public:
 	BOOL Init(const char* dbDir, const char* pListName, const char* pKLineName);
 	void Close();
 
-protected:
+public:
 	virtual BOOL StockListIsOn();
 	virtual int GetStockList(STOCK_CODE_NAME* pListBuf, int bufCounts);
 

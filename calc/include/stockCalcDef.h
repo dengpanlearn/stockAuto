@@ -14,17 +14,12 @@ struct STOCK_CODE_NAME
 	char	name[STOCK_CODE_NAME_MAX];
 };
 
-struct STOCK_MANAGER_JOB_LIST
-{
-	UINT    jobStep;
-	UINT	stockCounts;
-	STOCK_CODE_NAME	codeName[0];
-};
-
 enum STOCK_CALC_EVENT_CMD
 {
 	STOCK_CALC_EVENT_UPDATE_STOCK_LIST = 0x00000001,
 	STOCK_CALC_EVENT_UPDATE_STOCK_KLINE = 0x00000002,
+	STOCK_CALC_EVENT_GET_STOCK_LIST = 0x00000003,
+	STOCK_CALC_EVENT_GET_STOCK_LIST_RESP = 0x00000004,
 };
 
 typedef TASK_EVENT_PARAM	STOCK_CALC_UPDATE_LIST;
@@ -37,4 +32,29 @@ struct STOCK_CALC_UPDATE_KLINE
 	char	codeName[STOCK_CODE_NAME_MAX];
 	int		updateCycles;
 };
+
+struct STOCK_CALC_GET_LIST
+{
+	TASK_EVENT_PARAM	eventParam;
+	UINT				bufCounts;
+	STOCK_CODE_NAME*	pListBuf;
+};
+
+struct STOCK_CALC_GET_LIST_RESP
+{
+	TASK_EVENT_PARAM	eventParam;
+	int					respResult;
+};
+
+struct STOCK_MANAGER_JOB_LIST
+{
+	UINT    jobStep;
+	UINT	stockCounts;
+	STOCK_CODE_NAME	codeName[0];
+};
+struct STOCK_MANAGER_JOB_LIST_UPDATE
+{
+	UINT    jobStep;
+};
+
 #endif // !__STOCK_CALC_DEF_H__
