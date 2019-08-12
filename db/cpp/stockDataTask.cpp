@@ -28,7 +28,7 @@ BOOL CStockDataTask::Create(LPCTSTR pNameTask, int stackSize, int priTask, int o
 	do
 	{
 
-		if (!pStockSqlite->Init(m_configData.dataDir, m_configData.listFileName, m_configData.klineFileName))
+		if (!pStockSqlite->Init(m_configData.dataDir, m_configData.listFileName, m_configData.klineFileName, m_configData.tracelogFileName))
 			break;
 
 		if (!CMultiEventsTask::Create(pNameTask, stackSize, priTask, optTask, timeoutMs, maxEvents, maxEventParamSize))
@@ -63,12 +63,11 @@ void CStockDataTask::OnActive()
 int CStockDataTask::OnEventActive(UINT cmd, void* param, int paramLen)
 {
 	int result = EVENT_COMPLETE_OK;
-
-
+	STOCK_CALC_GET_LIST * pGetList = (STOCK_CALC_GET_LIST*)param;
+	STOCK_CALC_LOAD_TRACELOG* pLoadTraceLog = (STOCK_CALC_LOAD_TRACELOG*)param;
 	switch (cmd)
 	{
 	case STOCK_CALC_EVENT_GET_STOCK_LIST:
-		STOCK_CALC_GET_LIST * pGetList = (STOCK_CALC_GET_LIST*)param;
 		if (!m_pStockData->StockListIsOn())
 		{
 			result = EVENT_COMPLETE_FAIL;
@@ -79,6 +78,16 @@ int CStockDataTask::OnEventActive(UINT cmd, void* param, int paramLen)
 		}
 		break;
 
+	case STOCK_CALC_EVENT_LOAD_TRACE_LOG:
+		if (!m_pStockData->TraceLogIsOn())
+		{
+			result = EVENT_COMPLETE_FAIL;
+		}
+		else
+		{
+			result = m_pStockData->GetTraceLog(pLoadTraceLog->pLogBuf, pLoadTraceLog->bufCounts);
+		}
+		break;
 	default:
 		result = EVENT_COMPLETE_FAIL;
 	}
@@ -98,4 +107,8 @@ void CStockDataTask::InitConfig(STOCKAUTO_CONFIG_DATA* pConfigData)
 
 	if (pConfigData->klineFileName[0] == '\0')
 		memcpy(pConfigData->klineFileName, STOCKAUTO_CONFIG_DATA_KLINE_FILENAME_DFT, sizeof(STOCKAUTO_CONFIG_DATA_KLINE_FILENAME_DFT));
+
+
+	if (pConfigData->tracelogFileName[0] == '\0')
+		memcpy(pConfigData->tracelogFileName, STOCKAUTO_CONFIG_DATA_TRACELOG_FILENAME_DFT, sizeof(STOCKAUTO_CONFIG_DATA_TRACELOG_FILENAME_DFT));
 }

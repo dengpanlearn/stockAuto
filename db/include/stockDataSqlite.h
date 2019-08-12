@@ -16,16 +16,19 @@ public:
 	CStockDataSqlite() {}
 	~CStockDataSqlite() {}
 
-	BOOL Init(const char* dbDir, const char* pListName, const char* pKLineName);
+	BOOL Init(const char* dbDir, const char* pListName, const char* pKLineName, const char* pTraceName);
 	void Close();
 
 public:
 	virtual BOOL StockListIsOn();
 	virtual int GetStockList(STOCK_CODE_NAME* pListBuf, int bufCounts);
+	virtual BOOL TraceLogIsOn();
+	virtual int GetTraceLog(STOCK_MANAGER_TRACE_LOG* pTraceLogBuf, int bufCounts);
 
 private:
 	QSqlDatabase	m_listDb;
 	QSqlDatabase	m_klineDb;
+	QSqlDatabase	m_traceLogDb;
 };
 
 #endif // ! __STOCK_DATA_SQLITE_H__

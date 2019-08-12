@@ -63,7 +63,7 @@ void CStockUpdateTask::OnActive()
 int CStockUpdateTask::OnEventActive(UINT cmd, void* param, int paramLen)
 {
 	BOOL result = TRUE;
-	
+	STOCK_CALC_UPDATE_KLINE* pKLineParam = (STOCK_CALC_UPDATE_KLINE*)param;
 
 	switch (cmd)
 	{
@@ -72,7 +72,6 @@ int CStockUpdateTask::OnEventActive(UINT cmd, void* param, int paramLen)
 		break;
 
 	case STOCK_CALC_EVENT_UPDATE_STOCK_KLINE:
-		STOCK_CALC_UPDATE_KLINE* pKLineParam = (STOCK_CALC_UPDATE_KLINE*)param;
 		result = m_pStockUpdate->UpdateLatestKLine(pKLineParam->codeName, pKLineParam->updateCycles);
 		break;
 	}
