@@ -33,10 +33,11 @@ protected:
 		STOCK_AUTO_MANAGER_STEP_TRACELOG_LOADING,
 		STOCK_AUTO_MANAGER_STEP_HISKLINE_UPDATING,
 		STOCK_AUTO_MANAGER_STEP_STOCK_TRACING,
-		STOCK_AUTO_MANAGER_STEP_LIST_ERROR,
+		STOCK_AUTO_MANAGER_STEP_ERROR,
 	};
 
-	
+private:
+	void InitStockTraceByLog(STOCK_MANAGER_JOB_TRACELOG_LOAD* pJobTraceLog, STOCK_MANAGER_JOB_LIST* pJobList);
 
 private:
 	UINT OnStockAutoManagerInit();
@@ -51,6 +52,8 @@ private:
 	void OnTraceLogLoadResp(STOCK_CALC_LOAD_TRACELOG_RESP* pTraceLogResp);
 	BOOL OnTraceLogLoadComplete(int result, void* param, int paramLen);
 
+	UINT OnStockAutoManagerHisKLineUpdate();
+
 private:
 	CStockDataTask * m_pDataTask;
 	CStockUpdateTask*	m_pUpdateTask;
@@ -59,6 +62,7 @@ private:
 	STOCK_MANAGER_JOB_LIST*		m_pJobList;
 	STOCK_MANAGER_JOB_TRACELOG_LOAD*	m_pJobTraceLog;
 	STOCK_MANAGER_JOB_LIST_UPDATE	m_jobListUpdate;
+	STOCK_MANAGER_JOB_HISKLINE_UPDATE m_jobHisKLineUpdate;
 };
 
 #endif // !__STOCK_AUTO_MANAGER_H__

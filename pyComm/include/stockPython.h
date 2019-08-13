@@ -21,6 +21,7 @@ public:
 	BOOL UpdateLatestStockList();
 
 	BOOL UpdateLatestKLine(char const* pStockCode, int counts);
+	BOOL CStockPython::UpdateLatestKLineByTime(char const* pStockCode, time_t endTime, int counts);
 
 private:
 	PyObject*	m_pModuleKLine;

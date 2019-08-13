@@ -85,7 +85,7 @@ int CStockDataSqlite::GetTraceLog(STOCK_MANAGER_TRACE_LOG* pTraceLogBuf, int buf
 		return -1;
 
 	QSqlQuery sqlQuery(m_traceLogDb);
-	QString selSql("select step, symbol, hightime, highval, buytime, buyval,  selltime, sellval, lasttime from trace");
+	QString selSql("select step, symbol, hightime, highval, buytime, buyval,  selltime, sellval, histime from trace");
 	if (!sqlQuery.exec(selSql))
 	{
 		return -1;
@@ -108,7 +108,7 @@ int CStockDataSqlite::GetTraceLog(STOCK_MANAGER_TRACE_LOG* pTraceLogBuf, int buf
 		pTraceLogBuf->sellTime = sqlQuery.value(6).toInt();
 		pTraceLogBuf->fSellVal = sqlQuery.value(7).toFloat();
 
-		pTraceLogBuf->lastTime = sqlQuery.value(8).toInt();
+		pTraceLogBuf->hisTime = sqlQuery.value(8).toInt();
 		logCounts++;
 		pTraceLogBuf++;
 	}

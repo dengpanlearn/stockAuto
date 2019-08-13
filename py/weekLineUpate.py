@@ -131,7 +131,7 @@ class WeekKLineUpdate:
 
 if __name__ == '__main__':
     weekKLine =   WeekKLineUpdate()
-    if (not weekKLine.prepareUpdate('E:\\work\\stock\\StockAuto\\data', 'stockList.db', 'kline.db')):
+    if (not weekKLine.prepareUpdate('E:\\self\\stock\\data', 'stockList.db', 'kline.db')):
         ret = weekKLine.getAndUpdateStockList(int(time.time()))
         ret = weekKLine.getAndUpdateWeekKLine('SZ000004', int(time.time()), -82)
 

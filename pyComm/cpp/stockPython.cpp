@@ -124,3 +124,15 @@ BOOL CStockPython::UpdateLatestKLine(char const* pStockCode, int counts)
 
 	return result == 0;
 }
+
+BOOL CStockPython::UpdateLatestKLineByTime(char const* pStockCode, time_t endTime, int counts)
+{
+	PyObject* pRet = PyObject_CallMethod(m_pInstanceKLine, PYTHON_CLASS_WEEK_KLINE_METHOD_UPDATE_STOCK_KLINE, "sLi", pStockCode, endTime, counts);
+	if (pRet == NULL)
+		return FALSE;
+
+	int result = -1;
+	PyArg_Parse(pRet, "i", &result);
+
+	return result == 0;
+}

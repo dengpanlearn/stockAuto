@@ -1,7 +1,7 @@
 /*
 *stockAutoManager.cpp
 */
-
+#include <qdatetime.h>
 #include "../include/stockAutoManager.h"
 
 CStockAutoManager::CStockAutoManager()
@@ -12,6 +12,7 @@ CStockAutoManager::CStockAutoManager()
 	m_pDataTask = NULL;
 	m_pJobTraceLog = NULL;
 	memset(&m_jobListUpdate, 0, sizeof(m_jobListUpdate));
+	memset(&m_jobHisKLineUpdate, 0, sizeof(m_jobHisKLineUpdate));
 }
 
 CStockAutoManager::~CStockAutoManager()
@@ -22,7 +23,7 @@ CStockAutoManager::~CStockAutoManager()
 BOOL CStockAutoManager::Create(LPCTSTR pNameTask, int stackSize, int priTask, int optTask, int timeoutMs, int maxEvents, int maxEventParamSize)
 {
 	int jobListSize = sizeof(STOCK_MANAGER_JOB_LIST) + STOCK_AUTO_COUNTS_MAX * sizeof(STOCK_CODE_NAME);
-	int jobTraceLogSize = sizeof(STOCK_MANAGER_JOB_TRACELOG_LOAD) + STOCK_AUTO_COUNTS_MAX * sizeof(STOCK_MANAGER_TRACE_LOG);
+	int jobTraceLogSize = sizeof(STOCK_MANAGER_JOB_TRACELOG_LOAD) + 2*STOCK_AUTO_COUNTS_MAX * sizeof(STOCK_MANAGER_TRACE_LOG);
 	do
 	{
 		m_pDataTask = new CStockDataTask();
@@ -119,7 +120,7 @@ BOOL CStockAutoManager::CheckSelf()
 	case STOCK_AUTO_MANAGER_STEP_HISKLINE_UPDATING:
 		break;
 
-	case STOCK_AUTO_MANAGER_STEP_LIST_ERROR:
+	case STOCK_AUTO_MANAGER_STEP_ERROR:
 		break;
 
 	case STOCK_AUTO_MANAGER_STEP_TRACELOG_LOADING:
@@ -175,7 +176,34 @@ BOOL CStockAutoManager::OnEventComplete(UINT cmd, int result, void* param, int p
 	return re;
 }
 
+void CStockAutoManager::InitStockTraceByLog(STOCK_MANAGER_JOB_TRACELOG_LOAD* pJobTraceLog, STOCK_MANAGER_JOB_LIST* pJobList)
+{
+	int listSize = pJobList->stockCounts;
+	STOCK_CODE_NAME* pCodeList = pJobList->codeName;
 
+	int	logCounts = pJobTraceLog->logCounts;
+	STOCK_MANAGER_TRACE_LOG* pNewTraceLog = pJobTraceLog->traceLog + STOCK_AUTO_COUNTS_MAX;
+	memset(pNewTraceLog, 0, sizeof(STOCK_MANAGER_TRACE_LOG)* STOCK_AUTO_COUNTS_MAX);
+
+	for (int i = 0; i < listSize; i++, pCodeList++, pNewTraceLog++)
+	{
+		STOCK_MANAGER_TRACE_LOG* pTraceLog = pJobTraceLog->traceLog;
+		int j = 0;
+		for (; j < logCounts; j++, pTraceLog++)
+		{
+			if (strcmp(pTraceLog->code, pCodeList->code) == 0)
+			{
+				memcpy(pNewTraceLog, pTraceLog, sizeof(STOCK_MANAGER_TRACE_LOG));
+				break;
+			}
+		}
+
+		if (j >= logCounts)
+		{
+			memcpy(pNewTraceLog->code, pCodeList->code, sizeof(pCodeList->code));
+		}
+	}
+}
 
 UINT CStockAutoManager::OnStockAutoManagerInit()
 {
@@ -266,7 +294,7 @@ UINT CStockAutoManager::OnStockAutoManagerListUpdate()
 	else
 	{
 		m_jobListUpdate.jobStep = TASK_EVENT_JOB_STEP_NONE;
-		nextStep = STOCK_AUTO_MANAGER_STEP_LIST_ERROR;
+		nextStep = STOCK_AUTO_MANAGER_STEP_ERROR;
 	}
 
 	return nextStep;
@@ -306,7 +334,8 @@ UINT CStockAutoManager::OnStockAutoManagerTraceLogLoad()
 		STOCK_CALC_LOAD_TRACELOG traceLogLoadParam;
 		InitMultiTaskEventParam(&traceLogLoadParam, sizeof(traceLogLoadParam));
 
-
+		traceLogLoadParam.bufCounts = STOCK_AUTO_COUNTS_MAX;
+		traceLogLoadParam.pLogBuf = m_pJobTraceLog->traceLog;
 		BOOL postReuslt = m_pUpdateTask->PostEvent(STOCK_CALC_EVENT_LOAD_TRACE_LOG, &traceLogLoadParam,
 			sizeof(traceLogLoadParam), MultiTaskEventComplete);
 
@@ -319,12 +348,14 @@ UINT CStockAutoManager::OnStockAutoManagerTraceLogLoad()
 	else if (m_pJobTraceLog->jobStep == TASK_EVENT_JOB_STEP_COMPLETED_OK) // 获取成功
 	{
 		m_pJobTraceLog->jobStep = TASK_EVENT_JOB_STEP_NONE;
+		InitStockTraceByLog(m_pJobTraceLog, m_pJobList);
 		nextStep = STOCK_AUTO_MANAGER_STEP_HISKLINE_UPDATING;
 	}
 	else
 	{
 		m_pJobTraceLog->jobStep = TASK_EVENT_JOB_STEP_NONE;
-		nextStep = STOCK_AUTO_MANAGER_STEP_LIST_ERROR;
+		InitStockTraceByLog(m_pJobTraceLog, m_pJobList);
+		nextStep = STOCK_AUTO_MANAGER_STEP_HISKLINE_UPDATING;
 	}
 
 	return nextStep;
@@ -334,6 +365,7 @@ void CStockAutoManager::OnTraceLogLoadResp(STOCK_CALC_LOAD_TRACELOG_RESP* pTrace
 {
 	if (pTraceLogResp->respResult == EVENT_COMPLETE_FAIL)
 	{
+		m_pJobTraceLog->logCounts = 0;
 		m_pJobTraceLog->jobStep = TASK_EVENT_JOB_STEP_COMPLETED_FAIL;
 	}
 	else
@@ -350,4 +382,64 @@ BOOL CStockAutoManager::OnTraceLogLoadComplete(int result, void* param, int para
 	traceLogLoadResp.respResult = result;
 
 	return PostEvent(STOCK_CALC_EVENT_LOAD_TRACE_RESP, &traceLogLoadResp, sizeof(traceLogLoadResp), NULL);
+}
+
+UINT CStockAutoManager::OnStockAutoManagerHisKLineUpdate()
+{
+	UINT nextStep = STOCK_AUTO_MANAGER_STEP_HISKLINE_UPDATING;
+	if (m_jobHisKLineUpdate.jobStep == TASK_EVENT_JOB_STEP_WAITING_RESP)
+		return nextStep;
+
+	if (m_jobHisKLineUpdate.jobStep == TASK_EVENT_JOB_STEP_NONE)
+	{
+		STOCK_CALC_UPDATE_HISKLINE hisKLineUpdate;
+		InitMultiTaskEventParam(&hisKLineUpdate, sizeof(hisKLineUpdate));
+
+		STOCK_CODE_NAME* pCodeName = &m_pJobList->codeName[m_jobHisKLineUpdate.stockIdx];
+		STOCK_MANAGER_TRACE_LOG* pTraceLog = &m_pJobTraceLog->traceLog[m_jobHisKLineUpdate.stockIdx + STOCK_AUTO_COUNTS_MAX];
+
+		time_t hisTime = pTraceLog->hisTime;
+
+
+		QDateTime curDateTime = QDateTime::currentDateTime();
+		QDate curDate = curDateTime.date();
+		int curOffset = curDate.dayOfWeek();
+		QDate lastWeekDate = curDate.addDays(-curOffset);
+		if (hisTime <= 0)
+		{
+			hisKLineUpdate.endTime = QDateTime(lastWeekDate).toTime_t();
+			hisKLineUpdate.updateCycles = -STOCK_HIS_KLINE_MAX_COUNTS;
+		}
+		
+		
+		QDateTime hisDateTime = QDateTime::fromTime_t(hisTime);
+
+		
+		QDate hisDate = hisDateTime.date();
+		
+		
+		memcpy(hisKLineUpdate.code, pCodeName->code, sizeof(hisKLineUpdate.code));
+		BOOL postReuslt = m_pUpdateTask->PostEvent(STOCK_CALC_EVENT_UPDATE_STOCK_HISKLINE, &hisKLineUpdate,
+			sizeof(hisKLineUpdate), MultiTaskEventComplete);
+
+		if (postReuslt)
+		{
+			m_jobHisKLineUpdate.jobStep = TASK_EVENT_JOB_STEP_WAITING_RESP;
+		}
+
+	}
+	else if (m_jobHisKLineUpdate.jobStep == TASK_EVENT_JOB_STEP_COMPLETED_OK) // 获取成功
+	{
+		m_pJobTraceLog->jobStep = TASK_EVENT_JOB_STEP_NONE;
+		InitStockTraceByLog(m_pJobTraceLog, m_pJobList);
+		nextStep = STOCK_AUTO_MANAGER_STEP_HISKLINE_UPDATING;
+	}
+	else
+	{
+		m_pJobTraceLog->jobStep = TASK_EVENT_JOB_STEP_NONE;
+		InitStockTraceByLog(m_pJobTraceLog, m_pJobList);
+		nextStep = STOCK_AUTO_MANAGER_STEP_HISKLINE_UPDATING;
+	}
+
+	return nextStep;
 }
