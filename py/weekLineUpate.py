@@ -77,18 +77,23 @@ class WeekKLineUpdate:
 
     def getAndUpdateWeekKLine(self, stockNo, beginTime, counts):
         stockKLine = self.getWeekKLine(stockNo, beginTime*1000, counts)
-        
+     
         if (stockKLine.get('error_code', 1)):
             return -1
         else :
-            self.updateWeekKLine(stockKLine.get('data'))
-            return 0
+            if (not stockKLine.get("data")):
+                return -1
+            if self.updateWeekKLine(stockKLine.get('data')):
+                return 0
+            else :
+                return -1
+
             
     def getWeekKLine(self, stockNo, beginTime, counts):
         orgUrl = 'https://stock.xueqiu.com/v5/stock/chart/kline.json?symbol={stockNo}&begin={beginTime}&period=week&type=before&count={counts}&indicator=kline,ma'
         url = orgUrl.format(stockNo=stockNo, beginTime = beginTime, counts=counts)
         self.headers["Host"] = "stock.xueqiu.com"
-  
+       
         try:
             response = self.session.get(url, verify=False, headers = self.headers)
         except (ReadTimeout, ConnectTimeout, ConnectionError):
@@ -107,31 +112,36 @@ class WeekKLineUpdate:
         itemList =  data.get('item')
         columns = data.get('column')
 
-        closeIndex = columns.index('close')
-        timestampIndex = columns.index('timestamp')
-        columns.append('rsi')
-        columns.append('time')
-        for kline in itemList :
-            difClose = kline[closeIndex]-lastClose
-            curSmaAbs += (math.fabs(difClose)-curSmaAbs)/rsiCycle
-            if (difClose > 0) :
-                curSmaGain += (difClose-curSmaGain)/rsiCycle
-            else :
-                curSmaGain += (0-curSmaGain)/rsiCycle
-            kline.append(curSmaGain*100/curSmaAbs)
-            timeVal = time.asctime(time.localtime(kline[timestampIndex]//1000))
-            kline.append(timeVal)
-            lastClose = kline[closeIndex]
-            
-        df = DataFrame(itemList, columns=columns)
-        stockCode = data.get('symbol')
-        con=sqlite3.connect(self.saveDir+'\\'+self.dbStockKLine)
-        pandas.io.sql.to_sql(df[['open','high', 'close', 'low', 'volume', 'rsi', 'ma10', 'chg', 'percent', 'timestamp', 'time']], stockCode, con = con, if_exists='replace')
-
+        try:
+            closeIndex = columns.index('close')
+            timestampIndex = columns.index('timestamp')
+            columns.append('rsi')
+            columns.append('time')
+            for kline in itemList :
+                difClose = kline[closeIndex]-lastClose
+                curSmaAbs += (math.fabs(difClose)-curSmaAbs)/rsiCycle
+                if (difClose > 0) :
+                    curSmaGain += (difClose-curSmaGain)/rsiCycle
+                else :
+                    curSmaGain += (0-curSmaGain)/rsiCycle
+                kline.append(curSmaGain*100/curSmaAbs)
+                timeVal = time.asctime(time.localtime(kline[timestampIndex]//1000))
+                kline.append(timeVal)
+                lastClose = kline[closeIndex]
+                
+            df = DataFrame(itemList, columns=columns)
+            stockCode = data.get('symbol')
+            con=sqlite3.connect(self.saveDir+'\\'+self.dbStockKLine)
+            pandas.io.sql.to_sql(df[['open','high', 'close', 'low', 'volume', 'rsi', 'ma10', 'chg', 'percent', 'timestamp', 'time']], stockCode, con = con, if_exists='replace')
+            return True
+        except ValueError:
+            return False
 
 if __name__ == '__main__':
     weekKLine =   WeekKLineUpdate()
     if (not weekKLine.prepareUpdate('E:\\self\\stock\\data', 'stockList.db', 'kline.db')):
+        """
         ret = weekKLine.getAndUpdateStockList(int(time.time()))
-        ret = weekKLine.getAndUpdateWeekKLine('SZ000004', int(time.time()), -82)
+        """
+        ret = weekKLine.getAndUpdateWeekKLine('SH600004', int(time.time()-3600*24*20), -80)
 

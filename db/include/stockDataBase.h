@@ -19,6 +19,7 @@ public:
 
 	virtual BOOL TraceLogIsOn() = 0;
 	virtual int GetTraceLog(STOCK_MANAGER_TRACE_LOG* pTraceLogBuf, int bufCounts) = 0;
+	virtual int UpdateTraceLog(STOCK_MANAGER_TRACE_LOG* pTraceLogBuf) = 0;
 
 };
 #endif // ! __STOCK_DATA_BASE_H__

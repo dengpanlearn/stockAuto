@@ -59,5 +59,5 @@ BOOL CStockXiuQiuUpdate::UpdateLatestKLine(char const* pStockCode, int counts)
 
 BOOL CStockXiuQiuUpdate::UpdateLatestKLineByTime(char const* pStockCode, time_t endTime, int counts)
 {
-	return pStockPython->UpdateLatestKLine(pStockCode, endTime, counts);
+	return pStockPython->UpdateLatestKLineByTime(pStockCode, endTime, counts);
 }

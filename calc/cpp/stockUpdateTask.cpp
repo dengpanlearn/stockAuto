@@ -72,7 +72,7 @@ int CStockUpdateTask::OnEventActive(UINT cmd, void* param, int paramLen)
 		break;
 
 	case STOCK_CALC_EVENT_UPDATE_STOCK_HISKLINE:
-		result = m_pStockUpdate->UpdateLatestKLineByTime(pHisKLine->code, pHisKLine->updateCycles);
+		result = m_pStockUpdate->UpdateLatestKLineByTime(pHisKLine->code, pHisKLine->endTime, pHisKLine->updateCycles);
 		break;
 	}
 

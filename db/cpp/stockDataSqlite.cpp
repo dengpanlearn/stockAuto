@@ -85,7 +85,8 @@ int CStockDataSqlite::GetTraceLog(STOCK_MANAGER_TRACE_LOG* pTraceLogBuf, int buf
 		return -1;
 
 	QSqlQuery sqlQuery(m_traceLogDb);
-	QString selSql("select step, symbol, hightime, highval, buytime, buyval,  selltime, sellval, histime from trace");
+	QString selSql("select step, code, hightime, highval, buytime, buyval,  selltime, sellval, histime, updatetime from trace");
+	
 	if (!sqlQuery.exec(selSql))
 	{
 		return -1;
@@ -109,9 +110,48 @@ int CStockDataSqlite::GetTraceLog(STOCK_MANAGER_TRACE_LOG* pTraceLogBuf, int buf
 		pTraceLogBuf->fSellVal = sqlQuery.value(7).toFloat();
 
 		pTraceLogBuf->hisTime = sqlQuery.value(8).toInt();
+		pTraceLogBuf->updateTime = sqlQuery.value(9).toInt();
 		logCounts++;
 		pTraceLogBuf++;
 	}
 
 	return logCounts;
+}
+
+int CStockDataSqlite::UpdateTraceLog(STOCK_MANAGER_TRACE_LOG* pTraceLogBuf)
+{
+	if (!m_traceLogDb.isOpen())
+		return -1;
+	QTextCodec* pTextCode = QTextCodec::codecForLocale();
+
+	QSqlQuery sqlQuery(m_traceLogDb);
+
+	QString selSql = QString("select code from trace where code =%1").arg(pTextCode->toUnicode(pTraceLogBuf->code));
+	if (!sqlQuery.exec(selSql))
+	{
+		return -1;
+	}
+
+	if (selSql.isEmpty())
+	{
+		QString insertSql = QString("insert into trace values(?, ?, ?, ?, ?, ?,?, ?, ?, ?)");
+		sqlQuery.prepare(insertSql);
+	}
+	else
+	{
+		QString updateSql = QString("update trace set step=?, code=?, hightime=?, highval=?, buytime=?, buyval=?,  selltime=?, sellval=?, histime=?, updatetime=? where code=%1").arg(pTextCode->toUnicode(pTraceLogBuf->code));
+		sqlQuery.prepare(updateSql);
+	}
+	sqlQuery.bindValue(0, pTraceLogBuf->traceStep);
+	sqlQuery.bindValue(1, pTextCode->toUnicode(pTraceLogBuf->code));
+	sqlQuery.bindValue(2, pTraceLogBuf->highTime);
+	sqlQuery.bindValue(3, pTraceLogBuf->fHighVal);
+	sqlQuery.bindValue(4, pTraceLogBuf->buyTime);
+	sqlQuery.bindValue(5, pTraceLogBuf->fBuyVal);
+	sqlQuery.bindValue(6, pTraceLogBuf->sellTime);
+	sqlQuery.bindValue(7, pTraceLogBuf->fSellVal);
+	sqlQuery.bindValue(8, pTraceLogBuf->hisTime);
+	sqlQuery.bindValue(9, pTraceLogBuf->updateTime);
+
+	return sqlQuery.exec() ? 0 : -1;
 }

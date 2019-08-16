@@ -53,6 +53,8 @@ private:
 	BOOL OnTraceLogLoadComplete(int result, void* param, int paramLen);
 
 	UINT OnStockAutoManagerHisKLineUpdate();
+	void OnHisKLineUpdateResp(STOCK_CALC_UPDATE_HISKLINE_RESP* pHisKLineResp);
+	BOOL OnHisKLineUpdateComplete(int result, void* param, int paramLen);
 
 private:
 	CStockDataTask * m_pDataTask;

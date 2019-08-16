@@ -5,13 +5,17 @@
 #ifndef __STOCK_CALC_DEF_H__
 #define __STOCK_CALC_DEF_H__
 
+#include <dp.h>
 #include <dllLibEx.h>
 #include <taskDef.h>
 #define	STOCK_CODE_NAME_MAX				32
 #define	STOCK_AUTO_COUNTS_MAX			3800
-#define STOCK_TRACE_LOST_MAX_WEEKS		5
-#define	STOCK_HIS_KLINE_MAX_COUNTS		80
+#define STOCK_HIS_KLINE_MAX_COUNTS		80
+#define STOCK_TRACE_DAYS_PER_HIS_UPDATE (7)	
+#define STOCK_SECS_PER_DAY				(24*3600)
+#define STOCK_SECS_PER_WEEKS			(STOCK_SECS_PER_DAY*7)
 
+#define STOCK_WEEKS_LOST_BETWEEN_SECS(start, end) (((end)-(start)+STOCK_SECS_PER_WEEKS/2)/STOCK_SECS_PER_WEEKS)
 
 struct STOCK_CODE_NAME
 {
@@ -30,6 +34,7 @@ struct STOCK_MANAGER_TRACE_LOG
 	long	sellTime;
 	float	fSellVal;
 	long	hisTime;
+	long	updateTime;
 };
 
 enum STOCK_CALC_EVENT_CMD
@@ -42,6 +47,7 @@ enum STOCK_CALC_EVENT_CMD
 	STOCK_CALC_EVENT_GET_STOCK_LIST_RESP ,
 	STOCK_CALC_EVENT_LOAD_TRACE_LOG,
 	STOCK_CALC_EVENT_LOAD_TRACE_RESP,
+	STOCK_CALC_EVENT_UPDATE_TRACE_LOG,
 };
 
 enum STOCK_CALC_TRACE_STEP
@@ -78,7 +84,7 @@ struct STOCK_CALC_UPDATE_HISKLINE
 struct STOCK_CALC_UPDATE_HISKLINE_RESP
 {
 	TASK_EVENT_PARAM	eventParam;
-	int		result;
+	int		respResult;
 };
 
 struct STOCK_CALC_GET_LIST
@@ -107,6 +113,12 @@ struct STOCK_CALC_LOAD_TRACELOG_RESP
 	int					respResult;
 };
 
+struct STOCK_CALC_UPDATE_TRACELOG
+{
+	TASK_EVENT_PARAM	eventParam;
+	STOCK_MANAGER_TRACE_LOG	traceLog;
+};
+
 struct STOCK_MANAGER_JOB_LIST
 {
 	UINT    jobStep;
@@ -129,7 +141,6 @@ struct STOCK_MANAGER_JOB_HISKLINE_UPDATE
 {
 	UINT	jobStep;
 	int		stockIdx;
-	time_t	curTime;
 };
 
 

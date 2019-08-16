@@ -60,7 +60,6 @@ BOOL CStockPython::Init(char const* pPyDir, char const* pModule, char const* pDa
 		if (result < 0)
 			break;
 
-
 		return TRUE;
 	} while (FALSE);
 
@@ -70,7 +69,7 @@ BOOL CStockPython::Init(char const* pPyDir, char const* pModule, char const* pDa
 
 void CStockPython::Release()
 {
-#if 0
+#if 1
 	if (m_pInstanceKLine != NULL)
 	{
 		Py_DECREF(m_pInstanceKLine);
@@ -133,6 +132,6 @@ BOOL CStockPython::UpdateLatestKLineByTime(char const* pStockCode, time_t endTim
 
 	int result = -1;
 	PyArg_Parse(pRet, "i", &result);
-
+	Py_DECREF(pRet);
 	return result == 0;
 }
