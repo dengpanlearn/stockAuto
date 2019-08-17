@@ -55,7 +55,7 @@ BOOL CStockPython::Init(char const* pPyDir, char const* pModule, char const* pDa
 
 		int result = -1;
 		PyArg_Parse(pRet, "i", &result);
-
+		Py_DECREF(pRet);
 
 		if (result < 0)
 			break;
@@ -106,7 +106,7 @@ BOOL CStockPython::UpdateLatestStockList()
 
 	int result = -1;
 	PyArg_Parse(pRet, "i", &result);
-
+	Py_DECREF(pRet);
 	return result == 0;
 }
 
@@ -120,7 +120,7 @@ BOOL CStockPython::UpdateLatestKLine(char const* pStockCode, int counts)
 
 	int result = -1;
 	PyArg_Parse(pRet, "i", &result);
-
+	Py_DECREF(pRet);
 	return result == 0;
 }
 

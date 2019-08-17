@@ -127,6 +127,10 @@ BOOL CStockAutoManager::CheckSelf()
 	case STOCK_AUTO_MANAGER_STEP_TRACELOG_LOADING:
 		m_managerStep = OnStockAutoManagerTraceLogLoad();
 		break;
+
+	case STOCK_AUTO_MANAGER_STEP_STOCK_TRACING:
+	
+		break;
 	}
 
 	return TRUE;
@@ -358,6 +362,12 @@ UINT CStockAutoManager::OnStockAutoManagerTraceLogLoad()
 	{
 		m_pJobTraceLog->jobStep = TASK_EVENT_JOB_STEP_NONE;
 		InitStockTraceByLog(m_pJobTraceLog, m_pJobList);
+
+		QDateTime curDateTime = QDateTime::currentDateTime();
+		QDate curDate = curDateTime.date();
+		int curOffset = curDate.dayOfWeek();
+		QDate lastWeekDate = curDate.addDays(-curOffset);
+		m_jobHisKLineUpdate.lastWeekEndTime = QDateTime(lastWeekDate).toTime_t();
 		nextStep = STOCK_AUTO_MANAGER_STEP_HISKLINE_UPDATING;
 	}
 	else
@@ -407,26 +417,21 @@ UINT CStockAutoManager::OnStockAutoManagerHisKLineUpdate()
 		STOCK_CODE_NAME* pCodeName = &m_pJobList->codeName[m_jobHisKLineUpdate.stockIdx];
 		STOCK_MANAGER_TRACE_LOG* pTraceLog = &m_pJobTraceLog->traceLog[m_jobHisKLineUpdate.stockIdx + STOCK_AUTO_COUNTS_MAX];
 
-		time_t hisTime = pTraceLog->hisTime;
+		time_t updateTime = pTraceLog->updateTime;
 
-
-		QDateTime curDateTime = QDateTime::currentDateTime();
-		QDate curDate = curDateTime.date();
-		int curOffset = curDate.dayOfWeek();
-		QDate lastWeekDate = curDate.addDays(-curOffset);
-		if (hisTime <= 0)
+		if (updateTime <= 0)
 		{
-			hisKLineUpdate.endTime = QDateTime(lastWeekDate).toTime_t();
+			hisKLineUpdate.endTime = m_jobHisKLineUpdate.lastWeekEndTime;
 			hisKLineUpdate.updateCycles = -STOCK_HIS_KLINE_MAX_COUNTS;
 		}
 		else
 		{
-			QDateTime hisDateTime = QDateTime::fromTime_t(hisTime);
-			QDate hisDate = hisDateTime.date();
-			int hisOffset = hisDate.dayOfWeek();
-			QDate hisEndWeekDate = hisDate.addDays(7 - hisOffset);
-			QDate hisUpdateDate = hisDate.addDays(STOCK_TRACE_DAYS_PER_HIS_UPDATE);
-			if (lastWeekDate <= hisUpdateDate)
+			QDateTime updateDateTime = QDateTime::fromTime_t(updateTime);
+			QDate updateDate = updateDateTime.date();
+			int updateOffset = updateDate.dayOfWeek();
+			QDate updateEndWeekDate = updateDate.addDays(7 - updateOffset);
+			QDate lastWeekDate = QDateTime::fromTime_t(m_jobHisKLineUpdate.lastWeekEndTime).date();
+			if (lastWeekDate <= updateEndWeekDate)
 				goto _NEXT;
 			else
 			{
@@ -450,7 +455,8 @@ UINT CStockAutoManager::OnStockAutoManagerHisKLineUpdate()
 		STOCK_CALC_UPDATE_TRACELOG updateTraceLog;
 		InitMultiTaskEventParam(&updateTraceLog, sizeof(updateTraceLog));
 		STOCK_MANAGER_TRACE_LOG* pTraceLog = &m_pJobTraceLog->traceLog[m_jobHisKLineUpdate.stockIdx + STOCK_AUTO_COUNTS_MAX];
-		pTraceLog->updateTime = time(NULL);
+
+		pTraceLog->updateTime = m_jobHisKLineUpdate.lastWeekEndTime;
 		memcpy(&updateTraceLog.traceLog, pTraceLog, sizeof(STOCK_MANAGER_TRACE_LOG));
 
 		m_pDataTask->PostEvent(STOCK_CALC_EVENT_UPDATE_TRACE_LOG, &updateTraceLog,

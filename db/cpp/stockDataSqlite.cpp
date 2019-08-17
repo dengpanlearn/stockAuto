@@ -7,6 +7,7 @@
 #include <qsqldatabase.h>
 #include <qvariant.h>
 #include <qsqlquery.h>
+#include <qsqlerror.h>
 #include <qstring.h>
 #include "../include/stockDataSqlite.h"
 
@@ -19,7 +20,7 @@ BOOL CStockDataSqlite::Init(const char* dbDir, const char* pListName, const char
 
 	QString listFile = dir.absoluteFilePath(pTextCode->toUnicode(pListName));
 	QString klineFile = dir.absoluteFilePath(pTextCode->toUnicode(pKLineName));
-
+	QString traceFile = dir.absoluteFilePath(pTextCode->toUnicode(pTraceName));
 	m_listDb = QSqlDatabase::addDatabase("QSQLITE", "stocklist");
 	m_listDb.setDatabaseName(listFile);
 
@@ -28,7 +29,7 @@ BOOL CStockDataSqlite::Init(const char* dbDir, const char* pListName, const char
 	m_klineDb.setDatabaseName(klineFile);
 
 	m_traceLogDb = QSqlDatabase::addDatabase("QSQLITE", "tracelog");
-	m_traceLogDb.setDatabaseName(pTraceName);
+	m_traceLogDb.setDatabaseName(traceFile);
 
 	m_listDb.open();
 	m_klineDb.open();
@@ -126,22 +127,22 @@ int CStockDataSqlite::UpdateTraceLog(STOCK_MANAGER_TRACE_LOG* pTraceLogBuf)
 
 	QSqlQuery sqlQuery(m_traceLogDb);
 
-	QString selSql = QString("select code from trace where code =%1").arg(pTextCode->toUnicode(pTraceLogBuf->code));
-	if (!sqlQuery.exec(selSql))
-	{
-		return -1;
-	}
+	QString selSql = QString("select code from trace where code =\'%1\'").arg(pTextCode->toUnicode(pTraceLogBuf->code));
 
-	if (selSql.isEmpty())
+	if (!sqlQuery.exec(selSql))
+		return -1;
+
+	if (!sqlQuery.next())
 	{
 		QString insertSql = QString("insert into trace values(?, ?, ?, ?, ?, ?,?, ?, ?, ?)");
 		sqlQuery.prepare(insertSql);
 	}
 	else
 	{
-		QString updateSql = QString("update trace set step=?, code=?, hightime=?, highval=?, buytime=?, buyval=?,  selltime=?, sellval=?, histime=?, updatetime=? where code=%1").arg(pTextCode->toUnicode(pTraceLogBuf->code));
+		QString updateSql = QString("update trace set step=?, code=?, hightime=?, highval=?, buytime=?, buyval=?,  selltime=?, sellval=?, histime=?, updatetime=? where code=\'%1\'").arg(pTextCode->toUnicode(pTraceLogBuf->code));
 		sqlQuery.prepare(updateSql);
 	}
+
 	sqlQuery.bindValue(0, pTraceLogBuf->traceStep);
 	sqlQuery.bindValue(1, pTextCode->toUnicode(pTraceLogBuf->code));
 	sqlQuery.bindValue(2, pTraceLogBuf->highTime);
@@ -152,6 +153,5 @@ int CStockDataSqlite::UpdateTraceLog(STOCK_MANAGER_TRACE_LOG* pTraceLogBuf)
 	sqlQuery.bindValue(7, pTraceLogBuf->fSellVal);
 	sqlQuery.bindValue(8, pTraceLogBuf->hisTime);
 	sqlQuery.bindValue(9, pTraceLogBuf->updateTime);
-
 	return sqlQuery.exec() ? 0 : -1;
 }

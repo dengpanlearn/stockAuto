@@ -141,6 +141,7 @@ struct STOCK_MANAGER_JOB_HISKLINE_UPDATE
 {
 	UINT	jobStep;
 	int		stockIdx;
+	long	lastWeekEndTime;
 };
 
 

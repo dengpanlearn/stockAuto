@@ -14,9 +14,17 @@ struct STOCKAUTO_CONFIG_CALC
 };
 
 /*ƒ¨»œ≈‰÷√*/
+#ifdef XXX_WORK
 #define STOCKAUTO_CONFIG_PYTHON_MODULEDIR_DFT		"E:\\self\\stock\\src\\py"
+#else
+#define STOCKAUTO_CONFIG_PYTHON_MODULEDIR_DFT		"E:\\work\\stock\\StockAuto\\src\\py"
+#endif 
 #define	STOCKAUTO_CONFIG_PYTHON_KLINE_MODULE_DFT	PYTHON_MOUDLE_WEEK_KLINE
+#ifdef XXX_WORK
 #define	STOCKAUTO_CONFIG_PYTHON_UPDATE_DIR_DFT			"E:\\self\\stock\\data"
+#else
+#define STOCKAUTO_CONFIG_PYTHON_UPDATE_DIR_DFT		"E:\\work\\stock\\StockAuto\\data"
+#endif
 #define	STOCKAUTO_CONFIG_PYTHON_DB_STOCKLIST_DFT		"stockList.db"
 #define	STOCKAUTO_CONFIG_PYTHON_DB_STOCKKLINE_DFT		"kline.db"
 
