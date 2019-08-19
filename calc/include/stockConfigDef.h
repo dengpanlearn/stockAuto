@@ -13,6 +13,8 @@ struct STOCKAUTO_CONFIG_CALC
 	float fLimit;
 };
 
+#define XXX_WORK
+
 /*ƒ¨»œ≈‰÷√*/
 #ifdef XXX_WORK
 #define STOCKAUTO_CONFIG_PYTHON_MODULEDIR_DFT		"E:\\self\\stock\\src\\py"

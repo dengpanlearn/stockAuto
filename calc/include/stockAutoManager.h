@@ -38,6 +38,8 @@ protected:
 
 private:
 	void InitStockTraceByLog(STOCK_MANAGER_JOB_TRACELOG_LOAD* pJobTraceLog, STOCK_MANAGER_JOB_LIST* pJobList);
+	void InitStockTraceCalc(STOCK_MANAGER_TRACE_LOG* pTraceLog, int logCounts);
+
 
 private:
 	UINT OnStockAutoManagerInit();
@@ -65,6 +67,9 @@ private:
 	STOCK_MANAGER_JOB_TRACELOG_LOAD*	m_pJobTraceLog;
 	STOCK_MANAGER_JOB_LIST_UPDATE	m_jobListUpdate;
 	STOCK_MANAGER_JOB_HISKLINE_UPDATE m_jobHisKLineUpdate;
+	DL_LIST							m_listTraceWeek;
+	DL_LIST							m_listTraceReal;
+	STOCK_CALC_TRACE_NODE*			m_pCalcTraceBuf;
 };
 
 #endif // !__STOCK_AUTO_MANAGER_H__

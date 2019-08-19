@@ -13,6 +13,8 @@ CStockAutoManager::CStockAutoManager()
 	m_pJobTraceLog = NULL;
 	memset(&m_jobListUpdate, 0, sizeof(m_jobListUpdate));
 	memset(&m_jobHisKLineUpdate, 0, sizeof(m_jobHisKLineUpdate));
+	dllInit(&m_listTraceWeek);
+	dllInit(&m_listTraceReal);
 }
 
 CStockAutoManager::~CStockAutoManager()
@@ -34,12 +36,16 @@ BOOL CStockAutoManager::Create(LPCTSTR pNameTask, int stackSize, int priTask, in
 			STOCK_DATA_TASK_TIMEOUT, STOCK_DATA_TASK_EVENTS, STOCK_UPDATE_TASK_EVENT_PARAM_SIZE))
 			break;
 
-		m_pJobList = (STOCK_MANAGER_JOB_LIST*)calloc(1, jobListSize);
+		m_pJobList = (STOCK_MANAGER_JOB_LIST*)calloc(STOCK_AUTO_COUNTS_MAX, jobListSize);
 		if (m_pJobList == NULL)
 			break;
 
 		m_pJobTraceLog = (STOCK_MANAGER_JOB_TRACELOG_LOAD*)calloc(1, jobTraceLogSize);
 		if (m_pJobTraceLog == NULL)
+			break;
+
+		m_pCalcTraceBuf = (STOCK_CALC_TRACE_NODE*)calloc(1, sizeof(STOCK_CALC_TRACE_NODE));		
+		if (m_pCalcTraceBuf == NULL)
 			break;
 
 		m_pJobList->stockCounts = STOCK_AUTO_COUNTS_MAX;
@@ -73,6 +79,11 @@ void CStockAutoManager::Close()
 		m_pUpdateTask = NULL;
 	}
 
+	if (m_pCalcTraceBuf != NULL)
+	{
+		free(m_pCalcTraceBuf);
+		m_pCalcTraceBuf = NULL;
+	}
 	if (m_pJobTraceLog != NULL)
 	{
 		free(m_pJobTraceLog);
@@ -215,6 +226,27 @@ void CStockAutoManager::InitStockTraceByLog(STOCK_MANAGER_JOB_TRACELOG_LOAD* pJo
 		{
 			memcpy(pNewTraceLog->code, pCodeList->code, sizeof(pCodeList->code));
 		}
+	}
+}
+
+void CStockAutoManager::InitStockTraceCalc(STOCK_MANAGER_TRACE_LOG* pTraceLog, int logCounts)
+{
+	union
+	{
+		DL_NODE* pNode;
+		STOCK_CALC_TRACE_NODE*	m_pTraceNode;
+	};
+
+	m_pTraceNode = m_pCalcTraceBuf;
+	for (int j = 0; j < logCounts; j++, pTraceLog++, m_pTraceNode++)
+	{
+		m_pTraceNode->stockIdx = j;
+		m_pTraceNode->pTraceLog = pTraceLog;
+
+		if (pTraceLog->traceStep < CALC_STOCK_TRADE_STEP_CHECK_HIGH)
+			dllAdd(&m_listTraceWeek, pNode);
+		else
+			dllAdd(&m_listTraceReal, pNode);
 	}
 }
 
@@ -367,6 +399,7 @@ UINT CStockAutoManager::OnStockAutoManagerTraceLogLoad()
 		QDate curDate = curDateTime.date();
 		int curOffset = curDate.dayOfWeek();
 		QDate lastWeekDate = curDate.addDays(-curOffset);
+	
 		m_jobHisKLineUpdate.lastWeekEndTime = QDateTime(lastWeekDate).toTime_t();
 		nextStep = STOCK_AUTO_MANAGER_STEP_HISKLINE_UPDATING;
 	}
@@ -466,6 +499,7 @@ UINT CStockAutoManager::OnStockAutoManagerHisKLineUpdate()
 		if (++m_jobHisKLineUpdate.stockIdx >= m_pJobList->stockCounts)
 		{
 			m_jobHisKLineUpdate.stockIdx = 0;
+			InitStockTraceCalc(&m_pJobTraceLog->traceLog[STOCK_AUTO_COUNTS_MAX], m_pJobList->stockCounts);
 			nextStep = STOCK_AUTO_MANAGER_STEP_STOCK_TRACING;
 		}
 	}

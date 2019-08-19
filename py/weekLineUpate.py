@@ -143,5 +143,5 @@ if __name__ == '__main__':
         """
         ret = weekKLine.getAndUpdateStockList(int(time.time()))
         """
-        ret = weekKLine.getAndUpdateWeekKLine('SH600004', int(time.time()-3600*24*20), -80)
+        ret = weekKLine.getAndUpdateWeekKLine('SZ300009', int(time.time()-3600*24*1), -80)
 

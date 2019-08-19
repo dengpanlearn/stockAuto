@@ -27,10 +27,12 @@ struct STOCK_MANAGER_TRACE_LOG
 {
 	UINT	traceStep;
 	char	code[STOCK_CODE_NAME_MAX];
+	int		raiseBalanceCheckTimes;
 	long	highTime;
 	float	fHighVal;
 	long	buyTime;
 	float	fBuyVal;
+	int		rsiCheckTimesForSell;
 	long	sellTime;
 	float	fSellVal;
 	long	hisTime;
@@ -62,7 +64,8 @@ enum STOCK_CALC_TRACE_STEP
 struct STOCK_CALC_TRACE_NODE
 {
 	DL_NODE						node;
-	STOCK_MANAGER_TRACE_LOG		traceLog;
+	int							stockIdx;
+	STOCK_MANAGER_TRACE_LOG*	pTraceLog;
 };
 
 typedef TASK_EVENT_PARAM	STOCK_CALC_UPDATE_LIST;
