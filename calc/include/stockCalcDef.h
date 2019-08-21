@@ -11,12 +11,14 @@
 #define	STOCK_CODE_NAME_MAX				32
 #define	STOCK_AUTO_COUNTS_MAX			3800
 #define STOCK_HIS_KLINE_MAX_COUNTS		80
+#define STOCK_HIS_KLINE_MAX_COUNTS_FOR_TRACE	75
+#define STOCK_HIS_KLINE_MIN_COUNTS_FOR_TRACE	70
 #define STOCK_TRACE_DAYS_PER_HIS_UPDATE (7)	
 #define STOCK_SECS_PER_DAY				(24*3600)
 #define STOCK_SECS_PER_WEEKS			(STOCK_SECS_PER_DAY*7)
 
-#define STOCK_WEEKS_LOST_BETWEEN_SECS(start, end) (((end)-(start)+STOCK_SECS_PER_WEEKS/2)/STOCK_SECS_PER_WEEKS)
-
+#define STOCK_CALC_WEEKS_BETWEEN_SECS(start, end) (((end)-(start)+STOCK_SECS_PER_WEEKS/2)/STOCK_SECS_PER_WEEKS)
+#define STOCK_CALC_WEEKS_LOST_MAX	5
 struct STOCK_CODE_NAME
 {
 	char	code[STOCK_CODE_NAME_MAX];
@@ -50,6 +52,8 @@ enum STOCK_CALC_EVENT_CMD
 	STOCK_CALC_EVENT_LOAD_TRACE_LOG,
 	STOCK_CALC_EVENT_LOAD_TRACE_RESP,
 	STOCK_CALC_EVENT_UPDATE_TRACE_LOG,
+	STOCK_CALC_EVENT_GET_STOCK_HISKLINE,
+	STOCK_CALC_EVENT_GET_STOCK_HISKLINE_RESP,
 };
 
 enum STOCK_CALC_TRACE_STEP
@@ -66,6 +70,18 @@ struct STOCK_CALC_TRACE_NODE
 	DL_NODE						node;
 	int							stockIdx;
 	STOCK_MANAGER_TRACE_LOG*	pTraceLog;
+};
+
+struct STOCK_CALC_TRACE_KLINE
+{
+	long	timeVal;
+	float   fOpen;
+	float	fClose;
+	float	fHigh;
+	float	fLow;
+	float	fPercent;
+	float	fMa10;
+	float	fRsi7;
 };
 
 typedef TASK_EVENT_PARAM	STOCK_CALC_UPDATE_LIST;
@@ -122,6 +138,23 @@ struct STOCK_CALC_UPDATE_TRACELOG
 	STOCK_MANAGER_TRACE_LOG	traceLog;
 };
 
+class CStockTraceBase;
+struct STOCK_CALC_GET_HISKLINE
+{
+	TASK_EVENT_PARAM	eventParam;
+	CStockTraceBase*	pTraceBase;
+	STOCK_CALC_TRACE_KLINE*	pKLineBuf;
+	char	code[STOCK_CODE_NAME_MAX];
+	int		getCnt;
+};
+
+struct STOCK_CALC_GET_HISKLINE_RESP
+{
+	TASK_EVENT_PARAM	eventParam;
+	CStockTraceBase*	pTraceBase;
+	int respResult;
+};
+
 struct STOCK_MANAGER_JOB_LIST
 {
 	UINT    jobStep;
@@ -147,5 +180,11 @@ struct STOCK_MANAGER_JOB_HISKLINE_UPDATE
 	long	lastWeekEndTime;
 };
 
+struct STOCK_TRACE_JOB_HISKLINE_GET
+{
+	UINT	jobStep;
+	int		hisEndTime;
+	int		hisCounts;
+};
 
 #endif // !__STOCK_CALC_DEF_H__

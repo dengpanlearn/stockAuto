@@ -2,6 +2,7 @@
 *stockAutoManager.cpp
 */
 #include <qdatetime.h>
+#include "../include/stockTraceBase.h"
 #include "../include/stockAutoManager.h"
 
 CStockAutoManager::CStockAutoManager()
@@ -150,10 +151,17 @@ BOOL CStockAutoManager::CheckSelf()
 int CStockAutoManager::OnEventActive(UINT cmd, void* param, int paramLen)
 {
 	int result = EVENT_COMPLETE_OK;
-	STOCK_CALC_GET_LIST_RESP* pGetListResp = (STOCK_CALC_GET_LIST_RESP*)param;
-	STOCK_CALC_UPDATE_LIST_RESP* pUpdateListResp = (STOCK_CALC_UPDATE_LIST_RESP*)param;
-	STOCK_CALC_LOAD_TRACELOG_RESP* pLoadTraceLogResp = (STOCK_CALC_LOAD_TRACELOG_RESP*)param;
-	STOCK_CALC_UPDATE_HISKLINE_RESP* pUpdateHisKLineResp = (STOCK_CALC_UPDATE_HISKLINE_RESP*)param;
+	union
+	{
+		STOCK_CALC_GET_LIST_RESP* pGetListResp;
+		STOCK_CALC_UPDATE_LIST_RESP* pUpdateListResp;
+		STOCK_CALC_LOAD_TRACELOG_RESP* pLoadTraceLogResp;
+		STOCK_CALC_UPDATE_HISKLINE_RESP* pUpdateHisKLineResp;
+		STOCK_CALC_GET_HISKLINE_RESP* pGetHisKLineResp;
+	};
+
+	pGetListResp = (STOCK_CALC_GET_LIST_RESP*)param;
+
 	switch (cmd)
 	{
 	case STOCK_CALC_EVENT_GET_STOCK_LIST_RESP:	
@@ -170,6 +178,10 @@ int CStockAutoManager::OnEventActive(UINT cmd, void* param, int paramLen)
 
 	case STOCK_CALC_EVENT_UPDATE_STOCK_HISKLINE_RESP:
 		OnHisKLineUpdateResp(pUpdateHisKLineResp);
+		break;
+
+	case STOCK_CALC_EVENT_GET_STOCK_HISKLINE_RESP:
+		OnHisKLineGetResp(pGetHisKLineResp);
 		break;
 	}
 
@@ -195,6 +207,10 @@ BOOL CStockAutoManager::OnEventComplete(UINT cmd, int result, void* param, int p
 
 	case STOCK_CALC_EVENT_UPDATE_STOCK_HISKLINE:
 		re = OnHisKLineUpdateComplete(result, param, paramLen);
+
+	case STOCK_CALC_EVENT_GET_STOCK_HISKLINE:
+		re = OnHisKLineGetComplete(result, param, paramLen);
+		break;
 	}
 
 	return re;
@@ -250,6 +266,38 @@ void CStockAutoManager::InitStockTraceCalc(STOCK_MANAGER_TRACE_LOG* pTraceLog, i
 	}
 }
 
+STOCK_CALC_GET_HISKLINE* CStockAutoManager::AllocGetHisKLinePkt(CStockTraceBase* pTraceBase)
+{
+	STOCK_CALC_GET_HISKLINE* pGetHisKLine = (STOCK_CALC_GET_HISKLINE* )m_pDataTask->AllocPktByEvent(STOCK_CALC_EVENT_GET_STOCK_HISKLINE, sizeof(STOCK_CALC_GET_HISKLINE),
+		MultiTaskEventComplete, this);
+	if (pGetHisKLine == NULL)
+		return NULL;
+
+	pGetHisKLine->pTraceBase = pTraceBase;
+	return pGetHisKLine;
+}
+
+void CStockAutoManager::PostGetHisKLinePkt(STOCK_CALC_GET_HISKLINE* pGetHisKLine)
+{
+	m_pDataTask->PostPktByEvent(pGetHisKLine);
+}
+
+STOCK_CALC_GET_HISKLINE_RESP* CStockAutoManager::AllocGetHisKLineRespPkt(CStockTraceBase* pTraceBase)
+{
+	STOCK_CALC_GET_HISKLINE_RESP* pGetHisKLineResp = (STOCK_CALC_GET_HISKLINE_RESP*)AllocPktByEvent(STOCK_CALC_EVENT_GET_STOCK_HISKLINE_RESP, sizeof(STOCK_CALC_GET_HISKLINE_RESP),
+		NULL, this);
+	if (pGetHisKLineResp == NULL)
+		return NULL;
+
+	pGetHisKLineResp->pTraceBase = pTraceBase;
+	return pGetHisKLineResp;
+}
+
+void CStockAutoManager::PostGetHisKLineRespPkt(STOCK_CALC_GET_HISKLINE_RESP* pGetHisKLine)
+{
+	PostPktByEvent(pGetHisKLine);
+}
+
 UINT CStockAutoManager::OnStockAutoManagerInit()
 {
 	UINT nextStep = STOCK_AUTO_MANAGER_STEP_LIST_INIT;
@@ -259,16 +307,15 @@ UINT CStockAutoManager::OnStockAutoManagerInit()
 	if (m_pJobList->jobStep == TASK_EVENT_JOB_STEP_NONE)
 	{
 		// 查询
-		STOCK_CALC_GET_LIST getListParam;
-		InitMultiTaskEventParam(&getListParam, sizeof(getListParam));
-
-		getListParam.bufCounts = STOCK_AUTO_COUNTS_MAX;
-		getListParam.pListBuf = m_pJobList->codeName;
-		BOOL postReuslt = m_pDataTask->PostEvent(STOCK_CALC_EVENT_GET_STOCK_LIST, &getListParam,
-			sizeof(getListParam), MultiTaskEventComplete);
-
-		if (postReuslt)
+		STOCK_CALC_GET_LIST* pGetListParam = (STOCK_CALC_GET_LIST* )m_pDataTask->AllocPktByEvent(STOCK_CALC_EVENT_GET_STOCK_LIST, sizeof(STOCK_CALC_GET_LIST),
+			MultiTaskEventComplete, this);
+	
+		if (pGetListParam != NULL)
 		{
+			pGetListParam->bufCounts = STOCK_AUTO_COUNTS_MAX;
+			pGetListParam->pListBuf = m_pJobList->codeName;
+
+			m_pDataTask->PostPktByEvent(pGetListParam);
 			m_pJobList->jobStep = TASK_EVENT_JOB_STEP_WAITING_RESP;
 		}
 	}
@@ -301,11 +348,15 @@ void CStockAutoManager::OnStockListGetResp(STOCK_CALC_GET_LIST_RESP* pGetListRes
 
 BOOL CStockAutoManager::OnStockListGetComplete(int result, void* param, int paramLen)
 {
-	STOCK_CALC_GET_LIST_RESP getListResp;
-	memset(&getListResp, 0, sizeof(STOCK_CALC_GET_LIST_RESP));
-	getListResp.respResult = result;
+	STOCK_CALC_GET_LIST_RESP* pGetListResp = (STOCK_CALC_GET_LIST_RESP* )AllocPktByEvent(STOCK_CALC_EVENT_GET_STOCK_LIST_RESP,
+		sizeof(STOCK_CALC_GET_LIST_RESP), NULL, this);
 
-	return PostEvent(STOCK_CALC_EVENT_GET_STOCK_LIST_RESP, &getListResp, sizeof(getListResp), NULL);
+	if (pGetListResp == NULL)
+		return FALSE;
+
+	pGetListResp->respResult = result;
+	PostPktByEvent(pGetListResp);
+	return TRUE;
 }
 
 
@@ -318,18 +369,13 @@ UINT CStockAutoManager::OnStockAutoManagerListUpdate()
 	if (m_jobListUpdate.jobStep == TASK_EVENT_JOB_STEP_NONE)
 	{
 		// 查询
-		STOCK_CALC_UPDATE_LIST updateListParam;
-		InitMultiTaskEventParam(&updateListParam, sizeof(updateListParam));
-
-
-		BOOL postReuslt = m_pUpdateTask->PostEvent(STOCK_CALC_EVENT_UPDATE_STOCK_LIST, &updateListParam,
-			sizeof(updateListParam), MultiTaskEventComplete);
-
-		if (postReuslt)
+		STOCK_CALC_UPDATE_LIST* pUpdateListParam = (STOCK_CALC_UPDATE_LIST*)m_pUpdateTask->AllocPktByEvent(STOCK_CALC_EVENT_UPDATE_STOCK_LIST,
+			sizeof(STOCK_CALC_UPDATE_LIST), MultiTaskEventComplete, this);
+		if (pUpdateListParam != NULL)
 		{
+			m_pUpdateTask->PostPktByEvent(pUpdateListParam);
 			m_jobListUpdate.jobStep = TASK_EVENT_JOB_STEP_WAITING_RESP;
 		}
-
 	}
 	else if (m_jobListUpdate.jobStep == TASK_EVENT_JOB_STEP_COMPLETED_OK) // 获取成功
 	{
@@ -360,11 +406,15 @@ void CStockAutoManager::OnStockListUpdateResp(STOCK_CALC_UPDATE_LIST_RESP* pUpda
 
 BOOL CStockAutoManager::OnStockListUpdateComplete(int result, void* param, int paramLen)
 {
-	STOCK_CALC_UPDATE_LIST_RESP updateListResp;
-	memset(&updateListResp, 0, sizeof(STOCK_CALC_GET_LIST_RESP));
-	updateListResp.respResult = result;
+	STOCK_CALC_UPDATE_LIST_RESP* pUpdateListResp = (STOCK_CALC_UPDATE_LIST_RESP*)AllocPktByEvent(STOCK_CALC_EVENT_UPDATE_STOCK_LIST_RESP,
+		sizeof(STOCK_CALC_UPDATE_LIST_RESP), NULL, this);
 
-	return PostEvent(STOCK_CALC_EVENT_UPDATE_STOCK_LIST_RESP, &updateListResp, sizeof(updateListResp), NULL);
+	if (pUpdateListResp == NULL)
+		return FALSE;
+
+	pUpdateListResp->respResult = result;
+	PostPktByEvent(pUpdateListResp);
+	return TRUE;
 }
 
 UINT CStockAutoManager::OnStockAutoManagerTraceLogLoad()
@@ -376,19 +426,16 @@ UINT CStockAutoManager::OnStockAutoManagerTraceLogLoad()
 	if (m_pJobTraceLog->jobStep == TASK_EVENT_JOB_STEP_NONE)
 	{
 		// 查询
-		STOCK_CALC_LOAD_TRACELOG traceLogLoadParam;
-		InitMultiTaskEventParam(&traceLogLoadParam, sizeof(traceLogLoadParam));
-
-		traceLogLoadParam.bufCounts = STOCK_AUTO_COUNTS_MAX;
-		traceLogLoadParam.pLogBuf = m_pJobTraceLog->traceLog;
-		BOOL postReuslt = m_pDataTask->PostEvent(STOCK_CALC_EVENT_LOAD_TRACE_LOG, &traceLogLoadParam,
-			sizeof(traceLogLoadParam), MultiTaskEventComplete);
-
-		if (postReuslt)
+		STOCK_CALC_LOAD_TRACELOG* pTraceLogLoad = (STOCK_CALC_LOAD_TRACELOG*)m_pDataTask->AllocPktByEvent(STOCK_CALC_EVENT_LOAD_TRACE_LOG,
+			sizeof(pTraceLogLoad), MultiTaskEventComplete, this);
+		if (pTraceLogLoad != NULL)
 		{
+			pTraceLogLoad->bufCounts = STOCK_AUTO_COUNTS_MAX;
+			pTraceLogLoad->pLogBuf = m_pJobTraceLog->traceLog;
+
+			m_pDataTask->PostPktByEvent(pTraceLogLoad);
 			m_pJobTraceLog->jobStep = TASK_EVENT_JOB_STEP_WAITING_RESP;
 		}
-
 	}
 	else if (m_pJobTraceLog->jobStep == TASK_EVENT_JOB_STEP_COMPLETED_OK) // 获取成功
 	{
@@ -429,11 +476,14 @@ void CStockAutoManager::OnTraceLogLoadResp(STOCK_CALC_LOAD_TRACELOG_RESP* pTrace
 
 BOOL CStockAutoManager::OnTraceLogLoadComplete(int result, void* param, int paramLen)
 {
-	STOCK_CALC_LOAD_TRACELOG_RESP traceLogLoadResp;
-	memset(&traceLogLoadResp, 0, sizeof(STOCK_CALC_GET_LIST_RESP));
-	traceLogLoadResp.respResult = result;
+	STOCK_CALC_LOAD_TRACELOG_RESP* pTraceLogResp = (STOCK_CALC_LOAD_TRACELOG_RESP*)AllocPktByEvent(STOCK_CALC_EVENT_LOAD_TRACE_RESP,
+		 sizeof(STOCK_CALC_LOAD_TRACELOG_RESP), NULL, this);
+	if (pTraceLogResp == NULL)
+		return FALSE;
 
-	return PostEvent(STOCK_CALC_EVENT_LOAD_TRACE_RESP, &traceLogLoadResp, sizeof(traceLogLoadResp), NULL);
+	pTraceLogResp->respResult = result;
+	PostPktByEvent(pTraceLogResp);
+	return TRUE;
 }
 
 UINT CStockAutoManager::OnStockAutoManagerHisKLineUpdate()
@@ -444,18 +494,17 @@ UINT CStockAutoManager::OnStockAutoManagerHisKLineUpdate()
 
 	if (m_jobHisKLineUpdate.jobStep == TASK_EVENT_JOB_STEP_NONE)
 	{
-		STOCK_CALC_UPDATE_HISKLINE hisKLineUpdate;
-		InitMultiTaskEventParam(&hisKLineUpdate, sizeof(hisKLineUpdate));
-
 		STOCK_CODE_NAME* pCodeName = &m_pJobList->codeName[m_jobHisKLineUpdate.stockIdx];
 		STOCK_MANAGER_TRACE_LOG* pTraceLog = &m_pJobTraceLog->traceLog[m_jobHisKLineUpdate.stockIdx + STOCK_AUTO_COUNTS_MAX];
 
 		time_t updateTime = pTraceLog->updateTime;
+		time_t hisEndTime = 0;
+		int hisUpdateCycles = 0;
 
 		if (updateTime <= 0)
 		{
-			hisKLineUpdate.endTime = m_jobHisKLineUpdate.lastWeekEndTime;
-			hisKLineUpdate.updateCycles = -STOCK_HIS_KLINE_MAX_COUNTS;
+			hisEndTime = m_jobHisKLineUpdate.lastWeekEndTime;
+			hisUpdateCycles = -STOCK_HIS_KLINE_MAX_COUNTS;
 		}
 		else
 		{
@@ -469,31 +518,36 @@ UINT CStockAutoManager::OnStockAutoManagerHisKLineUpdate()
 			else
 			{
 				int lastWeekTime = QDateTime(lastWeekDate).toTime_t();
-				hisKLineUpdate.endTime = lastWeekTime;
-				hisKLineUpdate.updateCycles = -STOCK_HIS_KLINE_MAX_COUNTS;
+				hisEndTime = lastWeekTime;
+				hisUpdateCycles = -STOCK_HIS_KLINE_MAX_COUNTS;
 			}
 		}
 
-		memcpy(hisKLineUpdate.code, pCodeName->code, sizeof(hisKLineUpdate.code));
-		BOOL postReuslt = m_pUpdateTask->PostEvent(STOCK_CALC_EVENT_UPDATE_STOCK_HISKLINE, &hisKLineUpdate,
-			sizeof(hisKLineUpdate), MultiTaskEventComplete);
+		STOCK_CALC_UPDATE_HISKLINE* pHisKLineUpdate = (STOCK_CALC_UPDATE_HISKLINE*)m_pUpdateTask->AllocPktByEvent(STOCK_CALC_EVENT_UPDATE_STOCK_HISKLINE,
+			sizeof(STOCK_CALC_UPDATE_HISKLINE), MultiTaskEventComplete, this);
 
-		if (postReuslt)
-		{
-			m_jobHisKLineUpdate.jobStep = TASK_EVENT_JOB_STEP_WAITING_RESP;
-		}
+		if (pHisKLineUpdate == NULL)
+			return nextStep;
+		pHisKLineUpdate->endTime = hisEndTime;
+		pHisKLineUpdate->updateCycles = hisUpdateCycles;
+		memcpy(pHisKLineUpdate->code, pCodeName->code, sizeof(pHisKLineUpdate->code));
+		m_pUpdateTask->PostPktByEvent(pHisKLineUpdate);
+		m_jobHisKLineUpdate.jobStep = TASK_EVENT_JOB_STEP_WAITING_RESP;
 	}
 	else if (m_jobHisKLineUpdate.jobStep == TASK_EVENT_JOB_STEP_COMPLETED_OK) // 获取成功
 	{
-		STOCK_CALC_UPDATE_TRACELOG updateTraceLog;
-		InitMultiTaskEventParam(&updateTraceLog, sizeof(updateTraceLog));
+		STOCK_CALC_UPDATE_TRACELOG* pUpdateTraceLog = (STOCK_CALC_UPDATE_TRACELOG*)m_pDataTask->AllocPktByEvent(STOCK_CALC_EVENT_UPDATE_TRACE_LOG,
+			sizeof(STOCK_CALC_UPDATE_TRACELOG), NULL, this);
+
+		if (pUpdateTraceLog == NULL)
+			return nextStep;
+		
 		STOCK_MANAGER_TRACE_LOG* pTraceLog = &m_pJobTraceLog->traceLog[m_jobHisKLineUpdate.stockIdx + STOCK_AUTO_COUNTS_MAX];
 
 		pTraceLog->updateTime = m_jobHisKLineUpdate.lastWeekEndTime;
-		memcpy(&updateTraceLog.traceLog, pTraceLog, sizeof(STOCK_MANAGER_TRACE_LOG));
+		memcpy(&pUpdateTraceLog->traceLog, pTraceLog, sizeof(STOCK_MANAGER_TRACE_LOG));
 
-		m_pDataTask->PostEvent(STOCK_CALC_EVENT_UPDATE_TRACE_LOG, &updateTraceLog,
-			sizeof(updateTraceLog), NULL);
+		m_pDataTask->PostPktByEvent(pUpdateTraceLog);
 	_NEXT:
 		m_jobHisKLineUpdate.jobStep = TASK_EVENT_JOB_STEP_NONE;
 		if (++m_jobHisKLineUpdate.stockIdx >= m_pJobList->stockCounts)
@@ -525,9 +579,26 @@ void CStockAutoManager::OnHisKLineUpdateResp(STOCK_CALC_UPDATE_HISKLINE_RESP* pH
 
 BOOL CStockAutoManager::OnHisKLineUpdateComplete(int result, void* param, int paramLen)
 {
-	STOCK_CALC_UPDATE_HISKLINE_RESP hisKLineUpdateResp;
-	memset(&hisKLineUpdateResp, 0, sizeof(STOCK_CALC_UPDATE_HISKLINE_RESP));
-	hisKLineUpdateResp.respResult = result;
+	STOCK_CALC_UPDATE_HISKLINE_RESP* pHisKLineUpdateResp = (STOCK_CALC_UPDATE_HISKLINE_RESP*)AllocPktByEvent(STOCK_CALC_EVENT_UPDATE_STOCK_HISKLINE_RESP,
+		sizeof(STOCK_CALC_UPDATE_HISKLINE_RESP), NULL, this);
+	if (pHisKLineUpdateResp == NULL)
+		return FALSE;
 
-	return PostEvent(STOCK_CALC_EVENT_UPDATE_STOCK_HISKLINE_RESP, &hisKLineUpdateResp, sizeof(hisKLineUpdateResp), NULL);
+	pHisKLineUpdateResp->respResult = result;
+
+	PostPktByEvent(pHisKLineUpdateResp);
+	return TRUE;
+}
+
+void CStockAutoManager::OnHisKLineGetResp(STOCK_CALC_GET_HISKLINE_RESP* pGetHisKLineResp)
+{
+	CStockTraceBase* pTraceBase = pGetHisKLineResp->pTraceBase;
+	pTraceBase->OnGetKLineResp(pGetHisKLineResp);
+}
+
+BOOL CStockAutoManager::OnHisKLineGetComplete(int result, void* param, int paramLen)
+{
+	STOCK_CALC_GET_HISKLINE* pGetHisKLine = (STOCK_CALC_GET_HISKLINE*)param;
+	CStockTraceBase* pTraceBase = pGetHisKLine->pTraceBase;
+	return pTraceBase->OnGetKLineComplete(result, param, paramLen);
 }
