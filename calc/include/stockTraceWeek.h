@@ -17,13 +17,15 @@ public:
 	void Close();
 
 protected:
+	virtual void InitStockTrace(STOCK_CALC_TRACE_NODE* pTraceNode);
+
 	UINT DoPrepareWork(STOCK_CALC_TRACE_NODE* pTraceNode);
 	virtual void Next(DL_NODE* pNode);
 	virtual void DoTraceWork(STOCK_CALC_TRACE_NODE* pTraceNode);
 
 private:
 	float	m_fPercent;
-	int		m_iRaiseBalances;
+	int		m_iRaiseBalances;	
 };
 
 #endif // !__STOCK_TRACE_WEEK_H__

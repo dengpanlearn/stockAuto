@@ -7,7 +7,7 @@
 
 CStockTraceWeek::CStockTraceWeek(CStockAutoManager* pAutoManager, DL_LIST* pTraceList):CStockTraceBase(pAutoManager, pTraceList)
 {
-	
+
 }
 
 CStockTraceWeek::~CStockTraceWeek()
@@ -27,9 +27,19 @@ void CStockTraceWeek::Close()
 	CStockTraceBase::Close();
 }
 
+void CStockTraceWeek::InitStockTrace(STOCK_CALC_TRACE_NODE* pTraceNode)
+{
+	STOCK_MANAGER_TRACE_LOG* pTraceLog = pTraceNode->pTraceLog;
+	if (pTraceLog->traceStep == STOCK_CALC_TRACE_STEP_NONE)
+		pTraceLog->traceStep = CALC_STOCK_TRADE_STEP_CHECK_BALANCE_RAISE;
+}
+
 UINT CStockTraceWeek::DoPrepareWork(STOCK_CALC_TRACE_NODE* pTraceNode)
 {
 	STOCK_MANAGER_TRACE_LOG* pTraceLog = pTraceNode->pTraceLog;
+	if (pTraceLog->traceStep != CALC_STOCK_TRADE_STEP_CHECK_BALANCE_RAISE)
+		return STOCK_TRACE_PREPARE_NONE;
+
 	QDateTime hisDateTime = QDateTime::fromTime_t(pTraceLog->hisTime);
 	QDateTime updateDateTime = QDateTime::fromTime_t(pTraceLog->updateTime);
 
@@ -47,7 +57,14 @@ UINT CStockTraceWeek::DoPrepareWork(STOCK_CALC_TRACE_NODE* pTraceNode)
 
 void CStockTraceWeek::Next(DL_NODE* pNode)
 {
+	STOCK_CALC_TRACE_NODE* pTraceNode = (STOCK_CALC_TRACE_NODE*)pNode;
+	STOCK_MANAGER_TRACE_LOG* pTraceLog = pTraceNode->pTraceLog;
 
+
+	if (pTraceLog->traceStep > CALC_STOCK_TRADE_STEP_CHECK_BALANCE_RAISE)
+	{
+
+	}
 }
 
 
@@ -60,6 +77,11 @@ void CStockTraceWeek::DoTraceWork(STOCK_CALC_TRACE_NODE* pTraceNode)
 
 	STOCK_MANAGER_TRACE_LOG* pTraceLog = pTraceNode->pTraceLog;
 
+	STOCK_CALC_UPDATE_TRACELOG* pUpdateTraceLog = AllocUpdateTraceLogPkt();
+	if (pUpdateTraceLog == NULL)
+	{
+
+	}
 	QDateTime hisDateTime = QDateTime::fromTime_t(pTraceLog->hisTime);
 	QDateTime updateDateTime = QDateTime::fromTime_t(pTraceLog->updateTime);
 
@@ -86,9 +108,9 @@ void CStockTraceWeek::DoTraceWork(STOCK_CALC_TRACE_NODE* pTraceNode)
 		if (++pTraceLog->raiseBalanceCheckTimes >= m_iRaiseBalances)
 		{
 			pTraceLog->traceStep = CALC_STOCK_TRADE_STEP_CHECK_HIGH;
-			pTraceLog->hisTime = pTraceKLinePos->timeVal;
 			break;
 		}
-		
 	}
+
+	pTraceLog->hisTime = pTraceKLinePos->timeVal / 1000;
 }

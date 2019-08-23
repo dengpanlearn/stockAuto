@@ -298,6 +298,22 @@ void CStockAutoManager::PostGetHisKLineRespPkt(STOCK_CALC_GET_HISKLINE_RESP* pGe
 	PostPktByEvent(pGetHisKLine);
 }
 
+STOCK_CALC_UPDATE_TRACELOG* CStockAutoManager::AllocUpdateTraceLogPkt(CStockTraceBase* pTraceBase)
+{
+	STOCK_CALC_UPDATE_TRACELOG* pUpdateTraceLog = (STOCK_CALC_UPDATE_TRACELOG*)m_pDataTask->AllocPktByEvent(STOCK_CALC_EVENT_UPDATE_TRACE_LOG, sizeof(STOCK_CALC_UPDATE_TRACELOG),
+		NULL, this);
+	if (pUpdateTraceLog == NULL)
+		return NULL;
+
+	pUpdateTraceLog->pRsv = pTraceBase;
+	return pUpdateTraceLog;
+}
+
+void CStockAutoManager::PostUpdateTraceLogPkt(STOCK_CALC_UPDATE_TRACELOG* pUpdateTraceLog)
+{
+	m_pDataTask->PostPktByEvent(pUpdateTraceLog);
+}
+
 UINT CStockAutoManager::OnStockAutoManagerInit()
 {
 	UINT nextStep = STOCK_AUTO_MANAGER_STEP_LIST_INIT;

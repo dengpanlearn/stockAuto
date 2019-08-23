@@ -47,6 +47,12 @@ public:
 	STOCK_CALC_GET_HISKLINE_RESP* AllocGetHisKLineRespPkt(CStockTraceBase* pTraceBase);
 	void PostGetHisKLineRespPkt(STOCK_CALC_GET_HISKLINE_RESP* pGetHisKLine);
 
+	STOCK_CALC_UPDATE_TRACELOG* AllocUpdateTraceLogPkt(CStockTraceBase* pTraceBase);
+	void PostUpdateTraceLogPkt(STOCK_CALC_UPDATE_TRACELOG* pUpdateTraceLog);
+
+	inline void AddTraceWeekList(STOCK_CALC_TRACE_NODE* pTraceNode);
+	inline void AddTraceRealList(STOCK_CALC_TRACE_NODE* pTraceNode);
+
 private:
 	UINT OnStockAutoManagerInit();
 	void OnStockListGetResp(STOCK_CALC_GET_LIST_RESP* pGetListResp);
@@ -69,6 +75,8 @@ private:
 private:
 	CStockDataTask * m_pDataTask;
 	CStockUpdateTask*	m_pUpdateTask;
+	CStockTraceBase*	m_pTraceWeek;
+	CStockTraceBase*	m_pTraceReal;
 	CCriticalSection	m_cs;
 	UINT				m_managerStep;
 	STOCK_MANAGER_JOB_LIST*		m_pJobList;
@@ -79,5 +87,15 @@ private:
 	DL_LIST							m_listTraceReal;
 	STOCK_CALC_TRACE_NODE*			m_pCalcTraceBuf;
 };
+
+inline void CStockAutoManager::AddTraceWeekList(STOCK_CALC_TRACE_NODE* pTraceNode)
+{
+	m_pTraceWeek->AddTraceStock(pTraceNode);
+}
+
+inline void CStockAutoManager::AddTraceRealList(STOCK_CALC_TRACE_NODE* pTraceNode)
+{
+	m_pTraceReal->AddTraceStock(pTraceNode);
+}
 
 #endif // !__STOCK_AUTO_MANAGER_H__

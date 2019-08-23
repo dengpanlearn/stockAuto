@@ -24,6 +24,20 @@ BOOL CStockTraceBase::Init(int hisKLineCounts)
 		return FALSE;
 
 	m_pCurNode = DLL_FIRST(m_pTraceList);
+	union
+	{
+		STOCK_CALC_TRACE_NODE* pTraceNode;
+		DL_NODE*			pNode;
+	};
+
+	pNode = m_pCurNode;
+
+	while (pNode)
+	{
+		InitStockTrace(pTraceNode);
+		pNode = pNode->next;
+	}
+
 	m_hisKLineCounts = hisKLineCounts;
 	return TRUE;
 }
