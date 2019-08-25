@@ -53,26 +53,26 @@ void CStockTraceBase::Close()
 
 void CStockTraceBase::Trace()
 {
-	if (m_pCurNode != NULL)
+	if (m_pCurNode == NULL)
+		return;
+
+	
+	STOCK_CALC_TRACE_NODE*  pTraceNode = (STOCK_CALC_TRACE_NODE*)m_pCurNode;
+
+	if (m_workStep == STOCK_TRACE_STEP_PRPARING)
 	{
-		STOCK_CALC_TRACE_NODE*  pTraceNode = (STOCK_CALC_TRACE_NODE*)m_pCurNode;
-		UINT prepareResult = DoPrepareWork(pTraceNode);
-		switch (prepareResult)
-		{
-		case STOCK_TRACE_PREPARE_OK:
-			DoTraceWork(pTraceNode);		// NO break;
-
-		case STOCK_TRACE_PREPARE_FAIL:
-
-		case STOCK_TRACE_PREPARE_NONE:
-			Next(m_pCurNode);
-			break;
-
-		case STOCK_TRACE_PREPARE_WAIT_RESP:
-		case STOCK_TRACE_PREPARE_BUSY:
-			break;
-		}
+		m_workStep = DoPrepareWork(pTraceNode);
 	}
+	else if (m_workStep == STOCK_TRACE_STEP_WORKING)
+	{
+		m_workStep = DoTraceWork(pTraceNode);
+	}
+	else
+	{
+		m_workStep = Next(m_pCurNode);
+	}
+	
+	
 }
 
 void CStockTraceBase::AddTraceStock(STOCK_CALC_TRACE_NODE* pTraceNode)
@@ -114,13 +114,13 @@ BOOL CStockTraceBase::OnGetKLineComplete(int result, void* param, int paramLen)
 UINT CStockTraceBase::GetHisKLine(STOCK_CALC_TRACE_NODE* pTraceNode, int counts)
 {
 	if (m_jobGetHisKine.jobStep == TASK_EVENT_JOB_STEP_WAITING_RESP)
-		return STOCK_TRACE_PREPARE_WAIT_RESP;
+		return STOCK_TRACE_WORK_WAIT_RESP;
 
 	if (m_jobGetHisKine.jobStep == TASK_EVENT_JOB_STEP_NONE)
 	{
 		STOCK_CALC_GET_HISKLINE* pGetHisKLine = m_pAutoManager->AllocGetHisKLinePkt(this);
 		if (pGetHisKLine == NULL)
-			return STOCK_TRACE_PREPARE_BUSY;
+			return STOCK_TRACE_WORK_BUSY;
 
 		memcpy(pGetHisKLine->code, pTraceNode->pTraceLog->code, sizeof(pGetHisKLine->code));
 		pGetHisKLine->getCnt = counts;
@@ -131,28 +131,36 @@ UINT CStockTraceBase::GetHisKLine(STOCK_CALC_TRACE_NODE* pTraceNode, int counts)
 	else if (m_jobGetHisKine.jobStep == TASK_EVENT_JOB_STEP_COMPLETED_OK)
 	{
 		m_jobGetHisKine.jobStep = TASK_EVENT_JOB_STEP_NONE;
-		return STOCK_TRACE_PREPARE_OK;
+		return STOCK_TRACE_WORK_OK;
 	}
 	else
 	{
 		m_jobGetHisKine.jobStep = TASK_EVENT_JOB_STEP_NONE;
-		return STOCK_TRACE_PREPARE_FAIL;
+		return STOCK_TRACE_WORK_FAIL;
 	}
 }
 
 UINT CStockTraceBase::DoPrepareWork(STOCK_CALC_TRACE_NODE* pTraceNode)
 {
-
+	if (CheckForPrepare(pTraceNode))
+		return STOCK_TRACE_STEP_WORKING;
+	else
+		return STOCK_TRACE_STEP_END;
 }
 
+BOOL CheckForPrepare(STOCK_CALC_TRACE_NODE* pTraceNode)
+{
+	return TRUE;
+}
 
-void CStockTraceBase::Next(DL_NODE* pNode)
+UINT CStockTraceBase::Next(DL_NODE* pNode)
 {
 	if (pNode != NULL)
 		m_pCurNode = m_pCurNode->next;
+	return STOCK_TRACE_STEP_PRPARING;
 }
 
-void CStockTraceBase::DoTraceWork(STOCK_CALC_TRACE_NODE* pTraceNode)
+UINT CStockTraceBase::DoTraceWork(STOCK_CALC_TRACE_NODE* pTraceNode)
 {
-
+	return STOCK_TRACE_STEP_END;
 }

@@ -28,19 +28,22 @@ protected:
 
 	inline STOCK_CALC_UPDATE_TRACELOG* AllocUpdateTraceLogPkt();
 	inline void PostUpdateTraceLogRespPkt(STOCK_CALC_UPDATE_TRACELOG* pUpdateTraceLog);
+	inline BOOL IsJobGetHisKLineNone();
+
 protected:
 	void TraceStock(STOCK_CALC_TRACE_NODE* pTraceNode);
 	virtual void InitStockTrace(STOCK_CALC_TRACE_NODE* pTraceNode) = 0;
 	virtual UINT DoPrepareWork(STOCK_CALC_TRACE_NODE* pTraceNode);
-	virtual void Next(DL_NODE* pNode);
-	virtual void DoTraceWork(STOCK_CALC_TRACE_NODE* pTraceNode);
+	virtual BOOL CheckForPrepare(STOCK_CALC_TRACE_NODE* pTraceNode);
+	virtual UINT Next(DL_NODE* pNode);
+	virtual UINT DoTraceWork(STOCK_CALC_TRACE_NODE* pTraceNode);
 	enum
 	{
-		STOCK_TRACE_PREPARE_WAIT_RESP = 0x01,
-		STOCK_TRACE_PREPARE_BUSY,
-		STOCK_TRACE_PREPARE_OK,
-		STOCK_TRACE_PREPARE_NONE,
-		STOCK_TRACE_PREPARE_FAIL,
+		STOCK_TRACE_WORK_WAIT_RESP = 0x01,
+		STOCK_TRACE_WORK_BUSY,
+		STOCK_TRACE_WORK_OK,
+		STOCK_TRACE_WORK_NONE,
+		STOCK_TRACE_WORK_FAIL,
 
 		STOCK_TRACE_STEP_PRPARING = 0x01,
 		STOCK_TRACE_STEP_WORKING,
@@ -71,5 +74,10 @@ inline STOCK_CALC_UPDATE_TRACELOG* CStockTraceBase::AllocUpdateTraceLogPkt()
 inline void CStockTraceBase::PostUpdateTraceLogRespPkt(STOCK_CALC_UPDATE_TRACELOG* pUpdateTraceLog)
 {
 	m_pAutoManager->PostUpdateTraceLogPkt(pUpdateTraceLog);
+}
+
+inline BOOL CStockTraceBase::IsJobGetHisKLineNone()
+{
+	return m_jobGetHisKine.jobStep == TASK_EVENT_JOB_STEP_NONE;
 }
 #endif // !__STOCK_TRACE_BASE_H__

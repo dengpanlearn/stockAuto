@@ -34,11 +34,11 @@ void CStockTraceWeek::InitStockTrace(STOCK_CALC_TRACE_NODE* pTraceNode)
 		pTraceLog->traceStep = CALC_STOCK_TRADE_STEP_CHECK_BALANCE_RAISE;
 }
 
-UINT CStockTraceWeek::DoPrepareWork(STOCK_CALC_TRACE_NODE* pTraceNode)
+BOOL CStockTraceWeek::CheckForPrepare(STOCK_CALC_TRACE_NODE* pTraceNode)
 {
 	STOCK_MANAGER_TRACE_LOG* pTraceLog = pTraceNode->pTraceLog;
 	if (pTraceLog->traceStep != CALC_STOCK_TRADE_STEP_CHECK_BALANCE_RAISE)
-		return STOCK_TRACE_PREPARE_NONE;
+		return FALSE;
 
 	QDateTime hisDateTime = QDateTime::fromTime_t(pTraceLog->hisTime);
 	QDateTime updateDateTime = QDateTime::fromTime_t(pTraceLog->updateTime);
@@ -47,15 +47,42 @@ UINT CStockTraceWeek::DoPrepareWork(STOCK_CALC_TRACE_NODE* pTraceNode)
 	QDate updateDate = updateDateTime.date();
 
 	int offset = hisDate.dayOfWeek();
-	QDate hisEndDate = hisDate.addDays(7- offset);
+	QDate hisEndDate = hisDate.addDays(7 - offset);
 
-	if (hisEndDate >= updateDate)
-		return STOCK_TRACE_PREPARE_NONE;
-
-	return GetHisKLine(pTraceNode, STOCK_HIS_KLINE_MAX_COUNTS_FOR_TRACE);
+	return (hisEndDate < updateDate);
 }
 
-void CStockTraceWeek::Next(DL_NODE* pNode)
+UINT CStockTraceWeek::DoPrepareWork(STOCK_CALC_TRACE_NODE* pTraceNode)
+{
+	if (IsJobGetHisKLineNone())
+	{
+		if (!CheckForPrepare(pTraceNode))
+			return STOCK_TRACE_STEP_END;
+	}
+
+	UINT nextStep = STOCK_TRACE_STEP_PRPARING;
+	UINT result = GetHisKLine(pTraceNode, STOCK_HIS_KLINE_MAX_COUNTS_FOR_TRACE);
+
+	switch (result)
+	{
+	case STOCK_TRACE_WORK_OK:
+		nextStep = STOCK_TRACE_STEP_WORKING;
+		break;
+
+	case STOCK_TRACE_WORK_FAIL:
+	case STOCK_TRACE_WORK_NONE:
+		nextStep = STOCK_TRACE_STEP_END;
+		break;
+
+	case STOCK_TRACE_WORK_WAIT_RESP:
+	case STOCK_TRACE_WORK_BUSY:
+		break;
+	}
+
+	return result;
+}
+
+UINT CStockTraceWeek::Next(DL_NODE* pNode)
 {
 	STOCK_CALC_TRACE_NODE* pTraceNode = (STOCK_CALC_TRACE_NODE*)pNode;
 	STOCK_MANAGER_TRACE_LOG* pTraceLog = pTraceNode->pTraceLog;
@@ -68,7 +95,7 @@ void CStockTraceWeek::Next(DL_NODE* pNode)
 }
 
 
-void CStockTraceWeek::DoTraceWork(STOCK_CALC_TRACE_NODE* pTraceNode)
+UINT CStockTraceWeek::DoTraceWork(STOCK_CALC_TRACE_NODE* pTraceNode)
 {
 	int hisKLineCounts = 0;
 	STOCK_CALC_TRACE_KLINE const* pTraceKLine = GetCurHisKLinePtr(hisKLineCounts);

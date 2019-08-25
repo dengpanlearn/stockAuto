@@ -19,9 +19,12 @@ public:
 protected:
 	virtual void InitStockTrace(STOCK_CALC_TRACE_NODE* pTraceNode);
 
-	UINT DoPrepareWork(STOCK_CALC_TRACE_NODE* pTraceNode);
-	virtual void Next(DL_NODE* pNode);
-	virtual void DoTraceWork(STOCK_CALC_TRACE_NODE* pTraceNode);
+	virtual UINT DoPrepareWork(STOCK_CALC_TRACE_NODE* pTraceNode);
+	virtual BOOL CheckForPrepare(STOCK_CALC_TRACE_NODE* pTraceNode);
+	virtual UINT Next(DL_NODE* pNode);
+	virtual UINT DoTraceWork(STOCK_CALC_TRACE_NODE* pTraceNode);
+
+	
 
 private:
 	float	m_fPercent;
