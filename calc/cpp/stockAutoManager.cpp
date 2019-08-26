@@ -158,6 +158,7 @@ int CStockAutoManager::OnEventActive(UINT cmd, void* param, int paramLen)
 		STOCK_CALC_LOAD_TRACELOG_RESP* pLoadTraceLogResp;
 		STOCK_CALC_UPDATE_HISKLINE_RESP* pUpdateHisKLineResp;
 		STOCK_CALC_GET_HISKLINE_RESP* pGetHisKLineResp;
+		STOCK_CALC_UPDATE_TRACELOG_RESP* pUpdateTraceLogResp;
 	};
 
 	pGetListResp = (STOCK_CALC_GET_LIST_RESP*)param;
@@ -182,6 +183,10 @@ int CStockAutoManager::OnEventActive(UINT cmd, void* param, int paramLen)
 
 	case STOCK_CALC_EVENT_GET_STOCK_HISKLINE_RESP:
 		OnHisKLineGetResp(pGetHisKLineResp);
+		break;
+
+	case STOCK_CALC_EVENT_UPDATE_TRACE_LOG_RESP:
+		OnUpdateTraceLogResp(pUpdateTraceLogResp);
 		break;
 	}
 
@@ -210,6 +215,10 @@ BOOL CStockAutoManager::OnEventComplete(UINT cmd, int result, void* param, int p
 
 	case STOCK_CALC_EVENT_GET_STOCK_HISKLINE:
 		re = OnHisKLineGetComplete(result, param, paramLen);
+		break;
+
+	case STOCK_CALC_EVENT_UPDATE_TRACE_LOG:
+		re = OnUpdateTraceLogComplete(result, param, paramLen);
 		break;
 	}
 
@@ -305,13 +314,41 @@ STOCK_CALC_UPDATE_TRACELOG* CStockAutoManager::AllocUpdateTraceLogPkt(CStockTrac
 	if (pUpdateTraceLog == NULL)
 		return NULL;
 
-	pUpdateTraceLog->pRsv = pTraceBase;
+	pUpdateTraceLog->pTraceBase = pTraceBase;
 	return pUpdateTraceLog;
 }
 
 void CStockAutoManager::PostUpdateTraceLogPkt(STOCK_CALC_UPDATE_TRACELOG* pUpdateTraceLog)
 {
 	m_pDataTask->PostPktByEvent(pUpdateTraceLog);
+}
+
+STOCK_CALC_UPDATE_TRACELOG_RESP* CStockAutoManager::AllocUpdateTraceLogRespPkt(CStockTraceBase* pTraceBase)
+{
+	STOCK_CALC_UPDATE_TRACELOG_RESP* pUpdateTraceLogResp = (STOCK_CALC_UPDATE_TRACELOG_RESP*)m_pDataTask->AllocPktByEvent(STOCK_CALC_EVENT_UPDATE_TRACE_LOG_RESP, sizeof(STOCK_CALC_UPDATE_TRACELOG_RESP),
+		NULL, this);
+	if (pUpdateTraceLogResp == NULL)
+		return NULL;
+
+	pUpdateTraceLogResp->pTraceBase = pTraceBase;
+	return pUpdateTraceLogResp;
+}
+
+void CStockAutoManager::PostUpdateTraceLogRespPkt(STOCK_CALC_UPDATE_TRACELOG_RESP* pUpdateTraceLogResp)
+{
+	m_pDataTask->PostPktByEvent(pUpdateTraceLogResp);
+}
+
+void CStockAutoManager::AddTraceList(CStockTraceBase* pTraceBase, STOCK_CALC_TRACE_NODE* pTraceNode)
+{
+	if (pTraceBase == m_pTraceWeek)
+	{
+		m_pTraceReal->AddTraceStock(pTraceNode);
+	}
+	else
+	{
+		m_pTraceWeek->AddTraceStock(pTraceNode);
+	}
 }
 
 UINT CStockAutoManager::OnStockAutoManagerInit()
@@ -616,5 +653,18 @@ BOOL CStockAutoManager::OnHisKLineGetComplete(int result, void* param, int param
 {
 	STOCK_CALC_GET_HISKLINE* pGetHisKLine = (STOCK_CALC_GET_HISKLINE*)param;
 	CStockTraceBase* pTraceBase = pGetHisKLine->pTraceBase;
+	return pTraceBase->OnGetKLineComplete(result, param, paramLen);
+}
+
+void CStockAutoManager::OnUpdateTraceLogResp(STOCK_CALC_UPDATE_TRACELOG_RESP* pUpdateTraceLogResp)
+{
+	CStockTraceBase* pTraceBase = pUpdateTraceLogResp->pTraceBase;
+	pTraceBase->OnUpdateTraceLogResp(pUpdateTraceLogResp);
+}
+
+BOOL CStockAutoManager::OnUpdateTraceLogComplete(int result, void* param, int paramLen)
+{
+	STOCK_CALC_UPDATE_TRACELOG* pUpdateTraceLog = (STOCK_CALC_UPDATE_TRACELOG*)param;
+	CStockTraceBase* pTraceBase = pUpdateTraceLog->pTraceBase;
 	return pTraceBase->OnGetKLineComplete(result, param, paramLen);
 }

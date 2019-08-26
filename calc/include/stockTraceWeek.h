@@ -24,7 +24,8 @@ protected:
 	virtual UINT Next(DL_NODE* pNode);
 	virtual UINT DoTraceWork(STOCK_CALC_TRACE_NODE* pTraceNode);
 
-	
+private:
+	BOOL DoTraceWeekWork(STOCK_CALC_TRACE_NODE* pTraceNode);
 
 private:
 	float	m_fPercent;

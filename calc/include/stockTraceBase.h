@@ -19,16 +19,23 @@ public:
 	void AddTraceStock(STOCK_CALC_TRACE_NODE* pTraceNode);
 
 public:
-	void OnGetKLineResp(STOCK_CALC_GET_HISKLINE_RESP* pUpdateListResp);
+	void OnGetKLineResp(STOCK_CALC_GET_HISKLINE_RESP* pGetKLineResp);
 	BOOL OnGetKLineComplete(int result, void* param, int paramLen);
+
+	void OnUpdateTraceLogResp(STOCK_CALC_UPDATE_TRACELOG_RESP* pUpdateTraceLogResp);
+	BOOL OnUpdateTraceLogComplete(int result, void* param, int paramLen);
 
 protected:
 	inline STOCK_CALC_TRACE_KLINE const* GetCurHisKLinePtr(int& counts);
-	UINT GetHisKLine(STOCK_CALC_TRACE_NODE* pTraceNode, int counts);
 
-	inline STOCK_CALC_UPDATE_TRACELOG* AllocUpdateTraceLogPkt();
-	inline void PostUpdateTraceLogRespPkt(STOCK_CALC_UPDATE_TRACELOG* pUpdateTraceLog);
+	UINT GetHisKLine(STOCK_CALC_TRACE_NODE* pTraceNode, int counts);
+	UINT UpdateTraceLog(STOCK_CALC_TRACE_NODE* pTraceNode);
+
+
 	inline BOOL IsJobGetHisKLineNone();
+	inline BOOL IsJobUpdateTraceLogNone();
+
+	void RemoveTraceNode(STOCK_CALC_TRACE_NODE* pTraceNode);
 
 protected:
 	void TraceStock(STOCK_CALC_TRACE_NODE* pTraceNode);
@@ -57,6 +64,7 @@ private:
 	DL_NODE*				m_pCurNode;
 	int						m_hisKLineCounts;
 	STOCK_TRACE_JOB_HISKLINE_GET m_jobGetHisKine;
+	STOCK_TRACE_JOB_TRACELOG_UPDATE m_jobUpdateTraceLog;
 	UINT					m_workStep;
 };
 
@@ -66,18 +74,13 @@ inline STOCK_CALC_TRACE_KLINE const* CStockTraceBase::GetCurHisKLinePtr(int& cou
 	return m_pHisKLine;
 }
 
-inline STOCK_CALC_UPDATE_TRACELOG* CStockTraceBase::AllocUpdateTraceLogPkt()
-{
-	return m_pAutoManager->AllocUpdateTraceLogPkt(this);
-}
-
-inline void CStockTraceBase::PostUpdateTraceLogRespPkt(STOCK_CALC_UPDATE_TRACELOG* pUpdateTraceLog)
-{
-	m_pAutoManager->PostUpdateTraceLogPkt(pUpdateTraceLog);
-}
-
 inline BOOL CStockTraceBase::IsJobGetHisKLineNone()
 {
 	return m_jobGetHisKine.jobStep == TASK_EVENT_JOB_STEP_NONE;
+}
+
+inline BOOL CStockTraceBase::IsJobUpdateTraceLogNone()
+{
+	return m_jobUpdateTraceLog.jobStep == TASK_EVENT_JOB_STEP_NONE;
 }
 #endif // !__STOCK_TRACE_BASE_H__

@@ -10,6 +10,7 @@ CStockTraceBase::CStockTraceBase(CStockAutoManager* pAutoManager, DL_LIST* pTrac
 	m_pTraceList = pTraceList;
 
 	memset(&m_jobGetHisKine, 0, sizeof(m_jobGetHisKine));
+	memset(&m_jobUpdateTraceLog, 0, sizeof(m_jobUpdateTraceLog));
 }
 
 CStockTraceBase::~CStockTraceBase()
@@ -31,7 +32,7 @@ BOOL CStockTraceBase::Init(int hisKLineCounts)
 	};
 
 	pNode = m_pCurNode;
-
+	m_workStep = STOCK_TRACE_STEP_PRPARING;
 	while (pNode)
 	{
 		InitStockTrace(pTraceNode);
@@ -85,15 +86,15 @@ void CStockTraceBase::TraceStock(STOCK_CALC_TRACE_NODE* pTraceNode)
 
 }
 
-void CStockTraceBase::OnGetKLineResp(STOCK_CALC_GET_HISKLINE_RESP* pUpdateListResp)
+void CStockTraceBase::OnGetKLineResp(STOCK_CALC_GET_HISKLINE_RESP* pGetKLineResp)
 {
-	if (pUpdateListResp->respResult < 0)
+	if (pGetKLineResp->respResult < 0)
 	{
 		m_jobGetHisKine.jobStep = TASK_EVENT_JOB_STEP_COMPLETED_FAIL;
 	}
 	else
 	{
-		m_jobGetHisKine.hisCounts = pUpdateListResp->respResult;
+		m_jobGetHisKine.hisCounts = pGetKLineResp->respResult;
 		m_jobGetHisKine.jobStep = TASK_EVENT_JOB_STEP_COMPLETED_OK;
 	}
 }
@@ -108,6 +109,31 @@ BOOL CStockTraceBase::OnGetKLineComplete(int result, void* param, int paramLen)
 
 	pGetHisKLineResp->respResult = result;
 	m_pAutoManager->PostGetHisKLineRespPkt(pGetHisKLineResp);
+	return TRUE;
+}
+
+void CStockTraceBase::OnUpdateTraceLogResp(STOCK_CALC_UPDATE_TRACELOG_RESP* pUpdateTraceLogResp)
+{
+	if (pUpdateTraceLogResp->respResult < 0)
+	{
+		m_jobUpdateTraceLog.jobStep = TASK_EVENT_JOB_STEP_COMPLETED_FAIL;
+	}
+	else
+	{
+		m_jobUpdateTraceLog.jobStep = TASK_EVENT_JOB_STEP_COMPLETED_OK;
+	}
+}
+
+BOOL CStockTraceBase::OnUpdateTraceLogComplete(int result, void* param, int paramLen)
+{
+	STOCK_CALC_UPDATE_TRACELOG* pUpdateTraceLog = (STOCK_CALC_UPDATE_TRACELOG*)param;
+	STOCK_CALC_UPDATE_TRACELOG_RESP* pUpdateTraceLogResp = m_pAutoManager->AllocUpdateTraceLogRespPkt(pUpdateTraceLog->pTraceBase);
+
+	if (pUpdateTraceLogResp == NULL)
+		return FALSE;
+
+	pUpdateTraceLogResp->respResult = result;
+	m_pAutoManager->PostUpdateTraceLogRespPkt(pUpdateTraceLogResp);
 	return TRUE;
 }
 
@@ -140,6 +166,40 @@ UINT CStockTraceBase::GetHisKLine(STOCK_CALC_TRACE_NODE* pTraceNode, int counts)
 	}
 }
 
+UINT CStockTraceBase::UpdateTraceLog(STOCK_CALC_TRACE_NODE* pTraceNode)
+{
+	if (m_jobUpdateTraceLog.jobStep == TASK_EVENT_JOB_STEP_WAITING_RESP)
+		return STOCK_TRACE_WORK_WAIT_RESP;
+
+	if (m_jobUpdateTraceLog.jobStep == TASK_EVENT_JOB_STEP_NONE)
+	{
+		STOCK_CALC_UPDATE_TRACELOG* pUpdateTraceLog = m_pAutoManager->AllocUpdateTraceLogPkt(this);
+		if (pUpdateTraceLog == NULL)
+			return STOCK_TRACE_WORK_BUSY;
+
+		memcpy(&pUpdateTraceLog->traceLog, pTraceNode->pTraceLog, sizeof(pUpdateTraceLog->traceLog));
+	
+		m_pAutoManager->PostUpdateTraceLogPkt(pUpdateTraceLog);
+		m_jobUpdateTraceLog.jobStep = TASK_EVENT_JOB_STEP_WAITING_RESP;
+	}
+	else if (m_jobUpdateTraceLog.jobStep == TASK_EVENT_JOB_STEP_COMPLETED_OK)
+	{
+		m_jobUpdateTraceLog.jobStep = TASK_EVENT_JOB_STEP_NONE;
+		return STOCK_TRACE_WORK_OK;
+	}
+	else
+	{
+		m_jobUpdateTraceLog.jobStep = TASK_EVENT_JOB_STEP_NONE;
+		return STOCK_TRACE_WORK_OK;
+	}
+}
+
+void CStockTraceBase::RemoveTraceNode(STOCK_CALC_TRACE_NODE* pTraceNode)
+{
+	dllRemove(m_pTraceList, &pTraceNode->node);
+	m_pAutoManager->AddTraceList(this, pTraceNode);
+}
+
 UINT CStockTraceBase::DoPrepareWork(STOCK_CALC_TRACE_NODE* pTraceNode)
 {
 	if (CheckForPrepare(pTraceNode))
@@ -148,7 +208,7 @@ UINT CStockTraceBase::DoPrepareWork(STOCK_CALC_TRACE_NODE* pTraceNode)
 		return STOCK_TRACE_STEP_END;
 }
 
-BOOL CheckForPrepare(STOCK_CALC_TRACE_NODE* pTraceNode)
+BOOL CStockTraceBase::CheckForPrepare(STOCK_CALC_TRACE_NODE* pTraceNode)
 {
 	return TRUE;
 }
@@ -156,7 +216,7 @@ BOOL CheckForPrepare(STOCK_CALC_TRACE_NODE* pTraceNode)
 UINT CStockTraceBase::Next(DL_NODE* pNode)
 {
 	if (pNode != NULL)
-		m_pCurNode = m_pCurNode->next;
+		m_pCurNode = pNode->next;
 	return STOCK_TRACE_STEP_PRPARING;
 }
 
