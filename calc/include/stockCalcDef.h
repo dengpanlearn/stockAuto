@@ -35,6 +35,7 @@ struct STOCK_MANAGER_TRACE_LOG
 	long	buyTime;
 	float	fBuyVal;
 	int		rsiCheckTimesForSell;
+	int		rsiCheckTimesForBuy;
 	long	sellTime;
 	float	fSellVal;
 	long	hisTime;

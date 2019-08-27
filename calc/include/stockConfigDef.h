@@ -52,10 +52,30 @@ struct STOCKAUTO_CONFIG_DATA
 	char tracelogFileName[STOCK_CONFIG_NAME_MAX];
 };
 
+struct STOCKAUTO_CONFIG_TRACE
+{
+	float		fRaisePercent;
+	int			raiseBalances;
+	int			reachHighRanges;
+	int			rsiBuyWaits;
+	float		fRsiBuy;
+	float		fRsiSell;
+	float		rsiSellWaits; 
+	float		fCutLossPercent;
+};
+
+#define STOCKAUTO_CONFIG_TRACE_RAISE_PERCENT_DFT		0.004
+#define STOCKAUTO_CONFIG_TRACE_RAISE_BALANCES_DFT		3
+#define STOCKAUTO_CONFIG_TRACE_REAHHIGH_RANGES_DFT		70
+#define STOCKAUTO_CONFIG_TRACE_RSI_BUY_DFT				75
+#define STOCKAUTO_CONFIG_TRACE_RSI_SELL_DFT				70
+#define	STOCKAUTO_CONFIG_TRACE_RSI_SELL_WAITS_DFT		3
+#define	STOCKAUTO_CONFIG_TRACE_CUTLOSS_PERCENT_DFT		3
 struct STOCKAUTO_CONFIG
 {
 	STOCKAUTO_CONFIG_PYTHON		configPython;
 	STOCKAUTO_CONFIG_DATA		configData;
+	STOCKAUTO_CONFIG_TRACE		configTrace;
 };
 
 #endif // !__STOCK_CONFIG_DEF_H__

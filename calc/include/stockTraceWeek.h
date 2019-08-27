@@ -13,7 +13,7 @@ public:
 	CStockTraceWeek(CStockAutoManager* pAutoManager, DL_LIST* pTraceList);
 	~CStockTraceWeek();
 
-	BOOL Init(int hisKLineCounts, float fPercent, int iRaiseBalances);
+	BOOL Init(int hisKLineCounts, STOCKAUTO_CONFIG_TRACE const* pConfigTrace);
 	void Close();
 
 protected:
@@ -28,8 +28,12 @@ private:
 	BOOL DoTraceWeekWork(STOCK_CALC_TRACE_NODE* pTraceNode);
 
 private:
-	float	m_fPercent;
+	float	m_fRaisePercent;
 	int		m_iRaiseBalances;	
+	int		m_iReachHighRanges;
+	float	m_fRsiBuy;
+	int		m_iRsiBuyWaits;
+	float	m_fRsiSell;
 };
 
 #endif // !__STOCK_TRACE_WEEK_H__

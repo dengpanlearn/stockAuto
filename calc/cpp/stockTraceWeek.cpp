@@ -15,10 +15,14 @@ CStockTraceWeek::~CStockTraceWeek()
 	Close();
 }
 
-BOOL CStockTraceWeek::Init(int hisKLineCounts, float fPercent, int iRaiseBalances)
+BOOL CStockTraceWeek::Init(int hisKLineCounts, STOCKAUTO_CONFIG_TRACE const* pConfigTrace)
 {
-	m_fPercent = fPercent;
-	m_iRaiseBalances = iRaiseBalances;
+	m_fRaisePercent = pConfigTrace->fRaisePercent;
+	m_iRaiseBalances = pConfigTrace->raiseBalances;
+	m_iReachHighRanges = pConfigTrace->reachHighRanges;
+	m_fRsiBuy = pConfigTrace->fRsiBuy;
+	m_iRsiBuyWaits = pConfigTrace->rsiBuyWaits;
+	m_fRsiSell = pConfigTrace->fRsiSell;
 	return CStockTraceBase::Init(hisKLineCounts);
 }
 
@@ -37,8 +41,6 @@ void CStockTraceWeek::InitStockTrace(STOCK_CALC_TRACE_NODE* pTraceNode)
 BOOL CStockTraceWeek::CheckForPrepare(STOCK_CALC_TRACE_NODE* pTraceNode)
 {
 	STOCK_MANAGER_TRACE_LOG* pTraceLog = pTraceNode->pTraceLog;
-	if (pTraceLog->traceStep != CALC_STOCK_TRADE_STEP_CHECK_BALANCE_RAISE)
-		return FALSE;
 
 	QDateTime hisDateTime = QDateTime::fromTime_t(pTraceLog->hisTime);
 	QDateTime updateDateTime = QDateTime::fromTime_t(pTraceLog->updateTime);
@@ -98,11 +100,24 @@ UINT CStockTraceWeek::Next(DL_NODE* pNode)
 	return result;
 }
 
+static BOOL IsReachHigh(STOCK_CALC_TRACE_KLINE const* pStart, STOCK_CALC_TRACE_KLINE const* pCur)
+{
+	while (pStart != pCur)
+	{
+		if (pStart->fHigh > pCur->fHigh)
+			return FALSE;
+
+		pStart++;
+	}
+
+	return TRUE;
+}
+
 BOOL CStockTraceWeek::DoTraceWeekWork(STOCK_CALC_TRACE_NODE* pTraceNode)
 {
 	int hisKLineCounts = 0;
 	STOCK_CALC_TRACE_KLINE const* pTraceKLine = GetCurHisKLinePtr(hisKLineCounts);
-	if (hisKLineCounts < STOCK_HIS_KLINE_MIN_COUNTS_FOR_TRACE)
+	if (hisKLineCounts < m_iReachHighRanges)
 		return FALSE;
 
 	STOCK_MANAGER_TRACE_LOG* pTraceLog = pTraceNode->pTraceLog;
@@ -118,23 +133,72 @@ BOOL CStockTraceWeek::DoTraceWeekWork(STOCK_CALC_TRACE_NODE* pTraceNode)
 	long hisEndTime = QDateTime(hisEndDate).toTime_t();
 	int offsetWeeks = STOCK_CALC_WEEKS_BETWEEN_SECS(pTraceLog->updateTime, hisEndTime);
 	if (offsetWeeks > STOCK_CALC_WEEKS_LOST_MAX)
+	{
 		offsetWeeks = STOCK_CALC_WEEKS_LOST_MAX;
+	}
 
 	STOCK_CALC_TRACE_KLINE const* pTraceKLinePos = pTraceKLine + hisKLineCounts - offsetWeeks;
 
 	for (int i = 0; i < offsetWeeks; i++, pTraceKLinePos++)
 	{
-		if (pTraceKLinePos->fPercent > m_fPercent)
+		if (pTraceLog->traceStep == CALC_STOCK_TRADE_STEP_CHECK_BALANCE_RAISE)
 		{
-			pTraceLog->raiseBalanceCheckTimes = 0;
-			continue;
+			if (pTraceKLinePos->fPercent > m_fRaisePercent)
+			{
+				pTraceLog->raiseBalanceCheckTimes = 0;
+				continue;
+			}
+
+			if (++pTraceLog->raiseBalanceCheckTimes < m_iRaiseBalances)
+				continue;
+
+			
+			pTraceLog->traceStep = CALC_STOCK_TRADE_STEP_CHECK_HIGH;
+		}
+		else if (pTraceLog->traceStep == CALC_STOCK_TRADE_STEP_CHECK_HIGH)
+		{
+			if (IsReachHigh(pTraceKLine, pTraceKLinePos))
+			{
+				pTraceLog->traceStep = CALC_STOCK_TRADE_STEP_WAIT_BUY;
+				pTraceLog->rsiCheckTimesForBuy = 0;
+				continue;
+			}
+
+			if (pTraceKLinePos->fPercent > m_fRaisePercent)
+			{
+			__TRACE_INIT:
+				pTraceLog->raiseBalanceCheckTimes = 0;
+				pTraceLog->traceStep = CALC_STOCK_TRADE_STEP_CHECK_BALANCE_RAISE;
+				continue;
+			}
+
+		}
+		else if (pTraceLog->traceStep == CALC_STOCK_TRADE_STEP_WAIT_BUY)
+		{
+			if (pTraceKLinePos->fRsi7 > m_fRsiBuy)
+			{
+				// 历史时间不能买入, 直接重新开始流程
+				goto __TRACE_INIT;
+			}
+
+			if (++pTraceLog->rsiCheckTimesForBuy >= m_iRsiBuyWaits)
+				goto __TRACE_INIT;
+				
+		}
+		else if (pTraceLog->traceStep == CALC_STOCK_TRADE_STEP_WAIT_SELL)
+		{
+			if (pTraceKLinePos->fRsi7 < m_f)
+			{
+				
+				continue;
+			}
+
+
+
 		}
 
-		if (++pTraceLog->raiseBalanceCheckTimes >= m_iRaiseBalances)
-		{
-			pTraceLog->traceStep = CALC_STOCK_TRADE_STEP_CHECK_HIGH;
-			break;
-		}
+
+		
 	}
 
 	pTraceLog->hisTime = pTraceKLinePos->timeVal / 1000;
