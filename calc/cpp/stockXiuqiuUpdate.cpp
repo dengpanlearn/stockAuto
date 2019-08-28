@@ -61,3 +61,8 @@ BOOL CStockXiuQiuUpdate::UpdateLatestKLineByTime(char const* pStockCode, time_t 
 {
 	return pStockPython->UpdateLatestKLineByTime(pStockCode, endTime, counts);
 }
+
+BOOL CStockXiuQiuUpdate::GetLatestKLine(char const* pStockCode, STOCK_CALC_TRACE_KLINE* pCurKLine)
+{
+	return pStockPython->GetLatestKLine(pStockCode, pCurKLine);
+}

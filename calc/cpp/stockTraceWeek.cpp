@@ -134,6 +134,11 @@ BOOL CStockTraceWeek::DoTraceWeekWork(STOCK_CALC_TRACE_NODE* pTraceNode)
 	int offsetWeeks = STOCK_CALC_WEEKS_BETWEEN_SECS(pTraceLog->updateTime, hisEndTime);
 	if (offsetWeeks > STOCK_CALC_WEEKS_LOST_MAX)
 	{
+		if (pTraceLog->traceStep != CALC_STOCK_TRADE_STEP_WAIT_SELL)
+		{
+			pTraceLog->raiseBalanceCheckTimes = 0;
+			pTraceLog->traceStep = CALC_STOCK_TRADE_STEP_CHECK_BALANCE_RAISE;
+		}
 		offsetWeeks = STOCK_CALC_WEEKS_LOST_MAX;
 	}
 
@@ -187,21 +192,14 @@ BOOL CStockTraceWeek::DoTraceWeekWork(STOCK_CALC_TRACE_NODE* pTraceNode)
 		}
 		else if (pTraceLog->traceStep == CALC_STOCK_TRADE_STEP_WAIT_SELL)
 		{
-			if (pTraceKLinePos->fRsi7 < m_f)
+			if (pTraceKLinePos->fRsi7 < m_fRsiSell)
 			{
-				
-				continue;
+				pTraceLog->rsiCheckTimesForBuy++;
 			}
-
-
-
 		}
-
-
-		
 	}
-
-	pTraceLog->hisTime = pTraceKLinePos->timeVal / 1000;
+	pTraceKLinePos--;
+	pTraceLog->hisTime = pTraceKLinePos->timeVal;
 
 	return TRUE;
 }

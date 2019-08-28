@@ -135,3 +135,71 @@ BOOL CStockPython::UpdateLatestKLineByTime(char const* pStockCode, time_t endTim
 	Py_DECREF(pRet);
 	return result == 0;
 }
+
+BOOL CStockPython::GetLatestKLine(char const* pStockCode, STOCK_CALC_TRACE_KLINE* pCurKLine)
+{
+	PyObject* pItemVal;
+	int itemSize = 0;
+	
+	PyObject* pCode = NULL;
+	PyObject* pItem = NULL;
+	
+	PyObject* pRet = PyObject_CallMethod(m_pInstanceKLine, PYTHON_CLASS_WEEK_KLINE_METHOD_LATEST_STOCK_KLINE, "s", pStockCode);
+	if (pRet == NULL)
+		return FALSE;
+
+	int parseResult  = -1;
+	BOOL bResult = FALSE;
+	pCode = PyDict_GetItemString(pRet, "code");
+	if (pCode == NULL)
+		goto _CODE_NONE;
+
+	PyArg_Parse(pCode, "i", &parseResult);
+	if (parseResult == -1)
+		goto _CODE_ERROR;
+
+	pItem = PyDict_GetItemString(pRet, "item");
+	if (pItem == NULL)
+		goto _CODE_NONE;
+
+	if (!PyList_Check(pItem))
+		goto _ITEM_ERROR;
+
+	itemSize = PyList_Size(pItem);
+	if (itemSize != STOCK_CALC_TRACE_KLINE_INDEX_NUM)
+		goto _ITEM_ERROR;
+
+	pItemVal = PyList_GetItem(pItem, STOCK_CALC_TRACE_KLINE_INDEX_OPEN);
+	PyArg_Parse(pItemVal, "f", &pCurKLine->fOpen);
+
+	pItemVal = PyList_GetItem(pItem, STOCK_CALC_TRACE_KLINE_INDEX_CLOSE);
+	PyArg_Parse(pItemVal, "f", &pCurKLine->fClose);
+
+	pItemVal = PyList_GetItem(pItem, STOCK_CALC_TRACE_KLINE_INDEX_HIGH);
+	PyArg_Parse(pItemVal, "f", &pCurKLine->fHigh);
+
+	pItemVal = PyList_GetItem(pItem, STOCK_CALC_TRACE_KLINE_INDEX_LOW);
+	PyArg_Parse(pItemVal, "f", &pCurKLine->fLow);
+
+	pItemVal = PyList_GetItem(pItem, STOCK_CALC_TRACE_KLINE_INDEX_PERCENT);
+	PyArg_Parse(pItemVal, "f", &pCurKLine->fPercent);
+
+	pItemVal = PyList_GetItem(pItem, STOCK_CALC_TRACE_KLINE_INDEX_MA10);
+	PyArg_Parse(pItemVal, "f", &pCurKLine->fMa10);
+
+	pItemVal = PyList_GetItem(pItem, STOCK_CALC_TRACE_KLINE_INDEX_TIMEVAL);
+	PyArg_Parse(pItemVal, "i", &pCurKLine->timeVal);
+
+	pItemVal = PyList_GetItem(pItem, STOCK_CALC_TRACE_KLINE_INDEX_RSI7);
+	PyArg_Parse(pItemVal, "f", &pCurKLine->fRsi7);
+
+	bResult = TRUE;
+_ITEM_ERROR:
+	Py_DECREF(pItem);
+_ITEM_NONE:
+_CODE_ERROR:
+	Py_DECREF(pCode);
+_CODE_NONE:
+	Py_DECREF(pRet);
+	return bResult;
+}

@@ -24,6 +24,7 @@ public:
 	virtual BOOL UpdateLatestStockList() = 0;
 	virtual BOOL UpdateLatestKLine(char const* pStockCode, int counts) = 0;
 	virtual BOOL UpdateLatestKLineByTime(char const* pStockCode, time_t endTime, int counts) = 0;
+	virtual BOOL GetLatestKLine(char const* pStockCode, STOCK_CALC_TRACE_KLINE* pCurKLine) = 0;
 private:
 	char m_szUpdateDir[STOCK_AUTO_SAVE_DIR_MAX_SIZE];
 };

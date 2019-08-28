@@ -63,7 +63,12 @@ void CStockUpdateTask::OnActive()
 int CStockUpdateTask::OnEventActive(UINT cmd, void* param, int paramLen)
 {
 	BOOL result = TRUE;
-	STOCK_CALC_UPDATE_HISKLINE* pHisKLine = (STOCK_CALC_UPDATE_HISKLINE*)param;
+	union
+	{
+		STOCK_CALC_UPDATE_HISKLINE* pHisKLine;
+		STOCK_CALC_GET_CUR_HISKLINE* pCurHisKLine;
+	};
+	pHisKLine  = (STOCK_CALC_UPDATE_HISKLINE*)param;
 
 	switch (cmd)
 	{
@@ -73,6 +78,10 @@ int CStockUpdateTask::OnEventActive(UINT cmd, void* param, int paramLen)
 
 	case STOCK_CALC_EVENT_UPDATE_STOCK_HISKLINE:
 		result = m_pStockUpdate->UpdateLatestKLineByTime(pHisKLine->code, pHisKLine->endTime, pHisKLine->updateCycles);
+		break;
+
+	case STOCK_CALC_EVENT_GET_CUR_STOCK_HISKLINE:
+		result = m_pStockUpdate->GetLatestKLine(pCurHisKLine->code, pCurHisKLine->pCurKLine);
 		break;
 	}
 

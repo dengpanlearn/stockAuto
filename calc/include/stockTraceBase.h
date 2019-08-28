@@ -65,6 +65,7 @@ private:
 	int						m_hisKLineCounts;
 	STOCK_TRACE_JOB_HISKLINE_GET m_jobGetHisKine;
 	STOCK_TRACE_JOB_TRACELOG_UPDATE m_jobUpdateTraceLog;
+	STOCK_TRACE_JOB_CURHISKLINE_GET m_jobGetCurHisKLine;
 	UINT					m_workStep;
 };
 

@@ -13,22 +13,35 @@ public:
 	CStockTraceReal(CStockAutoManager* pAutoManager, DL_LIST* pTraceList);
 	~CStockTraceReal();
 
-	BOOL Init(int hisHighCounts, float fRsiBuy, float fRsiSell, float fRsiSellWaits, float fCutLossPercent);
+	BOOL Init(int hisHighCounts, STOCKAUTO_CONFIG_TRACE const* pConfigTrace);
 	void Close();
 
 protected:
 
-	virtual void InitStockTrace(STOCK_CALC_TRACE_NODE* pTraceNode) = 0;
+	virtual void InitStockTrace(STOCK_CALC_TRACE_NODE* pTraceNode);
 	virtual UINT DoPrepareWork(STOCK_CALC_TRACE_NODE* pTraceNode);
 	virtual BOOL CheckForPrepare(STOCK_CALC_TRACE_NODE* pTraceNode);
 	virtual UINT Next(DL_NODE* pNode);
 	virtual UINT DoTraceWork(STOCK_CALC_TRACE_NODE* pTraceNode);
 
 private:
-	int		m_iHisHighCounts;
+	BOOL DoPreparerHisKLine(STOCK_CALC_TRACE_NODE* pTraceNode);
+	BOOL DoPreparerCurHisKLine(STOCK_CALC_TRACE_NODE* pTraceNode);
+
+private:
+	enum
+	{
+		STOCK_TRACE_REAL_PRPARE_STEP_NONE = 0x00,
+		STOCK_TRACE_REAL_PRPARE_STEP_HISKLINE,
+		STOCK_TRACE_REAL_PRPARE_STEP_CUR_HISKLINE
+	};
+
+	UINT	m_realTraceStep;
+	int		m_iReachHighRanges;
 	float	m_fRsiBuy;
+	int		m_iRsiBuyWaits;
 	float	m_fRsiSell;
-	float	m_fRsiSellWaits;
+	int		m_iRsiSellWaits;
 	float	m_fCutLossPercent;
 };
 

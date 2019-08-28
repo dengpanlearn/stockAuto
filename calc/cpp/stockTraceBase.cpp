@@ -79,6 +79,8 @@ void CStockTraceBase::Trace()
 void CStockTraceBase::AddTraceStock(STOCK_CALC_TRACE_NODE* pTraceNode)
 {
 	dllAdd(m_pTraceList, &pTraceNode->node);
+	if (m_pCurNode == NULL)
+		m_pCurNode = &pTraceNode->node;
 }
 
 void CStockTraceBase::TraceStock(STOCK_CALC_TRACE_NODE* pTraceNode)

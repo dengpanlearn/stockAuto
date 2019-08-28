@@ -7,7 +7,7 @@
 
 #include <dp.h>
 #include <Python.h>
-
+#include <stockCalcDef.h>
 class CStockPython
 {
 public:
@@ -21,7 +21,9 @@ public:
 	BOOL UpdateLatestStockList();
 
 	BOOL UpdateLatestKLine(char const* pStockCode, int counts);
-	BOOL CStockPython::UpdateLatestKLineByTime(char const* pStockCode, time_t endTime, int counts);
+	BOOL UpdateLatestKLineByTime(char const* pStockCode, time_t endTime, int counts);
+
+	BOOL GetLatestKLine(char const* pStockCode, STOCK_CALC_TRACE_KLINE* pCurKLine);
 
 private:
 	PyObject*	m_pModuleKLine;
