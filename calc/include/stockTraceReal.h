@@ -25,15 +25,15 @@ protected:
 	virtual UINT DoTraceWork(STOCK_CALC_TRACE_NODE* pTraceNode);
 
 private:
-	BOOL DoPreparerHisKLine(STOCK_CALC_TRACE_NODE* pTraceNode);
-	BOOL DoPreparerCurHisKLine(STOCK_CALC_TRACE_NODE* pTraceNode);
+	BOOL DoPreparerHisKLine(STOCK_CALC_TRACE_NODE* pTraceNode, UINT& prepareStep);
+	BOOL DoPreparerCurHisKLine(STOCK_CALC_TRACE_NODE* pTraceNode, UINT& prepareStep);
 
 private:
 	enum
 	{
 		STOCK_TRACE_REAL_PRPARE_STEP_NONE = 0x00,
 		STOCK_TRACE_REAL_PRPARE_STEP_HISKLINE,
-		STOCK_TRACE_REAL_PRPARE_STEP_CUR_HISKLINE
+		STOCK_TRACE_REAL_PRPARE_STEP_CUR_HISKLINE,
 	};
 
 	UINT	m_realTraceStep;

@@ -50,6 +50,8 @@ UINT CStockTraceReal::DoPrepareWork(STOCK_CALC_TRACE_NODE* pTraceNode)
 
 		m_realTraceStep = STOCK_TRACE_REAL_PRPARE_STEP_HISKLINE;	// no break
 	case STOCK_TRACE_REAL_PRPARE_STEP_HISKLINE:
+		if (!DoPreparerHisKLine(pTraceNode, m_realTraceStep))
+			goto _NEXT_END;
 		break;
 
 	case STOCK_TRACE_REAL_PRPARE_STEP_CUR_HISKLINE:
@@ -65,12 +67,32 @@ BOOL CStockTraceReal::CheckForPrepare(STOCK_CALC_TRACE_NODE* pTraceNode)
 	return  (pTraceLog->traceStep > CALC_STOCK_TRADE_STEP_CHECK_BALANCE_RAISE);
 }
 
-BOOL CStockTraceReal::DoPreparerHisKLine(STOCK_CALC_TRACE_NODE* pTraceNode)
+BOOL CStockTraceReal::DoPreparerHisKLine(STOCK_CALC_TRACE_NODE* pTraceNode, UINT& prepareStep)
 {
+	prepareStep = STOCK_TRACE_REAL_PRPARE_STEP_HISKLINE;
+	UINT result = GetHisKLine(pTraceNode, STOCK_HIS_KLINE_MAX_COUNTS_FOR_TRACE);
+
+	switch (result)
+	{
+	case STOCK_TRACE_WORK_OK:
+		prepareStep = STOCK_TRACE_REAL_PRPARE_STEP_CUR_HISKLINE;
+		break;
+
+	case STOCK_TRACE_WORK_FAIL:
+	case STOCK_TRACE_WORK_NONE:
+		prepareStep = STOCK_TRACE_REAL_PRPARE_STEP_NONE;
+		break;
+
+	case STOCK_TRACE_WORK_WAIT_RESP:
+	case STOCK_TRACE_WORK_BUSY:
+		break;
+	}
+
+	return (STOCK_TRACE_REAL_PRPARE_STEP_NONE == prepareStep);
 
 }
 
-BOOL CStockTraceReal::DoPreparerCurHisKLine(STOCK_CALC_TRACE_NODE* pTraceNode)
+BOOL CStockTraceReal::DoPreparerCurHisKLine(STOCK_CALC_TRACE_NODE* pTraceNode, UINT& prepareStep)
 {
 
 }
