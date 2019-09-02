@@ -159,6 +159,7 @@ int CStockAutoManager::OnEventActive(UINT cmd, void* param, int paramLen)
 		STOCK_CALC_UPDATE_HISKLINE_RESP* pUpdateHisKLineResp;
 		STOCK_CALC_GET_HISKLINE_RESP* pGetHisKLineResp;
 		STOCK_CALC_UPDATE_TRACELOG_RESP* pUpdateTraceLogResp;
+		STOCK_CALC_GET_CUR_HISKLINE_RESP* pGetCurHisKLineResp;
 	};
 
 	pGetListResp = (STOCK_CALC_GET_LIST_RESP*)param;
@@ -187,6 +188,10 @@ int CStockAutoManager::OnEventActive(UINT cmd, void* param, int paramLen)
 
 	case STOCK_CALC_EVENT_UPDATE_TRACE_LOG_RESP:
 		OnUpdateTraceLogResp(pUpdateTraceLogResp);
+		break;
+
+	case STOCK_CALC_EVENT_GET_CUR_STOCK_HISKLINE_RESP:
+		OnCurHisKLineGetResp(pGetCurHisKLineResp);
 		break;
 	}
 
@@ -219,6 +224,10 @@ BOOL CStockAutoManager::OnEventComplete(UINT cmd, int result, void* param, int p
 
 	case STOCK_CALC_EVENT_UPDATE_TRACE_LOG:
 		re = OnUpdateTraceLogComplete(result, param, paramLen);
+		break;
+
+	case STOCK_CALC_EVENT_GET_CUR_STOCK_HISKLINE:
+		re = OnCurHisKLineGetComplete(result, param, paramLen);
 		break;
 	}
 
@@ -302,9 +311,41 @@ STOCK_CALC_GET_HISKLINE_RESP* CStockAutoManager::AllocGetHisKLineRespPkt(CStockT
 	return pGetHisKLineResp;
 }
 
-void CStockAutoManager::PostGetHisKLineRespPkt(STOCK_CALC_GET_HISKLINE_RESP* pGetHisKLine)
+void CStockAutoManager::PostGetHisKLineRespPkt(STOCK_CALC_GET_HISKLINE_RESP* pGetHisKLineResp)
 {
-	PostPktByEvent(pGetHisKLine);
+	PostPktByEvent(pGetHisKLineResp);
+}
+
+STOCK_CALC_GET_CUR_HISKLINE* CStockAutoManager::AllocGetCurHisKLinePkt(CStockTraceBase* pTraceBase)
+{
+	STOCK_CALC_GET_CUR_HISKLINE* pGetCurHisKLine = (STOCK_CALC_GET_CUR_HISKLINE*)m_pUpdateTask->AllocPktByEvent(STOCK_CALC_EVENT_GET_CUR_STOCK_HISKLINE, sizeof(STOCK_CALC_GET_CUR_HISKLINE),
+		MultiTaskEventComplete, this);
+	if (pGetCurHisKLine == NULL)
+		return NULL;
+
+	pGetCurHisKLine->pTraceBase = pTraceBase;
+	return pGetCurHisKLine;
+}
+
+void CStockAutoManager::PostGetCurHisKLinePkt(STOCK_CALC_GET_CUR_HISKLINE* pGetCurHisKLine)
+{
+	m_pUpdateTask->PostPktByEvent(pGetCurHisKLine);
+}
+
+STOCK_CALC_GET_CUR_HISKLINE_RESP* CStockAutoManager::AllocGetCurHisKLineRespPkt(CStockTraceBase* pTraceBase)
+{
+	STOCK_CALC_GET_CUR_HISKLINE_RESP* pGetCurHisKLineResp = (STOCK_CALC_GET_CUR_HISKLINE_RESP*)AllocPktByEvent(STOCK_CALC_EVENT_GET_CUR_STOCK_HISKLINE_RESP, sizeof(STOCK_CALC_GET_CUR_HISKLINE_RESP),
+		NULL, this);
+	if (pGetCurHisKLineResp == NULL)
+		return NULL;
+
+	pGetCurHisKLineResp->pTraceBase = pTraceBase;
+	return pGetCurHisKLineResp;
+}
+
+void CStockAutoManager::PostGetCurHisKLineRespPkt(STOCK_CALC_GET_CUR_HISKLINE_RESP* pGetCurHisKLineResp)
+{
+	PostPktByEvent(pGetCurHisKLineResp);
 }
 
 STOCK_CALC_UPDATE_TRACELOG* CStockAutoManager::AllocUpdateTraceLogPkt(CStockTraceBase* pTraceBase)
@@ -666,5 +707,18 @@ BOOL CStockAutoManager::OnUpdateTraceLogComplete(int result, void* param, int pa
 {
 	STOCK_CALC_UPDATE_TRACELOG* pUpdateTraceLog = (STOCK_CALC_UPDATE_TRACELOG*)param;
 	CStockTraceBase* pTraceBase = pUpdateTraceLog->pTraceBase;
-	return pTraceBase->OnGetKLineComplete(result, param, paramLen);
+	return pTraceBase->OnUpdateTraceLogComplete(result, param, paramLen);
+}
+
+void CStockAutoManager::OnCurHisKLineGetResp(STOCK_CALC_GET_CUR_HISKLINE_RESP* pGetCurHisKLineResp)
+{
+	CStockTraceBase* pTraceBase = pGetCurHisKLineResp->pTraceBase;
+	pTraceBase->OnGetCurKLineResp(pGetCurHisKLineResp);
+}
+
+BOOL CStockAutoManager::OnCurHisKLineGetComplete(int result, void* param, int paramLen)
+{
+	STOCK_CALC_GET_CUR_HISKLINE* pGetHisKLine = (STOCK_CALC_GET_CUR_HISKLINE*)param;
+	CStockTraceBase* pTraceBase = pGetHisKLine->pTraceBase;
+	return pTraceBase->OnGetCurKLineComplete(result, param, paramLen);
 }

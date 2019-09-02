@@ -27,13 +27,14 @@ protected:
 private:
 	BOOL DoPreparerHisKLine(STOCK_CALC_TRACE_NODE* pTraceNode, UINT& prepareStep);
 	BOOL DoPreparerCurHisKLine(STOCK_CALC_TRACE_NODE* pTraceNode, UINT& prepareStep);
-
+	BOOL DoTraceRealWork(STOCK_CALC_TRACE_NODE* pTraceNode);
 private:
 	enum
 	{
 		STOCK_TRACE_REAL_PRPARE_STEP_NONE = 0x00,
 		STOCK_TRACE_REAL_PRPARE_STEP_HISKLINE,
 		STOCK_TRACE_REAL_PRPARE_STEP_CUR_HISKLINE,
+		STOCK_TRACE_REAL_PRPARE_STEP_END,
 	};
 
 	UINT	m_realTraceStep;

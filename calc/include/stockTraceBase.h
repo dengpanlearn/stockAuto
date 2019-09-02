@@ -25,12 +25,16 @@ public:
 	void OnUpdateTraceLogResp(STOCK_CALC_UPDATE_TRACELOG_RESP* pUpdateTraceLogResp);
 	BOOL OnUpdateTraceLogComplete(int result, void* param, int paramLen);
 
+	void OnGetCurKLineResp(STOCK_CALC_GET_CUR_HISKLINE_RESP* pGetCurKLineResp);
+	BOOL OnGetCurKLineComplete(int result, void* param, int paramLen);
+
 protected:
-	inline STOCK_CALC_TRACE_KLINE const* GetCurHisKLinePtr(int& counts);
+	inline STOCK_CALC_TRACE_KLINE const* GetHisKLinePtr(int& counts);
+	inline STOCK_CALC_TRACE_KLINE const* GetCurHisKLinePtr();
 
 	UINT GetHisKLine(STOCK_CALC_TRACE_NODE* pTraceNode, int counts);
 	UINT UpdateTraceLog(STOCK_CALC_TRACE_NODE* pTraceNode);
-
+	UINT GetCurHisKLine(STOCK_CALC_TRACE_NODE* pTraceNode);
 
 	inline BOOL IsJobGetHisKLineNone();
 	inline BOOL IsJobUpdateTraceLogNone();
@@ -69,10 +73,15 @@ private:
 	UINT					m_workStep;
 };
 
-inline STOCK_CALC_TRACE_KLINE const* CStockTraceBase::GetCurHisKLinePtr(int& counts)
+inline STOCK_CALC_TRACE_KLINE const* CStockTraceBase::GetHisKLinePtr(int& counts)
 {
 	counts = m_jobGetHisKine.hisCounts;
 	return m_pHisKLine;
+}
+
+inline STOCK_CALC_TRACE_KLINE const* CStockTraceBase::GetCurHisKLinePtr()
+{
+	return &m_jobGetCurHisKLine.curKLine;
 }
 
 inline BOOL CStockTraceBase::IsJobGetHisKLineNone()

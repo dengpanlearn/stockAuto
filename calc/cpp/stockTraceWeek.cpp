@@ -116,7 +116,7 @@ static BOOL IsReachHigh(STOCK_CALC_TRACE_KLINE const* pStart, STOCK_CALC_TRACE_K
 BOOL CStockTraceWeek::DoTraceWeekWork(STOCK_CALC_TRACE_NODE* pTraceNode)
 {
 	int hisKLineCounts = 0;
-	STOCK_CALC_TRACE_KLINE const* pTraceKLine = GetCurHisKLinePtr(hisKLineCounts);
+	STOCK_CALC_TRACE_KLINE const* pTraceKLine = GetHisKLinePtr(hisKLineCounts);
 	if (hisKLineCounts < m_iReachHighRanges)
 		return FALSE;
 

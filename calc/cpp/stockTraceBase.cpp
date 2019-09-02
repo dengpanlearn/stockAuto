@@ -139,6 +139,31 @@ BOOL CStockTraceBase::OnUpdateTraceLogComplete(int result, void* param, int para
 	return TRUE;
 }
 
+void CStockTraceBase::OnGetCurKLineResp(STOCK_CALC_GET_CUR_HISKLINE_RESP* pGetCurKLineResp)
+{
+	if (pGetCurKLineResp->respResult < 0)
+	{
+		m_jobGetCurHisKLine.jobStep = TASK_EVENT_JOB_STEP_COMPLETED_FAIL;
+	}
+	else
+	{
+		m_jobGetCurHisKLine.jobStep = TASK_EVENT_JOB_STEP_COMPLETED_OK;
+	}
+}
+
+BOOL CStockTraceBase::OnGetCurKLineComplete(int result, void* param, int paramLen)
+{
+	STOCK_CALC_GET_CUR_HISKLINE* pGetCurHisKLine = (STOCK_CALC_GET_CUR_HISKLINE*)param;
+	STOCK_CALC_GET_CUR_HISKLINE_RESP* pGetCurHisKLineResp = m_pAutoManager->AllocGetCurHisKLineRespPkt(pGetCurHisKLine->pTraceBase);
+
+	if (pGetCurHisKLineResp == NULL)
+		return FALSE;
+
+	pGetCurHisKLineResp->respResult = result;
+	m_pAutoManager->PostGetCurHisKLineRespPkt(pGetCurHisKLineResp);
+	return TRUE;
+}
+
 UINT CStockTraceBase::GetHisKLine(STOCK_CALC_TRACE_NODE* pTraceNode, int counts)
 {
 	if (m_jobGetHisKine.jobStep == TASK_EVENT_JOB_STEP_WAITING_RESP)
@@ -192,6 +217,36 @@ UINT CStockTraceBase::UpdateTraceLog(STOCK_CALC_TRACE_NODE* pTraceNode)
 	else
 	{
 		m_jobUpdateTraceLog.jobStep = TASK_EVENT_JOB_STEP_NONE;
+		return STOCK_TRACE_WORK_OK;
+	}
+}
+
+UINT CStockTraceBase::GetCurHisKLine(STOCK_CALC_TRACE_NODE* pTraceNode)
+{
+	if (m_jobGetCurHisKLine.jobStep == TASK_EVENT_JOB_STEP_WAITING_RESP)
+		return STOCK_TRACE_WORK_WAIT_RESP;
+
+	if (m_jobGetCurHisKLine.jobStep == TASK_EVENT_JOB_STEP_NONE)
+	{
+		STOCK_CALC_GET_CUR_HISKLINE* pGetCurHisKLine = m_pAutoManager->AllocGetCurHisKLinePkt(this);
+		if (pGetCurHisKLine == NULL)
+			return STOCK_TRACE_WORK_BUSY;
+
+		pGetCurHisKLine->pCurKLine = &m_jobGetCurHisKLine.curKLine;
+		memcpy(pGetCurHisKLine->code, pTraceNode->pTraceLog->code, sizeof(pGetCurHisKLine->code));
+		m_pAutoManager->PostGetCurHisKLinePkt(pGetCurHisKLine);
+
+	
+		m_jobGetCurHisKLine.jobStep = TASK_EVENT_JOB_STEP_WAITING_RESP;
+	}
+	else if (m_jobGetCurHisKLine.jobStep == TASK_EVENT_JOB_STEP_COMPLETED_OK)
+	{
+		m_jobGetCurHisKLine.jobStep = TASK_EVENT_JOB_STEP_NONE;
+		return STOCK_TRACE_WORK_OK;
+	}
+	else
+	{
+		m_jobGetCurHisKLine.jobStep = TASK_EVENT_JOB_STEP_NONE;
 		return STOCK_TRACE_WORK_OK;
 	}
 }

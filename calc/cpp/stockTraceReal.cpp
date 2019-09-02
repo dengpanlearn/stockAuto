@@ -55,6 +55,15 @@ UINT CStockTraceReal::DoPrepareWork(STOCK_CALC_TRACE_NODE* pTraceNode)
 		break;
 
 	case STOCK_TRACE_REAL_PRPARE_STEP_CUR_HISKLINE:
+		if (!DoPreparerCurHisKLine(pTraceNode, m_realTraceStep))
+			goto _NEXT_END;
+
+		if (m_realTraceStep == STOCK_TRACE_REAL_PRPARE_STEP_END)
+		{
+			m_realTraceStep = STOCK_TRACE_REAL_PRPARE_STEP_NONE;
+			nextStep = STOCK_TRACE_STEP_WORKING;
+		}
+	
 		break;
 	}
 
@@ -93,6 +102,53 @@ BOOL CStockTraceReal::DoPreparerHisKLine(STOCK_CALC_TRACE_NODE* pTraceNode, UINT
 }
 
 BOOL CStockTraceReal::DoPreparerCurHisKLine(STOCK_CALC_TRACE_NODE* pTraceNode, UINT& prepareStep)
+{
+	prepareStep = STOCK_TRACE_REAL_PRPARE_STEP_CUR_HISKLINE;
+	UINT result = GetCurHisKLine(pTraceNode);
+
+	switch (result)
+	{
+	case STOCK_TRACE_WORK_OK:
+		prepareStep = STOCK_TRACE_REAL_PRPARE_STEP_END;
+		break;
+
+	case STOCK_TRACE_WORK_FAIL:
+	case STOCK_TRACE_WORK_NONE:
+		prepareStep = STOCK_TRACE_REAL_PRPARE_STEP_NONE;
+		break;
+
+	case STOCK_TRACE_WORK_WAIT_RESP:
+	case STOCK_TRACE_WORK_BUSY:
+		break;
+	}
+
+	return (STOCK_TRACE_REAL_PRPARE_STEP_NONE == prepareStep);
+}
+
+BOOL CStockTraceReal::DoTraceRealWork(STOCK_CALC_TRACE_NODE* pTraceNode)
+{
+	STOCK_CALC_TRACE_KLINE const* pCurKLine = GetCurHisKLinePtr();
+	STOCK_MANAGER_TRACE_LOG* pTraceLog = pTraceNode->pTraceLog;
+	if (pTraceLog->traceStep == CALC_STOCK_TRADE_STEP_CHECK_HIGH)
+	{
+		int hisKLineCounts = 0;
+		STOCK_CALC_TRACE_KLINE const* pHisKLine = GetHisKLinePtr(hisKLineCounts);
+		if (hisKLineCounts < m_iReachHighRanges)
+			return FALSE;
+
+
+	}
+	else if (pTraceLog->traceStep == CALC_STOCK_TRADE_STEP_WAIT_BUY)
+	{
+
+	}
+	else if (pTraceLog->traceStep == CALC_STOCK_TRADE_STEP_WAIT_SELL)
+	{
+
+	}
+}
+
+UINT CStockTraceReal::DoTraceWork(STOCK_CALC_TRACE_NODE* pTraceNode)
 {
 
 }

@@ -45,7 +45,13 @@ public:
 	void PostGetHisKLinePkt(STOCK_CALC_GET_HISKLINE* pGetHisKLine);
 
 	STOCK_CALC_GET_HISKLINE_RESP* AllocGetHisKLineRespPkt(CStockTraceBase* pTraceBase);
-	void PostGetHisKLineRespPkt(STOCK_CALC_GET_HISKLINE_RESP* pGetHisKLine);
+	void PostGetHisKLineRespPkt(STOCK_CALC_GET_HISKLINE_RESP* pGetHisKLineResp);
+
+	STOCK_CALC_GET_CUR_HISKLINE* AllocGetCurHisKLinePkt(CStockTraceBase* pTraceBase);
+	void PostGetCurHisKLinePkt(STOCK_CALC_GET_CUR_HISKLINE* pGetCurHisKLine);
+
+	STOCK_CALC_GET_CUR_HISKLINE_RESP* AllocGetCurHisKLineRespPkt(CStockTraceBase* pTraceBase);
+	void PostGetCurHisKLineRespPkt(STOCK_CALC_GET_CUR_HISKLINE_RESP* pGetCurHisKLineResp);
 
 	STOCK_CALC_UPDATE_TRACELOG* AllocUpdateTraceLogPkt(CStockTraceBase* pTraceBase);
 	void PostUpdateTraceLogPkt(STOCK_CALC_UPDATE_TRACELOG* pUpdateTraceLog);
@@ -77,6 +83,9 @@ private:
 
 	void OnUpdateTraceLogResp(STOCK_CALC_UPDATE_TRACELOG_RESP* pUpdateTraceLogResp);
 	BOOL OnUpdateTraceLogComplete(int result, void* param, int paramLen);
+
+	void OnCurHisKLineGetResp(STOCK_CALC_GET_CUR_HISKLINE_RESP* pGetCurHisKLineResp);
+	BOOL OnCurHisKLineGetComplete(int result, void* param, int paramLen);
 private:
 	CStockDataTask * m_pDataTask;
 	CStockUpdateTask*	m_pUpdateTask;
