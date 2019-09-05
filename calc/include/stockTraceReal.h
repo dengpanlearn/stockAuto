@@ -38,12 +38,14 @@ private:
 	};
 
 	UINT	m_realTraceStep;
+	float	m_fRaisePercent;
 	int		m_iReachHighRanges;
 	float	m_fRsiBuy;
 	int		m_iRsiBuyWaits;
 	float	m_fRsiSell;
 	int		m_iRsiSellWaits;
 	float	m_fCutLossPercent;
+	QDate	m_rsiCheckEndDateForBuy
 };
 
 

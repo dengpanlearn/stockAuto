@@ -42,6 +42,8 @@ protected:
 	void RemoveTraceNode(STOCK_CALC_TRACE_NODE* pTraceNode);
 
 protected:
+	static BOOL IsReachHigh(STOCK_CALC_TRACE_KLINE const* pStart, STOCK_CALC_TRACE_KLINE const* pCur);
+
 	void TraceStock(STOCK_CALC_TRACE_NODE* pTraceNode);
 	virtual void InitStockTrace(STOCK_CALC_TRACE_NODE* pTraceNode) = 0;
 	virtual UINT DoPrepareWork(STOCK_CALC_TRACE_NODE* pTraceNode);

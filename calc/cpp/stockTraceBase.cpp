@@ -281,3 +281,16 @@ UINT CStockTraceBase::DoTraceWork(STOCK_CALC_TRACE_NODE* pTraceNode)
 {
 	return STOCK_TRACE_STEP_END;
 }
+
+BOOL CStockTraceBase::IsReachHigh(STOCK_CALC_TRACE_KLINE const* pStart, STOCK_CALC_TRACE_KLINE const* pCur)
+{
+	while (pStart != pCur)
+	{
+		if (pStart->fHigh > pCur->fHigh)
+			return FALSE;
+
+		pStart++;
+	}
+
+	return TRUE;
+}

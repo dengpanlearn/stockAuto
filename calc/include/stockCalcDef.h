@@ -8,14 +8,18 @@
 #include <dp.h>
 #include <dllLibEx.h>
 #include <taskDef.h>
+
+#define CALC_IN_DEADZONE(x,zone)			(((x) < (zone)) && ((x) > (-zone)))
 #define	STOCK_CODE_NAME_MAX				32
 #define	STOCK_AUTO_COUNTS_MAX			3800
 #define STOCK_HIS_KLINE_MAX_COUNTS		80
 #define STOCK_HIS_KLINE_MAX_COUNTS_FOR_TRACE	75
 #define STOCK_HIS_KLINE_MIN_COUNTS_FOR_TRACE	70
 #define STOCK_TRACE_DAYS_PER_HIS_UPDATE (7)	
+
+#define STOCK_DAYS_PER_WEEK				7
 #define STOCK_SECS_PER_DAY				(24*3600)
-#define STOCK_SECS_PER_WEEKS			(STOCK_SECS_PER_DAY*7)
+#define STOCK_SECS_PER_WEEKS			(STOCK_SECS_PER_DAY*STOCK_DAYS_PER_WEEK)
 
 #define STOCK_CALC_WEEKS_BETWEEN_SECS(start, end) (((end)-(start)+STOCK_SECS_PER_WEEKS/2)/STOCK_SECS_PER_WEEKS)
 #define STOCK_CALC_WEEKS_LOST_MAX	5

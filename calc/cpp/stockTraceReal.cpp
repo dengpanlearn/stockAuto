@@ -2,6 +2,7 @@
 *stockTraceReal.cpp
 */
 
+#include <qdatetime.h>
 #include "../include/stockTraceReal.h"
 
 CStockTraceReal::CStockTraceReal(CStockAutoManager* pAutoManager, DL_LIST* pTraceList):CStockTraceBase(pAutoManager, pTraceList)
@@ -22,6 +23,7 @@ BOOL CStockTraceReal::Init(int hisHighCounts, STOCKAUTO_CONFIG_TRACE const* pCon
 	m_iRsiSellWaits = pConfigTrace->rsiSellWaits;
 	m_iReachHighRanges = pConfigTrace->reachHighRanges;
 	m_fCutLossPercent = pConfigTrace->fCutLossPercent;
+	m_fRaisePercent = pConfigTrace->fRaisePercent;
 	return CStockTraceBase::Init(hisHighCounts);
 }
 
@@ -136,15 +138,67 @@ BOOL CStockTraceReal::DoTraceRealWork(STOCK_CALC_TRACE_NODE* pTraceNode)
 		if (hisKLineCounts < m_iReachHighRanges)
 			return FALSE;
 
+		if (IsReachHigh(pHisKLine, pCurKLine))
+		{
+			pTraceLog->traceStep = CALC_STOCK_TRADE_STEP_WAIT_BUY;
+			pTraceLog->rsiCheckTimesForBuy = 0;
+			pTraceLog->highTime = time(NULL);
+			pTraceLog->fHighVal = pCurKLine->fHigh;
 
+			QDateTime highDateTime = QDateTime::fromTime_t(pTraceLog->highTime);
+			QDate highDate = highDateTime.date();
+			int highOffset = highDate.dayOfWeek();
+			QDate highEndWeekDate = highDate.addDays(STOCK_DAYS_PER_WEEK - highOffset);
+
+			m_rsiCheckEndDateForBuy = highEndWeekDate.addDays(m_iRsiBuyWaits*STOCK_DAYS_PER_WEEK);
+		}
+		else
+		{
+			if (!CALC_IN_DEADZONE(pCurKLine->fPercent, m_fRaisePercent))
+			{
+			__TRACE_INIT:
+				pTraceLog->traceStep = CALC_STOCK_TRADE_STEP_CHECK_BALANCE_RAISE;
+				pTraceLog->raiseBalanceCheckTimes = 0;
+			}
+		}
 	}
 	else if (pTraceLog->traceStep == CALC_STOCK_TRADE_STEP_WAIT_BUY)
 	{
-
+		if (pCurKLine->fRsi7 > m_fRsiBuy)
+		{
+			pTraceLog->traceStep = CALC_STOCK_TRADE_STEP_WAIT_SELL;
+			pTraceLog->buyTime = time(NULL);
+			pTraceLog->fBuyVal = pCurKLine->fClose;
+			pTraceLog->rsiCheckTimesForSell = 0;
+		}
+		else
+		{
+			QDate curDate = QDate::currentDate();
+			if (curDate >= m_rsiCheckEndDateForBuy)
+			{
+				goto __TRACE_INIT;
+			}
+		}
 	}
 	else if (pTraceLog->traceStep == CALC_STOCK_TRADE_STEP_WAIT_SELL)
 	{
+		if (pCurKLine->fClose < pCurKLine->fMa10)
+		{
+		_TRACE_SELL:
+			pTraceLog->sellTime = time(NULL);
+			pTraceLog->fSellVal = pCurKLine->fClose;
 
+			goto __TRACE_INIT;
+		}
+		
+		if ((pTraceLog->fBuyVal - pCurKLine->fClose) / pTraceLog->fBuyVal >
+			m_fCutLossPercent)
+			goto _TRACE_SELL;
+
+		for (int i = 0; i < m_iRsiSellWaits-1; i++)
+		{
+
+		}
 	}
 }
 

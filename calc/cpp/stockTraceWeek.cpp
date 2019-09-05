@@ -100,19 +100,6 @@ UINT CStockTraceWeek::Next(DL_NODE* pNode)
 	return result;
 }
 
-static BOOL IsReachHigh(STOCK_CALC_TRACE_KLINE const* pStart, STOCK_CALC_TRACE_KLINE const* pCur)
-{
-	while (pStart != pCur)
-	{
-		if (pStart->fHigh > pCur->fHigh)
-			return FALSE;
-
-		pStart++;
-	}
-
-	return TRUE;
-}
-
 BOOL CStockTraceWeek::DoTraceWeekWork(STOCK_CALC_TRACE_NODE* pTraceNode)
 {
 	int hisKLineCounts = 0;
