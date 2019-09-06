@@ -68,6 +68,10 @@ void CStockTraceBase::Trace()
 	{
 		m_workStep = DoTraceWork(pTraceNode);
 	}
+	else if (m_workStep == STOCK_TRACE_STEP_WORKING)
+	{
+		m_workStep = DoTraceWork(pTraceNode);
+	}
 	else
 	{
 		m_workStep = Next(m_pCurNode);
@@ -279,7 +283,31 @@ UINT CStockTraceBase::Next(DL_NODE* pNode)
 
 UINT CStockTraceBase::DoTraceWork(STOCK_CALC_TRACE_NODE* pTraceNode)
 {
-	return STOCK_TRACE_STEP_END;
+	return STOCK_TRACE_STEP_UPDATING;
+}
+
+UINT CStockTraceBase::DoTraceUpdate(STOCK_CALC_TRACE_NODE* pTraceNode)
+{
+	UINT nextStep = STOCK_TRACE_STEP_UPDATING;
+	UINT result = UpdateTraceLog(pTraceNode);
+
+	switch (result)
+	{
+	case STOCK_TRACE_WORK_OK:
+		nextStep = STOCK_TRACE_STEP_END;
+		break;
+
+	case STOCK_TRACE_WORK_FAIL:
+	case STOCK_TRACE_WORK_NONE:
+		nextStep = STOCK_TRACE_STEP_END;
+		break;
+
+	case STOCK_TRACE_WORK_WAIT_RESP:
+	case STOCK_TRACE_WORK_BUSY:
+		break;
+	}
+
+	return nextStep;
 }
 
 BOOL CStockTraceBase::IsReachHigh(STOCK_CALC_TRACE_KLINE const* pStart, STOCK_CALC_TRACE_KLINE const* pCur)

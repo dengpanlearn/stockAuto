@@ -81,7 +81,7 @@ UINT CStockTraceWeek::DoPrepareWork(STOCK_CALC_TRACE_NODE* pTraceNode)
 		break;
 	}
 
-	return result;
+	return nextStep;
 }
 
 UINT CStockTraceWeek::Next(DL_NODE* pNode)
@@ -193,30 +193,13 @@ BOOL CStockTraceWeek::DoTraceWeekWork(STOCK_CALC_TRACE_NODE* pTraceNode)
 
 UINT CStockTraceWeek::DoTraceWork(STOCK_CALC_TRACE_NODE* pTraceNode)
 {
-	if (IsJobUpdateTraceLogNone())
-	{
-		if (!DoTraceWeekWork(pTraceNode))
-			return STOCK_TRACE_STEP_END;
-	}
+	if (!DoTraceWeekWork(pTraceNode))
+		return STOCK_TRACE_STEP_END;
+	
+	return CStockTraceBase::DoTraceWork(pTraceNode);
+}
 
-	UINT nextStep = STOCK_TRACE_STEP_WORKING;
-	UINT result = UpdateTraceLog(pTraceNode);
-
-	switch (result)
-	{
-	case STOCK_TRACE_WORK_OK:
-		nextStep = STOCK_TRACE_STEP_END;
-		break;
-
-	case STOCK_TRACE_WORK_FAIL:
-	case STOCK_TRACE_WORK_NONE:
-		nextStep = STOCK_TRACE_STEP_END;
-		break;
-
-	case STOCK_TRACE_WORK_WAIT_RESP:
-	case STOCK_TRACE_WORK_BUSY:
-		break;
-	}
-
-	return nextStep;
+UINT CStockTraceWeek::DoTraceUpdate(STOCK_CALC_TRACE_NODE* pTraceNode)
+{
+	return CStockTraceBase::DoTraceUpdate(pTraceNode);
 }

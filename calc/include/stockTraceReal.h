@@ -17,17 +17,20 @@ public:
 	void Close();
 
 protected:
+	static BOOL IsHisKLineRsiContinueLow(STOCK_CALC_TRACE_KLINE const* pHisKLineEnd, int times, float fRsiLimit);
 
 	virtual void InitStockTrace(STOCK_CALC_TRACE_NODE* pTraceNode);
 	virtual UINT DoPrepareWork(STOCK_CALC_TRACE_NODE* pTraceNode);
 	virtual BOOL CheckForPrepare(STOCK_CALC_TRACE_NODE* pTraceNode);
 	virtual UINT Next(DL_NODE* pNode);
 	virtual UINT DoTraceWork(STOCK_CALC_TRACE_NODE* pTraceNode);
+	virtual UINT DoTraceUpdate(STOCK_CALC_TRACE_NODE* pTraceNode);
 
 private:
 	BOOL DoPreparerHisKLine(STOCK_CALC_TRACE_NODE* pTraceNode, UINT& prepareStep);
 	BOOL DoPreparerCurHisKLine(STOCK_CALC_TRACE_NODE* pTraceNode, UINT& prepareStep);
 	BOOL DoTraceRealWork(STOCK_CALC_TRACE_NODE* pTraceNode);
+
 private:
 	enum
 	{
@@ -45,7 +48,7 @@ private:
 	float	m_fRsiSell;
 	int		m_iRsiSellWaits;
 	float	m_fCutLossPercent;
-	QDate	m_rsiCheckEndDateForBuy
+	QDate	m_rsiCheckEndDateForBuy;
 };
 
 

@@ -32,6 +32,18 @@ void CStockTraceReal::Close()
 	CStockTraceBase::Close();
 }
 
+
+BOOL CStockTraceReal::IsHisKLineRsiContinueLow(STOCK_CALC_TRACE_KLINE const* pHisKLineEnd, int times, float fRsiLimit)
+{
+	for (int i = 0; i < times; pHisKLineEnd--)
+	{
+		if (pHisKLineEnd->fRsi7 > fRsiLimit)
+			return FALSE;
+	}
+
+	return TRUE;
+}
+
 void CStockTraceReal::InitStockTrace(STOCK_CALC_TRACE_NODE* pTraceNode)
 {
 	m_realTraceStep = STOCK_TRACE_REAL_PRPARE_STEP_NONE;
@@ -141,7 +153,6 @@ BOOL CStockTraceReal::DoTraceRealWork(STOCK_CALC_TRACE_NODE* pTraceNode)
 		if (IsReachHigh(pHisKLine, pCurKLine))
 		{
 			pTraceLog->traceStep = CALC_STOCK_TRADE_STEP_WAIT_BUY;
-			pTraceLog->rsiCheckTimesForBuy = 0;
 			pTraceLog->highTime = time(NULL);
 			pTraceLog->fHighVal = pCurKLine->fHigh;
 
@@ -169,7 +180,6 @@ BOOL CStockTraceReal::DoTraceRealWork(STOCK_CALC_TRACE_NODE* pTraceNode)
 			pTraceLog->traceStep = CALC_STOCK_TRADE_STEP_WAIT_SELL;
 			pTraceLog->buyTime = time(NULL);
 			pTraceLog->fBuyVal = pCurKLine->fClose;
-			pTraceLog->rsiCheckTimesForSell = 0;
 		}
 		else
 		{
@@ -195,14 +205,33 @@ BOOL CStockTraceReal::DoTraceRealWork(STOCK_CALC_TRACE_NODE* pTraceNode)
 			m_fCutLossPercent)
 			goto _TRACE_SELL;
 
-		for (int i = 0; i < m_iRsiSellWaits-1; i++)
-		{
+		int hisKLineCounts = 0;
+		STOCK_CALC_TRACE_KLINE const* pHisKLine = GetHisKLinePtr(hisKLineCounts);
+		if (hisKLineCounts < m_iRsiSellWaits)
+			goto _TRACE_SELL;
 
+		STOCK_CALC_TRACE_KLINE const* pHisKLineEnd = pHisKLine + hisKLineCounts - 1;
+		if (IsHisKLineRsiContinueLow(pHisKLineEnd, m_iRsiSellWaits - 1, m_fRsiSell))
+		{
+			if (pCurKLine->fRsi7 < m_fRsiSell)
+				goto _TRACE_SELL;
 		}
 	}
+
+	pTraceLog->realTime = time(NULL);
+	return TRUE;
 }
 
 UINT CStockTraceReal::DoTraceWork(STOCK_CALC_TRACE_NODE* pTraceNode)
 {
+	if (!DoTraceRealWork(pTraceNode))
+		return STOCK_TRACE_STEP_END;
 
+	return CStockTraceBase::DoTraceWork(pTraceNode);
 }
+
+UINT CStockTraceReal::DoTraceUpdate(STOCK_CALC_TRACE_NODE* pTraceNode)
+{
+	return CStockTraceBase::DoTraceUpdate(pTraceNode);
+}
+

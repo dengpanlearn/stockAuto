@@ -38,12 +38,11 @@ struct STOCK_MANAGER_TRACE_LOG
 	float	fHighVal;
 	long	buyTime;
 	float	fBuyVal;
-	int		rsiCheckTimesForSell;
-	int		rsiCheckTimesForBuy;
 	long	sellTime;
 	float	fSellVal;
 	long	hisTime;
 	long	updateTime;
+	long	realTime;
 };
 
 enum STOCK_CALC_EVENT_CMD
