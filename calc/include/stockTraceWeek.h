@@ -17,6 +17,7 @@ public:
 	void Close();
 
 protected:
+	static STOCK_CALC_TRACE_KLINE const* GetNextHisKLinePtr(STOCK_CALC_TRACE_KLINE const* pHisKLineEnd, int findLimits, int lastHisTime);
 	virtual void InitStockTrace(STOCK_CALC_TRACE_NODE* pTraceNode);
 
 	virtual UINT DoPrepareWork(STOCK_CALC_TRACE_NODE* pTraceNode);
