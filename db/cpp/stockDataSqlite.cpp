@@ -86,7 +86,7 @@ int CStockDataSqlite::GetTraceLog(STOCK_MANAGER_TRACE_LOG* pTraceLogBuf, int buf
 		return -1;
 
 	QSqlQuery sqlQuery(m_traceLogDb);
-	QString selSql("select step, code, hightime, highval, buytime, buyval,  selltime, sellval, histime, updatetime, raisebalances, rsisells from trace");
+	QString selSql("select step, code, hightime, highval, buytime, buyval,  selltime, sellval, histime, updatetime, realtime, raisebalances from trace");
 	
 	if (!sqlQuery.exec(selSql))
 	{
@@ -112,9 +112,9 @@ int CStockDataSqlite::GetTraceLog(STOCK_MANAGER_TRACE_LOG* pTraceLogBuf, int buf
 
 		pTraceLogBuf->hisTime = sqlQuery.value(8).toInt();
 		pTraceLogBuf->updateTime = sqlQuery.value(9).toInt();
+		pTraceLogBuf->realTime = sqlQuery.value(10).toInt();
+		pTraceLogBuf->raiseBalanceCheckTimes = sqlQuery.value(11).toInt();
 
-		pTraceLogBuf->raiseBalanceCheckTimes = sqlQuery.value(10).toInt();
-		pTraceLogBuf->rsiCheckTimesForSell = sqlQuery.value(11).toInt();
 		logCounts++;
 		pTraceLogBuf++;
 	}
@@ -142,7 +142,7 @@ int CStockDataSqlite::UpdateTraceLog(STOCK_MANAGER_TRACE_LOG* pTraceLogBuf)
 	}
 	else
 	{
-		QString updateSql = QString("update trace set step=?, code=?, hightime=?, highval=?, buytime=?, buyval=?,  selltime=?, sellval=?, histime=?, updatetime=?, raisebalances=?, rsisells =? where code=\'%1\'").arg(pTextCode->toUnicode(pTraceLogBuf->code));
+		QString updateSql = QString("update trace set step=?, code=?, hightime=?, highval=?, buytime=?, buyval=?,  selltime=?, sellval=?, histime=?, updatetime=?, realtime=?, raisebalances=? where code=\'%1\'").arg(pTextCode->toUnicode(pTraceLogBuf->code));
 		sqlQuery.prepare(updateSql);
 	}
 
@@ -156,7 +156,8 @@ int CStockDataSqlite::UpdateTraceLog(STOCK_MANAGER_TRACE_LOG* pTraceLogBuf)
 	sqlQuery.bindValue(7, pTraceLogBuf->fSellVal);
 	sqlQuery.bindValue(8, pTraceLogBuf->hisTime);
 	sqlQuery.bindValue(9, pTraceLogBuf->updateTime);
-	sqlQuery.bindValue(10, pTraceLogBuf->raiseBalanceCheckTimes);
-	sqlQuery.bindValue(11, pTraceLogBuf->rsiCheckTimesForSell);
+	sqlQuery.bindValue(10, pTraceLogBuf->realTime);
+	sqlQuery.bindValue(11, pTraceLogBuf->raiseBalanceCheckTimes);
+	
 	return sqlQuery.exec() ? 0 : -1;
 }

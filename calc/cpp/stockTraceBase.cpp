@@ -261,6 +261,22 @@ void CStockTraceBase::RemoveTraceNode(STOCK_CALC_TRACE_NODE* pTraceNode)
 	m_pAutoManager->AddTraceList(this, pTraceNode);
 }
 
+
+void CStockTraceBase::NextFromStart()
+{
+	m_pCurNode = DLL_FIRST(m_pTraceList);
+}
+
+void CStockTraceBase::CalcBuyEndDate(int highTime, int limits, QDate& endDate)
+{
+	QDateTime highDateTime = QDateTime::fromTime_t(highTime);
+	QDate highDate = highDateTime.date();
+	int highOffset = highDate.dayOfWeek();
+	QDate highEndWeekDate = highDate.addDays(STOCK_DAYS_PER_WEEK - highOffset);
+
+	endDate = highEndWeekDate.addDays(limits*STOCK_DAYS_PER_WEEK);
+}
+
 UINT CStockTraceBase::DoPrepareWork(STOCK_CALC_TRACE_NODE* pTraceNode)
 {
 	if (CheckForPrepare(pTraceNode))

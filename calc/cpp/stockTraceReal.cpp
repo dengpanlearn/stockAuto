@@ -71,17 +71,36 @@ UINT CStockTraceReal::DoPrepareWork(STOCK_CALC_TRACE_NODE* pTraceNode)
 	case STOCK_TRACE_REAL_PRPARE_STEP_CUR_HISKLINE:
 		if (!DoPreparerCurHisKLine(pTraceNode, m_realTraceStep))
 			goto _NEXT_END;
+		break;
 
-		if (m_realTraceStep == STOCK_TRACE_REAL_PRPARE_STEP_END)
-		{
-			m_realTraceStep = STOCK_TRACE_REAL_PRPARE_STEP_NONE;
-			nextStep = STOCK_TRACE_STEP_WORKING;
-		}
-	
+	case STOCK_TRACE_REAL_PRPARE_STEP_END:
+		DoPreparerEnd(pTraceNode, m_realTraceStep);
+		nextStep = STOCK_TRACE_STEP_WORKING;
 		break;
 	}
 
 	return nextStep;
+}
+
+UINT CStockTraceReal::Next(DL_NODE* pNode)
+{
+	UINT result = CStockTraceBase::Next(pNode);
+
+	STOCK_CALC_TRACE_NODE* pTraceNode = (STOCK_CALC_TRACE_NODE*)pNode;
+	STOCK_MANAGER_TRACE_LOG* pTraceLog = pTraceNode->pTraceLog;
+
+
+	if (pTraceLog->traceStep == CALC_STOCK_TRADE_STEP_CHECK_BALANCE_RAISE)
+	{
+		RemoveTraceNode(pTraceNode);
+	}
+
+	if (pNode->next == NULL)
+	{
+		NextFromStart();
+	}
+
+	return result;
 }
 
 BOOL CStockTraceReal::CheckForPrepare(STOCK_CALC_TRACE_NODE* pTraceNode)
@@ -139,6 +158,21 @@ BOOL CStockTraceReal::DoPreparerCurHisKLine(STOCK_CALC_TRACE_NODE* pTraceNode, U
 	return (STOCK_TRACE_REAL_PRPARE_STEP_NONE == prepareStep);
 }
 
+BOOL CStockTraceReal::DoPreparerEnd(STOCK_CALC_TRACE_NODE* pTraceNode, UINT& prepareStep)
+{
+	if (prepareStep == STOCK_TRACE_REAL_PRPARE_STEP_END)
+	{
+		STOCK_MANAGER_TRACE_LOG* pTraceLog = pTraceNode->pTraceLog;
+		if (pTraceLog->traceStep == CALC_STOCK_TRADE_STEP_WAIT_BUY)
+		{
+			CalcBuyEndDate(pTraceLog->highTime, m_iRsiBuyWaits, m_rsiCheckEndDateForBuy);
+		}
+	}
+
+	m_realTraceStep = STOCK_TRACE_REAL_PRPARE_STEP_NONE;
+	return TRUE;
+}
+
 BOOL CStockTraceReal::DoTraceRealWork(STOCK_CALC_TRACE_NODE* pTraceNode)
 {
 	STOCK_CALC_TRACE_KLINE const* pCurKLine = GetCurHisKLinePtr();
@@ -155,13 +189,6 @@ BOOL CStockTraceReal::DoTraceRealWork(STOCK_CALC_TRACE_NODE* pTraceNode)
 			pTraceLog->traceStep = CALC_STOCK_TRADE_STEP_WAIT_BUY;
 			pTraceLog->highTime = time(NULL);
 			pTraceLog->fHighVal = pCurKLine->fHigh;
-
-			QDateTime highDateTime = QDateTime::fromTime_t(pTraceLog->highTime);
-			QDate highDate = highDateTime.date();
-			int highOffset = highDate.dayOfWeek();
-			QDate highEndWeekDate = highDate.addDays(STOCK_DAYS_PER_WEEK - highOffset);
-
-			m_rsiCheckEndDateForBuy = highEndWeekDate.addDays(m_iRsiBuyWaits*STOCK_DAYS_PER_WEEK);
 		}
 		else
 		{

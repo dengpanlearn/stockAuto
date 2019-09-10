@@ -29,6 +29,7 @@ protected:
 private:
 	BOOL DoPreparerHisKLine(STOCK_CALC_TRACE_NODE* pTraceNode, UINT& prepareStep);
 	BOOL DoPreparerCurHisKLine(STOCK_CALC_TRACE_NODE* pTraceNode, UINT& prepareStep);
+	BOOL DoPreparerEnd(STOCK_CALC_TRACE_NODE* pTraceNode, UINT& prepareStep);
 	BOOL DoTraceRealWork(STOCK_CALC_TRACE_NODE* pTraceNode);
 
 private:

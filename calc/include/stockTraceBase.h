@@ -5,6 +5,7 @@
 #ifndef __STOCK_TRACE_BASE_H__
 #define	__STOCK_TRACE_BASE_H__
 #include "stockAutoManager.h"
+#include <qdatetime.h>
 class CStockTraceBase
 {
 public:
@@ -40,7 +41,8 @@ protected:
 	inline BOOL IsJobUpdateTraceLogNone();
 
 	void RemoveTraceNode(STOCK_CALC_TRACE_NODE* pTraceNode);
-
+	void NextFromStart();
+	void CalcBuyEndDate(int highTime, int limits, QDate& endDate);
 protected:
 	static BOOL IsReachHigh(STOCK_CALC_TRACE_KLINE const* pStart, STOCK_CALC_TRACE_KLINE const* pCur);
 
