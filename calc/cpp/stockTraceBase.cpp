@@ -68,7 +68,7 @@ void CStockTraceBase::Trace()
 	{
 		m_workStep = DoTraceWork(pTraceNode);
 	}
-	else if (m_workStep == STOCK_TRACE_STEP_WORKING)
+	else if (m_workStep == STOCK_TRACE_STEP_UPDATING)
 	{
 		m_workStep = DoTraceWork(pTraceNode);
 	}
@@ -184,6 +184,7 @@ UINT CStockTraceBase::GetHisKLine(STOCK_CALC_TRACE_NODE* pTraceNode, int counts)
 		pGetHisKLine->pKLineBuf = m_pHisKLine;
 		m_pAutoManager->PostGetHisKLinePkt(pGetHisKLine);
 		m_jobGetHisKine.jobStep = TASK_EVENT_JOB_STEP_WAITING_RESP;
+		return STOCK_TRACE_WORK_WAIT_RESP;
 	}
 	else if (m_jobGetHisKine.jobStep == TASK_EVENT_JOB_STEP_COMPLETED_OK)
 	{
@@ -212,6 +213,7 @@ UINT CStockTraceBase::UpdateTraceLog(STOCK_CALC_TRACE_NODE* pTraceNode)
 	
 		m_pAutoManager->PostUpdateTraceLogPkt(pUpdateTraceLog);
 		m_jobUpdateTraceLog.jobStep = TASK_EVENT_JOB_STEP_WAITING_RESP;
+		return STOCK_TRACE_WORK_WAIT_RESP;
 	}
 	else if (m_jobUpdateTraceLog.jobStep == TASK_EVENT_JOB_STEP_COMPLETED_OK)
 	{
@@ -221,7 +223,7 @@ UINT CStockTraceBase::UpdateTraceLog(STOCK_CALC_TRACE_NODE* pTraceNode)
 	else
 	{
 		m_jobUpdateTraceLog.jobStep = TASK_EVENT_JOB_STEP_NONE;
-		return STOCK_TRACE_WORK_OK;
+		return STOCK_TRACE_WORK_FAIL;
 	}
 }
 
@@ -242,6 +244,7 @@ UINT CStockTraceBase::GetCurHisKLine(STOCK_CALC_TRACE_NODE* pTraceNode)
 
 	
 		m_jobGetCurHisKLine.jobStep = TASK_EVENT_JOB_STEP_WAITING_RESP;
+		return STOCK_TRACE_WORK_WAIT_RESP;
 	}
 	else if (m_jobGetCurHisKLine.jobStep == TASK_EVENT_JOB_STEP_COMPLETED_OK)
 	{
@@ -251,7 +254,7 @@ UINT CStockTraceBase::GetCurHisKLine(STOCK_CALC_TRACE_NODE* pTraceNode)
 	else
 	{
 		m_jobGetCurHisKLine.jobStep = TASK_EVENT_JOB_STEP_NONE;
-		return STOCK_TRACE_WORK_OK;
+		return STOCK_TRACE_WORK_FAIL;
 	}
 }
 

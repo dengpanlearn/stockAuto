@@ -20,7 +20,10 @@ public:
 	void Close();
 
 protected:
+	void InitConfig();
+
 	virtual void OnExit();
+	UINT PreActive(UINT timeout);
 	virtual BOOL CheckSelf();
 	virtual int OnEventActive(UINT cmd, void* param, int paramLen);
 	virtual BOOL OnEventComplete(UINT cmd, int result, void* param, int paramLen);
@@ -86,6 +89,9 @@ private:
 
 	void OnCurHisKLineGetResp(STOCK_CALC_GET_CUR_HISKLINE_RESP* pGetCurHisKLineResp);
 	BOOL OnCurHisKLineGetComplete(int result, void* param, int paramLen);
+
+
+	UINT OnStockAutoManagerTrace();
 private:
 	CStockDataTask * m_pDataTask;
 	CStockUpdateTask*	m_pUpdateTask;
@@ -100,6 +106,7 @@ private:
 	DL_LIST							m_listTraceWeek;
 	DL_LIST							m_listTraceReal;
 	STOCK_CALC_TRACE_NODE*			m_pCalcTraceBuf;
+	STOCKAUTO_CONFIG_TRACE			m_traceConfig;
 };
 
 

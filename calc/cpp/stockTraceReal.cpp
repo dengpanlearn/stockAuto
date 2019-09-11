@@ -66,6 +66,7 @@ UINT CStockTraceReal::DoPrepareWork(STOCK_CALC_TRACE_NODE* pTraceNode)
 	case STOCK_TRACE_REAL_PRPARE_STEP_HISKLINE:
 		if (!DoPreparerHisKLine(pTraceNode, m_realTraceStep))
 			goto _NEXT_END;
+
 		break;
 
 	case STOCK_TRACE_REAL_PRPARE_STEP_CUR_HISKLINE:

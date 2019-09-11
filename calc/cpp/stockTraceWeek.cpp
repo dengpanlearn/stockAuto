@@ -139,7 +139,7 @@ BOOL CStockTraceWeek::DoTraceWeekWork(STOCK_CALC_TRACE_NODE* pTraceNode)
 
 	BOOL bLostHis = FALSE;
 	STOCK_MANAGER_TRACE_LOG* pTraceLog = pTraceNode->pTraceLog;
-	int startTraceTime = (pTraceLog->traceStep == CALC_STOCK_TRADE_STEP_WAIT_SELL) ? pTraceLog->hisTime : pTraceLog->realTime;
+	int startTraceTime = pTraceLog->hisTime ;
 
 	STOCK_CALC_TRACE_KLINE const* pEndTraceKLine = pTraceKLine + hisKLineCounts - 1;
 	STOCK_CALC_TRACE_KLINE const* pStartTraceKLine = GetStartHisKLinePtr(pEndTraceKLine, STOCK_CALC_WEEKS_LOST_MAX, startTraceTime, bLostHis);
@@ -211,7 +211,7 @@ BOOL CStockTraceWeek::DoTraceWeekWork(STOCK_CALC_TRACE_NODE* pTraceNode)
 	} while (pStartTraceKLine++ <= pEndTraceKLine);
 
 
-	pTraceLog->highTime = time(NULL);
+	pTraceLog->highTime = pTraceLog->updateTime;
 
 	return TRUE;
 }

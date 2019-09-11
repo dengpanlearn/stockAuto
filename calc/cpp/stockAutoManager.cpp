@@ -3,6 +3,8 @@
 */
 #include <qdatetime.h>
 #include "../include/stockTraceBase.h"
+#include "../include/stockTraceReal.h"
+#include "../include/stockTraceWeek.h"
 #include "../include/stockAutoManager.h"
 
 CStockAutoManager::CStockAutoManager()
@@ -12,6 +14,8 @@ CStockAutoManager::CStockAutoManager()
 	m_pJobList = NULL;
 	m_pDataTask = NULL;
 	m_pJobTraceLog = NULL;
+	m_pTraceWeek = NULL;
+	m_pTraceReal = NULL;
 	memset(&m_jobListUpdate, 0, sizeof(m_jobListUpdate));
 	memset(&m_jobHisKLineUpdate, 0, sizeof(m_jobHisKLineUpdate));
 	dllInit(&m_listTraceWeek);
@@ -61,6 +65,7 @@ BOOL CStockAutoManager::Create(LPCTSTR pNameTask, int stackSize, int priTask, in
 		if (!CMultiEventsTask::Create(pNameTask, stackSize, priTask, optTask, timeoutMs, maxEvents, maxEventParamSize))
 			break;
 
+		InitConfig();
 		m_managerStep = STOCK_AUTO_MANAGER_STEP_LIST_INIT;
 		return TRUE;
 	} while (FALSE);
@@ -103,12 +108,34 @@ void CStockAutoManager::Close()
 	}
 }
 
+void CStockAutoManager::InitConfig()
+{
+	m_traceConfig.raiseBalances = STOCKAUTO_CONFIG_TRACE_RAISE_PERCENT_DFT;
+	m_traceConfig.fRaisePercent = STOCKAUTO_CONFIG_TRACE_RAISE_PERCENT_DFT;
+	m_traceConfig.rsiBuyWaits = STOCKAUTO_CONFIG_TRACE_RSI_BUY_WAIT_DFT;
+	m_traceConfig.fRsiBuy = STOCKAUTO_CONFIG_TRACE_RSI_BUY_DFT;
+	m_traceConfig.reachHighRanges = STOCKAUTO_CONFIG_TRACE_REAHHIGH_RANGES_DFT;
+	m_traceConfig.rsiSellWaits = STOCKAUTO_CONFIG_TRACE_RSI_SELL_WAITS_DFT;
+	m_traceConfig.fRsiSell = STOCKAUTO_CONFIG_TRACE_RSI_SELL_DFT;
+	m_traceConfig.fCutLossPercent = STOCKAUTO_CONFIG_TRACE_CUTLOSS_PERCENT_DFT;
+}
+
 void CStockAutoManager::OnExit()
 {
 	m_pUpdateTask->StopWork();
 	m_pUpdateTask->WaitWorkExit(2000);
 	m_pDataTask->StopWork();
 	m_pDataTask->WaitWorkExit(2000);
+}
+
+UINT CStockAutoManager::PreActive(UINT timeout)
+{
+	if (m_managerStep == STOCK_AUTO_MANAGER_STEP_STOCK_TRACING)
+	{
+		timeout = STOCK_AUTO_MANAGER_TASK_TIMEOUT_TRACE;
+	}
+	
+	return CMultiEventsTask::PreActive(timeout);
 }
 
 BOOL CStockAutoManager::CheckSelf()
@@ -141,7 +168,7 @@ BOOL CStockAutoManager::CheckSelf()
 		break;
 
 	case STOCK_AUTO_MANAGER_STEP_STOCK_TRACING:
-	
+		m_managerStep = OnStockAutoManagerTrace();
 		break;
 	}
 
@@ -281,6 +308,36 @@ void CStockAutoManager::InitStockTraceCalc(STOCK_MANAGER_TRACE_LOG* pTraceLog, i
 			dllAdd(&m_listTraceWeek, pNode);
 		else
 			dllAdd(&m_listTraceReal, pNode);
+	}
+
+	if (m_pTraceWeek == NULL)
+	{
+		CStockTraceWeek* pTraceWeek = new CStockTraceWeek(this, &m_listTraceWeek);
+		if (pTraceWeek != NULL)
+		{
+			if (!pTraceWeek->Init(STOCK_HIS_KLINE_MAX_COUNTS, &m_traceConfig))
+			{
+				delete pTraceWeek;
+				pTraceWeek = NULL;
+			}
+		}
+
+		m_pTraceWeek = pTraceWeek;
+	}
+
+	if (m_pTraceReal == NULL)
+	{
+		CStockTraceReal* pTraceReal = new CStockTraceReal(this, &m_listTraceWeek);
+		if (pTraceReal != NULL)
+		{
+			if (!pTraceReal->Init(STOCK_HIS_KLINE_MAX_COUNTS, &m_traceConfig))
+			{
+				delete pTraceReal;
+				pTraceReal = NULL;
+			}
+		}
+
+		m_pTraceReal = pTraceReal;
 	}
 }
 
@@ -721,4 +778,20 @@ BOOL CStockAutoManager::OnCurHisKLineGetComplete(int result, void* param, int pa
 	STOCK_CALC_GET_CUR_HISKLINE* pGetHisKLine = (STOCK_CALC_GET_CUR_HISKLINE*)param;
 	CStockTraceBase* pTraceBase = pGetHisKLine->pTraceBase;
 	return pTraceBase->OnGetCurKLineComplete(result, param, paramLen);
+}
+
+UINT CStockAutoManager::OnStockAutoManagerTrace()
+{
+	UINT nextStep = STOCK_AUTO_MANAGER_STEP_STOCK_TRACING;
+	if (m_pTraceWeek != NULL)
+	{
+		m_pTraceWeek->Trace();
+	}
+
+	if (m_pTraceReal != NULL)
+	{
+		m_pTraceReal->Trace();
+	}
+
+	return nextStep;
 }

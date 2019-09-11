@@ -4,6 +4,9 @@
 *股票交易接口
 */
 
+#include "../include/stockAutoManager.h"
+#include "../include/stockTraceBase.h"
+#include "../include/stockCalcDef.h"
 #include "../include/stockUpdateBase.h"
 
 CStockUpdateBase::CStockUpdateBase()

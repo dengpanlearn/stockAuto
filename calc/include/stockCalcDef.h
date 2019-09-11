@@ -125,6 +125,7 @@ struct STOCK_CALC_UPDATE_HISKLINE_RESP
 	int		respResult;
 };
 
+class CStockTraceBase;
 struct STOCK_CALC_GET_CUR_HISKLINE
 {
 	TASK_EVENT_PARAM	eventParam;
