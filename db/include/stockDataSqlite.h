@@ -25,6 +25,7 @@ public:
 	virtual BOOL TraceLogIsOn();
 	virtual int GetTraceLog(STOCK_MANAGER_TRACE_LOG* pTraceLogBuf, int bufCounts);
 	virtual int UpdateTraceLog(STOCK_MANAGER_TRACE_LOG* pTraceLogBuf);
+	virtual int GetHisKLine(char const* pStockCode, STOCK_CALC_TRACE_KLINE* pHisKLineBuf, int bufCounts);
 
 private:
 	QSqlDatabase	m_listDb;

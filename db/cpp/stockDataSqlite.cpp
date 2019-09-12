@@ -161,3 +161,40 @@ int CStockDataSqlite::UpdateTraceLog(STOCK_MANAGER_TRACE_LOG* pTraceLogBuf)
 	
 	return sqlQuery.exec() ? 0 : -1;
 }
+
+int CStockDataSqlite::GetHisKLine(char const* pStockCode, STOCK_CALC_TRACE_KLINE* pHisKLineBuf, int bufCounts)
+{
+	if (!m_klineDb.isOpen())
+		return -1;
+
+	QSqlQuery sqlQuery(m_klineDb);
+	QString selSql("select * from (select open, close, high, low, rsi, ma10, percent, timestamp from %1 order by timestamp desc limit %2) aa order by timestamp");
+	QTextCodec* pTextCode = QTextCodec::codecForLocale();
+	QString tab = pTextCode->toUnicode(pStockCode);
+
+	selSql = selSql.arg(tab).arg(bufCounts);
+	if (!sqlQuery.exec(selSql))
+	{
+		return -1;
+	}
+
+	int hisCounts = 0;
+	while (sqlQuery.next() && bufCounts--)
+	{
+		pHisKLineBuf->fOpen = sqlQuery.value(0).toFloat();
+		pHisKLineBuf->fClose = sqlQuery.value(1).toFloat();
+		pHisKLineBuf->fHigh = sqlQuery.value(2).toFloat();
+		pHisKLineBuf->fLow = sqlQuery.value(3).toFloat();
+		pHisKLineBuf->fRsi7 = sqlQuery.value(4).toFloat();
+		pHisKLineBuf->fMa10 = sqlQuery.value(5).toFloat();
+		pHisKLineBuf->fPercent = sqlQuery.value(6).toFloat();
+		pHisKLineBuf->timeVal = sqlQuery.value(7).toInt();
+		QString code = sqlQuery.value(1).toString();
+	
+
+		hisCounts++;
+		pHisKLineBuf++;
+	}
+
+	return hisCounts;
+}

@@ -70,7 +70,7 @@ void CStockTraceBase::Trace()
 	}
 	else if (m_workStep == STOCK_TRACE_STEP_UPDATING)
 	{
-		m_workStep = DoTraceWork(pTraceNode);
+		m_workStep = DoTraceUpdate(pTraceNode);
 	}
 	else
 	{

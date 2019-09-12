@@ -63,9 +63,16 @@ void CStockDataTask::OnActive()
 int CStockDataTask::OnEventActive(UINT cmd, void* param, int paramLen)
 {
 	int result = EVENT_COMPLETE_OK;
-	STOCK_CALC_GET_LIST * pGetList = (STOCK_CALC_GET_LIST*)param;
-	STOCK_CALC_LOAD_TRACELOG* pLoadTraceLog = (STOCK_CALC_LOAD_TRACELOG*)param;
-	STOCK_CALC_UPDATE_TRACELOG* pUpdateTraceLog = (STOCK_CALC_UPDATE_TRACELOG* )param;
+	union 
+	{
+		STOCK_CALC_GET_LIST * pGetList;
+		STOCK_CALC_LOAD_TRACELOG* pLoadTraceLog;
+		STOCK_CALC_UPDATE_TRACELOG* pUpdateTraceLog;
+		STOCK_CALC_GET_HISKLINE* pGetHisKLine;
+	};
+
+	pGetList = (STOCK_CALC_GET_LIST*)param;
+
 	switch (cmd)
 	{
 	case STOCK_CALC_EVENT_GET_STOCK_LIST:
@@ -94,6 +101,9 @@ int CStockDataTask::OnEventActive(UINT cmd, void* param, int paramLen)
 		result = m_pStockData->UpdateTraceLog(&pUpdateTraceLog->traceLog);
 		break;
 
+	case STOCK_CALC_EVENT_GET_STOCK_HISKLINE:
+		result = m_pStockData->GetHisKLine(pGetHisKLine->code, pGetHisKLine->pKLineBuf, pGetHisKLine->getCnt);
+		break;
 	default:
 		result = EVENT_COMPLETE_FAIL;
 	}

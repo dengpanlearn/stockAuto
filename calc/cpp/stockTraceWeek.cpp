@@ -110,7 +110,7 @@ STOCK_CALC_TRACE_KLINE const* CStockTraceWeek::GetStartHisKLinePtr(STOCK_CALC_TR
 	int offset = 7 - lastHisDate.dayOfWeek();
 	QDate lastHisEndDate = lastHisDate.addDays(offset);
 
-	int limitsWithPrev = 2;
+	int limitsWithPrev = 1;
 	findLimits += limitsWithPrev;
 	for (; i < findLimits; i++, pHisKLineEnd--)
 	{
@@ -139,12 +139,18 @@ BOOL CStockTraceWeek::DoTraceWeekWork(STOCK_CALC_TRACE_NODE* pTraceNode)
 
 	BOOL bLostHis = FALSE;
 	STOCK_MANAGER_TRACE_LOG* pTraceLog = pTraceNode->pTraceLog;
-	int startTraceTime = pTraceLog->hisTime ;
+	int startTraceTime = (pTraceLog->traceStep == CALC_STOCK_TRADE_STEP_CHECK_BALANCE_RAISE)? pTraceLog->hisTime: pTraceLog->realTime;
 
 	STOCK_CALC_TRACE_KLINE const* pEndTraceKLine = pTraceKLine + hisKLineCounts - 1;
 	STOCK_CALC_TRACE_KLINE const* pStartTraceKLine = GetStartHisKLinePtr(pEndTraceKLine, STOCK_CALC_WEEKS_LOST_MAX, startTraceTime, bLostHis);
 	if (pStartTraceKLine == NULL)
 		return FALSE;
+
+	if (pStartTraceKLine == pEndTraceKLine)
+	{
+		if (pTraceLog->traceStep == CALC_STOCK_TRADE_STEP_CHECK_BALANCE_RAISE)
+			return FALSE;
+	}
 
 
 	if (bLostHis && pTraceLog->traceStep != CALC_STOCK_TRADE_STEP_WAIT_SELL)
@@ -153,12 +159,30 @@ BOOL CStockTraceWeek::DoTraceWeekWork(STOCK_CALC_TRACE_NODE* pTraceNode)
 		pTraceLog->traceStep = CALC_STOCK_TRADE_STEP_CHECK_BALANCE_RAISE;
 	}
 
+	if (pTraceLog->traceStep == CALC_STOCK_TRADE_STEP_CHECK_BALANCE_RAISE)
+		pStartTraceKLine++;
+	else
+	{
+		QDateTime lastWeekDateTime = QDateTime::fromTime_t(pStartTraceKLine->timeVal);
+		QDateTime realDateTime = QDateTime::fromTime_t(pTraceLog->realTime);
+		QDate lastWeekDate = lastWeekDateTime.date();
+		QDate realDate = realDateTime.date();
+
+		if (realDate == lastWeekDate)
+		{
+			if (pStartTraceKLine == pEndTraceKLine)
+				goto __TRACE_END;
+		}
+		else
+			pStartTraceKLine++;
+	}
+
 
 	do
 	{
 		if (pTraceLog->traceStep == CALC_STOCK_TRADE_STEP_CHECK_BALANCE_RAISE)
 		{
-			if (pStartTraceKLine->fPercent > m_fRaisePercent)
+			if (!CALC_IN_DEADZONE(pStartTraceKLine->fPercent, m_fRaisePercent))
 			{
 				pTraceLog->raiseBalanceCheckTimes = 0;
 				continue;
@@ -167,7 +191,7 @@ BOOL CStockTraceWeek::DoTraceWeekWork(STOCK_CALC_TRACE_NODE* pTraceNode)
 			if (++pTraceLog->raiseBalanceCheckTimes < m_iRaiseBalances)
 				continue;
 
-
+			
 			pTraceLog->traceStep = CALC_STOCK_TRADE_STEP_CHECK_HIGH;
 		}
 		else if (pTraceLog->traceStep == CALC_STOCK_TRADE_STEP_CHECK_HIGH)
@@ -208,10 +232,10 @@ BOOL CStockTraceWeek::DoTraceWeekWork(STOCK_CALC_TRACE_NODE* pTraceNode)
 		{
 
 		}
-	} while (pStartTraceKLine++ <= pEndTraceKLine);
+	} while (pStartTraceKLine++ < pEndTraceKLine);
 
-
-	pTraceLog->highTime = pTraceLog->updateTime;
+	__TRACE_END:
+	pTraceLog->hisTime = pTraceLog->updateTime;
 
 	return TRUE;
 }

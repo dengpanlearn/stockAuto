@@ -49,7 +49,7 @@ BOOL CStockAutoManager::Create(LPCTSTR pNameTask, int stackSize, int priTask, in
 		if (m_pJobTraceLog == NULL)
 			break;
 
-		m_pCalcTraceBuf = (STOCK_CALC_TRACE_NODE*)calloc(1, sizeof(STOCK_CALC_TRACE_NODE));		
+		m_pCalcTraceBuf = (STOCK_CALC_TRACE_NODE*)calloc(STOCK_AUTO_COUNTS_MAX, sizeof(STOCK_CALC_TRACE_NODE));
 		if (m_pCalcTraceBuf == NULL)
 			break;
 
@@ -79,6 +79,17 @@ void CStockAutoManager::Close()
 {
 	CMultiEventsTask::Close();
 
+	if (m_pTraceWeek != NULL)
+	{
+		delete m_pTraceWeek;
+		m_pTraceWeek = NULL;
+	}
+
+	if (m_pTraceReal != NULL)
+	{
+		delete m_pTraceReal;
+		m_pTraceReal = NULL;
+	}
 	if (m_pUpdateTask != NULL)
 	{
 		delete m_pUpdateTask;
@@ -244,6 +255,7 @@ BOOL CStockAutoManager::OnEventComplete(UINT cmd, int result, void* param, int p
 
 	case STOCK_CALC_EVENT_UPDATE_STOCK_HISKLINE:
 		re = OnHisKLineUpdateComplete(result, param, paramLen);
+		break;
 
 	case STOCK_CALC_EVENT_GET_STOCK_HISKLINE:
 		re = OnHisKLineGetComplete(result, param, paramLen);
@@ -295,19 +307,28 @@ void CStockAutoManager::InitStockTraceCalc(STOCK_MANAGER_TRACE_LOG* pTraceLog, i
 	union
 	{
 		DL_NODE* pNode;
-		STOCK_CALC_TRACE_NODE*	m_pTraceNode;
+		STOCK_CALC_TRACE_NODE*	pTraceNode;
 	};
 
-	m_pTraceNode = m_pCalcTraceBuf;
-	for (int j = 0; j < logCounts; j++, pTraceLog++, m_pTraceNode++)
+	pTraceNode = m_pCalcTraceBuf;
+	for (int j = 0; j < logCounts; j++, pTraceLog++, pTraceNode++)
 	{
-		m_pTraceNode->stockIdx = j;
-		m_pTraceNode->pTraceLog = pTraceLog;
+		pTraceNode->stockIdx = j;
+		pTraceNode->pTraceLog = pTraceLog;
 
 		if (pTraceLog->traceStep < CALC_STOCK_TRADE_STEP_CHECK_HIGH)
 			dllAdd(&m_listTraceWeek, pNode);
 		else
-			dllAdd(&m_listTraceReal, pNode);
+		{
+			QDateTime realDateTime = QDateTime::fromTime_t(pTraceLog->realTime);
+			QDate realDate = realDateTime.date();
+			QDate curDate = QDate::currentDate();
+			QDate lastWeekEndDate = curDate.addDays(-curDate.dayOfWeek());
+			if (realDate <= lastWeekEndDate)
+				dllAdd(&m_listTraceWeek, pNode);
+			else
+				dllAdd(&m_listTraceReal, pNode);
+		}		
 	}
 
 	if (m_pTraceWeek == NULL)
@@ -327,7 +348,7 @@ void CStockAutoManager::InitStockTraceCalc(STOCK_MANAGER_TRACE_LOG* pTraceLog, i
 
 	if (m_pTraceReal == NULL)
 	{
-		CStockTraceReal* pTraceReal = new CStockTraceReal(this, &m_listTraceWeek);
+		CStockTraceReal* pTraceReal = new CStockTraceReal(this, &m_listTraceReal);
 		if (pTraceReal != NULL)
 		{
 			if (!pTraceReal->Init(STOCK_HIS_KLINE_MAX_COUNTS, &m_traceConfig))
@@ -408,7 +429,7 @@ void CStockAutoManager::PostGetCurHisKLineRespPkt(STOCK_CALC_GET_CUR_HISKLINE_RE
 STOCK_CALC_UPDATE_TRACELOG* CStockAutoManager::AllocUpdateTraceLogPkt(CStockTraceBase* pTraceBase)
 {
 	STOCK_CALC_UPDATE_TRACELOG* pUpdateTraceLog = (STOCK_CALC_UPDATE_TRACELOG*)m_pDataTask->AllocPktByEvent(STOCK_CALC_EVENT_UPDATE_TRACE_LOG, sizeof(STOCK_CALC_UPDATE_TRACELOG),
-		NULL, this);
+		MultiTaskEventComplete, this);
 	if (pUpdateTraceLog == NULL)
 		return NULL;
 
@@ -423,7 +444,7 @@ void CStockAutoManager::PostUpdateTraceLogPkt(STOCK_CALC_UPDATE_TRACELOG* pUpdat
 
 STOCK_CALC_UPDATE_TRACELOG_RESP* CStockAutoManager::AllocUpdateTraceLogRespPkt(CStockTraceBase* pTraceBase)
 {
-	STOCK_CALC_UPDATE_TRACELOG_RESP* pUpdateTraceLogResp = (STOCK_CALC_UPDATE_TRACELOG_RESP*)m_pDataTask->AllocPktByEvent(STOCK_CALC_EVENT_UPDATE_TRACE_LOG_RESP, sizeof(STOCK_CALC_UPDATE_TRACELOG_RESP),
+	STOCK_CALC_UPDATE_TRACELOG_RESP* pUpdateTraceLogResp = (STOCK_CALC_UPDATE_TRACELOG_RESP*)AllocPktByEvent(STOCK_CALC_EVENT_UPDATE_TRACE_LOG_RESP, sizeof(STOCK_CALC_UPDATE_TRACELOG_RESP),
 		NULL, this);
 	if (pUpdateTraceLogResp == NULL)
 		return NULL;
@@ -434,7 +455,7 @@ STOCK_CALC_UPDATE_TRACELOG_RESP* CStockAutoManager::AllocUpdateTraceLogRespPkt(C
 
 void CStockAutoManager::PostUpdateTraceLogRespPkt(STOCK_CALC_UPDATE_TRACELOG_RESP* pUpdateTraceLogResp)
 {
-	m_pDataTask->PostPktByEvent(pUpdateTraceLogResp);
+	PostPktByEvent(pUpdateTraceLogResp);
 }
 
 void CStockAutoManager::AddTraceList(CStockTraceBase* pTraceBase, STOCK_CALC_TRACE_NODE* pTraceNode)
