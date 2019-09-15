@@ -196,7 +196,8 @@ BOOL CStockTraceWeek::DoTraceWeekWork(STOCK_CALC_TRACE_NODE* pTraceNode)
 		}
 		else if (pTraceLog->traceStep == CALC_STOCK_TRADE_STEP_CHECK_HIGH)
 		{
-			if (IsReachHigh(pTraceKLine, pStartTraceKLine))
+			STOCK_CALC_TRACE_KLINE const* pCalcHighStart = pStartTraceKLine - m_iReachHighRanges;
+			if (IsReachHigh((pCalcHighStart <pTraceKLine)? pTraceKLine: pCalcHighStart, pStartTraceKLine))
 			{
 				pTraceLog->traceStep = CALC_STOCK_TRADE_STEP_WAIT_BUY;
 				continue;

@@ -11,6 +11,7 @@ CStockTraceBase::CStockTraceBase(CStockAutoManager* pAutoManager, DL_LIST* pTrac
 
 	memset(&m_jobGetHisKine, 0, sizeof(m_jobGetHisKine));
 	memset(&m_jobUpdateTraceLog, 0, sizeof(m_jobUpdateTraceLog));
+	memset(&m_jobGetCurHisKLine, 0, sizeof(m_jobGetCurHisKLine));
 }
 
 CStockTraceBase::~CStockTraceBase()
@@ -337,6 +338,19 @@ BOOL CStockTraceBase::IsReachHigh(STOCK_CALC_TRACE_KLINE const* pStart, STOCK_CA
 			return FALSE;
 
 		pStart++;
+	}
+
+	return TRUE;
+}
+
+BOOL CStockTraceBase::IsReachHigh(STOCK_CALC_TRACE_KLINE const* pKLineEnd, int klines, STOCK_CALC_TRACE_KLINE const* pCurKLine)
+{
+	while (klines-- > 0)
+	{
+		if (pKLineEnd->fHigh > pCurKLine->fHigh)
+			return FALSE;
+
+		pKLineEnd--;
 	}
 
 	return TRUE;

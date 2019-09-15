@@ -156,7 +156,7 @@ BOOL CStockTraceReal::DoPreparerCurHisKLine(STOCK_CALC_TRACE_NODE* pTraceNode, U
 		break;
 	}
 
-	return (STOCK_TRACE_REAL_PRPARE_STEP_NONE == prepareStep);
+	return (STOCK_TRACE_REAL_PRPARE_STEP_NONE != prepareStep);
 }
 
 BOOL CStockTraceReal::DoPreparerEnd(STOCK_CALC_TRACE_NODE* pTraceNode, UINT& prepareStep)
@@ -185,7 +185,7 @@ BOOL CStockTraceReal::DoTraceRealWork(STOCK_CALC_TRACE_NODE* pTraceNode)
 		if (hisKLineCounts < m_iReachHighRanges)
 			return FALSE;
 
-		if (IsReachHigh(pHisKLine, pCurKLine))
+		if (IsReachHigh(pHisKLine+ hisKLineCounts-1, m_iReachHighRanges, pCurKLine))
 		{
 			pTraceLog->traceStep = CALC_STOCK_TRADE_STEP_WAIT_BUY;
 			pTraceLog->highTime = time(NULL);

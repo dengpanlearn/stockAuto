@@ -45,7 +45,7 @@ protected:
 	void CalcBuyEndDate(int highTime, int limits, QDate& endDate);
 protected:
 	static BOOL IsReachHigh(STOCK_CALC_TRACE_KLINE const* pStart, STOCK_CALC_TRACE_KLINE const* pCur);
-
+	static BOOL IsReachHigh(STOCK_CALC_TRACE_KLINE const* pKLineEnd, int klines, STOCK_CALC_TRACE_KLINE const* pCurKLine);
 	void TraceStock(STOCK_CALC_TRACE_NODE* pTraceNode);
 	virtual void InitStockTrace(STOCK_CALC_TRACE_NODE* pTraceNode) = 0;
 	virtual UINT DoPrepareWork(STOCK_CALC_TRACE_NODE* pTraceNode);

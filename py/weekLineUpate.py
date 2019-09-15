@@ -9,6 +9,7 @@ import time
 from pandas import DataFrame
 from requests.exceptions import ReadTimeout
 from requests.exceptions import ConnectTimeout
+from requests.exceptions import TooManyRedirects
 from requests.exceptions import ConnectionError
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
 
@@ -55,7 +56,7 @@ class WeekKLineUpdate:
             url = orgUrl.format(pageNo=k, curTime = curTime)
             try:
                 response = self.session.get(url, verify=False, headers = self.headers)
-            except (ReadTimeout, ConnectTimeout, ConnectionError):
+            except (ReadTimeout, ConnectTimeout, ConnectionError, TooManyRedirects):
                 break
             else:
                 if (response.status_code == 200):
@@ -126,7 +127,6 @@ class WeekKLineUpdate:
             
     def getAndUpdateWeekKLine(self, stockNo, beginTime, counts):
         stockKLine = self.getWeekKLine(stockNo, beginTime*1000, counts)
-     
         if (stockKLine.get('error_code', 1)):
             return -1
         else :
@@ -144,7 +144,7 @@ class WeekKLineUpdate:
        
         try:
             response = self.session.get(url, verify=False, headers = self.headers)
-        except (ReadTimeout, ConnectTimeout, ConnectionError):
+        except (ReadTimeout, ConnectTimeout, ConnectionError, TooManyRedirects):
             return None;
         else:
             if (response.status_code == 200):
@@ -191,8 +191,10 @@ if __name__ == '__main__':
     if (not weekKLine.prepareUpdate('E:\\self\\stock\\data', 'stockList.db', 'kline.db')):
         """
         ret = weekKLine.getAndUpdateStockList(int(time.time()))
-        
-        ret = weekKLine.getAndUpdateWeekKLine('SZ300001', int(time.time()), -1)
-        """
+      
+        ret = weekKLine.getAndUpdateWeekKLine('SZ300599', int(time.time()), -1)
+       
         ret = weekKLine.getCurWeekKLine('SZ300001')
+        """
+        ret = weekKLine.getAndUpdateWeekKLine('SZ300599',1567872000, -1)
         print(ret)

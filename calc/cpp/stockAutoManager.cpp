@@ -121,7 +121,7 @@ void CStockAutoManager::Close()
 
 void CStockAutoManager::InitConfig()
 {
-	m_traceConfig.raiseBalances = STOCKAUTO_CONFIG_TRACE_RAISE_PERCENT_DFT;
+	m_traceConfig.raiseBalances = STOCKAUTO_CONFIG_TRACE_RAISE_BALANCES_DFT;
 	m_traceConfig.fRaisePercent = STOCKAUTO_CONFIG_TRACE_RAISE_PERCENT_DFT;
 	m_traceConfig.rsiBuyWaits = STOCKAUTO_CONFIG_TRACE_RSI_BUY_WAIT_DFT;
 	m_traceConfig.fRsiBuy = STOCKAUTO_CONFIG_TRACE_RSI_BUY_DFT;
