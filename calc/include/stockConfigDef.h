@@ -8,7 +8,7 @@
 #include <global.h>
 #define STOCK_CONFIG_NAME_MAX		STOCK_AUTO_SAVE_DIR_MAX_SIZE
 
-//#define XXX_WORK
+#define XXX_WORK
 
 /*д╛хоеДжц*/
 #ifdef XXX_WORK

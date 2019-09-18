@@ -189,8 +189,7 @@ int CStockDataSqlite::GetHisKLine(char const* pStockCode, STOCK_CALC_TRACE_KLINE
 		pHisKLineBuf->fMa10 = sqlQuery.value(5).toFloat();
 		pHisKLineBuf->fPercent = sqlQuery.value(6).toFloat();
 		pHisKLineBuf->timeVal = sqlQuery.value(7).toInt();
-		QString code = sqlQuery.value(1).toString();
-	
+		
 
 		hisCounts++;
 		pHisKLineBuf++;
