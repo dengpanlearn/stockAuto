@@ -1,136 +1,132 @@
 /*
 * qtObjectAgent.cpp
 */
+#include <qtimer.h>
 #include "../include/qtObjectAgent.h"
 
-CQtObjectAgent::CQtObjectAgent(QObject *parent, QThread* pThreadObj)
+CQtObjectAgent::CQtObjectAgent(QObject *parent)
 	: QObject(parent)
 {
-	m_workStep = 0;
-	m_pThreadObj = pThreadObj;
+
 }
 
 CQtObjectAgent::~CQtObjectAgent()
 {
-
+	Close();
 }
 
-void CQtObjectAgent::OnInit(QThread* pServerObj)
+BOOL CQtObjectAgent::Create(QThread* pServerObj)
 {
-	connect(this, SIGNAL(SignalStartWork(void const*)), this, SLOT(OnStartWork(void const*)));
-	connect(this, SIGNAL(SignalStopWork()), this, SLOT(OnStopWork()));
-	connect(this, SIGNAL(SignalContinueWork()), this, SLOT(OnContinueWork()));
-	connect(this, SIGNAL(SignalThreadExit()), this, SLOT(OnThreadExit()));
-	connect(pServerObj, SIGNAL(finished()), pServerObj, SLOT(deleteLater()));
+	m_pThreadObj = pServerObj;
+
+	return OnInit();
 }
 
-void CQtObjectAgent::OnClose()
+BOOL CQtObjectAgent::OnInit()
 {
-
-}
-
-void CQtObjectAgent::Init()
-{
-
-	OnInit(m_pThreadObj);
-}
-
-BOOL CQtObjectAgent::StartWork(void const* pParam)
-{
-	if (!DP_ATOMIC_CAS(m_workStep, SYM_WORK_STEP_NONE, SYM_WORK_STEP_WORKING))
-		return FALSE;
-
-	emit SignalStartWork(pParam);
+	moveToThread(m_pThreadObj);
+	connect(m_pThreadObj, SIGNAL(finished()), m_pThreadObj, SLOT(deleteLater()));
+	connect(this, SIGNAL(SignalActive()), this, SLOT(OnSignalActive()));
+	
 	return TRUE;
 }
 
-void CQtObjectAgent::StopWork()
+void CQtObjectAgent::Close()
 {
-	if (!DP_ATOMIC_CAS(m_workStep, SYM_WORK_STEP_WORKING, SYM_WORK_STEP_WAITING_STOP))
-		return;
 
-	emit SignalStopWork();
 }
 
-void CQtObjectAgent::SyncExit(int timeout)
+void CQtObjectAgent::Active()
 {
-	if (!m_pThreadObj->isRunning())
-		return;
-
-	DP_ATOMIC_SET(m_workStep, SYM_WORK_STEP_WAITING_EXIT);
-	emit SignalThreadExit();
-
-	if (!m_pThreadObj->wait(timeout))
-	{
-		m_pThreadObj->quit();
-	}
+	emit SignalActive();
 }
 
-void CQtObjectAgent::OnStartWork(void const* pParam)
-{
-	if (!PrepareWork(pParam))
-	{
-		DP_ATOMIC_SET(m_workStep, SYM_WORK_STEP_NONE);
-		OnWorkResult(FALSE);
-		return;
-	}
 
-	emit SignalContinueWork();
+void CQtObjectAgent::OnSignalActive()
+{
+	OnActive();
 }
 
-void CQtObjectAgent::OnStopWork()
+
+CQtExitAgent::CQtExitAgent(QObject *parent):CQtObjectAgent(parent)
 {
-	
 }
 
-void CQtObjectAgent::OnContinueWork()
+CQtExitAgent::~CQtExitAgent()
 {
-	UINT curStep = DP_ATOMIC_GET(m_workStep);
-	
-	if (curStep == SYM_WORK_STEP_WORKING)
-	{
-		DoingWork();
-	}
-	else if (curStep == SYM_WORK_STEP_WAITING_STOP)
-	{
-		StoppingWork();
-	}
+	Close();
 }
 
-void CQtObjectAgent::OnThreadExit()
+
+BOOL CQtExitAgent::Create(QThread* pServerObj)
 {
-	ExitingWork();
+	return CQtObjectAgent::Create(pServerObj);
 }
 
-void CQtObjectAgent::NotifyContinueWork(int progress)
+void CQtExitAgent::Close()
 {
-	emit SignalWorkProgress(progress);
-	emit SignalContinueWork();
+	CQtObjectAgent::Close();
 }
 
-BOOL CQtObjectAgent::PrepareWork(void const* pParam)
+BOOL CQtExitAgent::OnInit()
 {
-	return TRUE;
+	return CQtObjectAgent::OnInit();
 }
 
-void CQtObjectAgent::DoingWork()
+void CQtExitAgent::OnActive()
 {
-	DP_ATOMIC_SET(m_workStep, SYM_WORK_STEP_NONE);
-	OnWorkResult(TRUE);
-}
-
-void CQtObjectAgent::StoppingWork()
-{
-	DP_ATOMIC_SET(m_workStep, SYM_WORK_STEP_NONE);
-	OnWorkResult(TRUE);
-}
-
-void CQtObjectAgent::ExitingWork()
-{
+	OnExit();
 	m_pThreadObj->quit();
 }
 
-void CQtObjectAgent::OnWorkResult(BOOL bSuccess)
+void CQtExitAgent::OnExit()
 {
-	emit SignalWorkResult(bSuccess);
+
 }
+
+CQtTimeAgent::CQtTimeAgent(QObject *parent):CQtObjectAgent(parent)
+{
+	m_pTimer = NULL;
+}
+
+CQtTimeAgent::~CQtTimeAgent()
+{
+	Close();
+}
+
+BOOL CQtTimeAgent::Create(QThread* pServerObj, int timeoutMs)
+{
+	m_timeout = timeoutMs;
+	return CQtObjectAgent::Create(pServerObj);
+}
+
+void CQtTimeAgent::Close()
+{
+
+}
+
+BOOL CQtTimeAgent::OnInit()
+{
+	if (!CQtObjectAgent::OnInit())
+		return FALSE;
+
+	m_pTimer = new QTimer(this);
+	if (m_pTimer == NULL)
+		return FALSE;
+
+	connect(m_pTimer, SIGNAL(timeout()), this, SLOT(OnSignalTimeout()));
+	m_pTimer->setInterval(m_timeout);
+	m_pTimer->start();
+	return TRUE;
+}
+
+void CQtTimeAgent::OnActive()
+{
+
+}
+
+void CQtTimeAgent::OnTimeout()
+{
+
+}
+
