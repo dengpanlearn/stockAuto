@@ -1,9 +1,18 @@
-#pragma once
-#include <qthread.h>
-#include <qtObjectAgent.h>
-#include <qtServerTask.h>
+/*
+*stockAutoWindow.h
+*/
+
+#ifndef __STOCK_AUTO_WINDOW_H__
+#define	__STOCK_AUTO_WINDOW_H__
+
+
 #include <QtWidgets/QMainWindow>
-#include <qpushbutton.h>
+
+class CQtServerTask;
+class CQtExitAgent;
+class QPushButton;
+class CQtStockAgent;
+
 
 class CStockAutoWindow : public QMainWindow
 {
@@ -12,10 +21,21 @@ class CStockAutoWindow : public QMainWindow
 public:
     CStockAutoWindow(QWidget *parent = Q_NULLPTR);
 
-	private slots:
-	void OnBtn(bool);
+private:
+	void OnInit();
+	void RetranlateUi();
+
+	BOOL OnInitQtServerAndAgent();
+
+private slots:
+	void OnNotifyAutoManagerStep();
+	void OnNotifyStockTrace();
+
 private:
 	QPushButton* m_pBtn;
 	CQtServerTask*	m_pServerTask;
 	CQtExitAgent* m_pExitAgent;
+	CQtStockAgent*	m_pStockAgent;
 };
+
+#endif // !__STOCK_AUTO_WINDOW_H__

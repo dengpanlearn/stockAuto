@@ -14,7 +14,7 @@ class CQtObjectAgent : public QObject
 	Q_OBJECT
 
 public:
-	CQtObjectAgent(QObject *parent);
+	CQtObjectAgent(QObject *parent = NULL);
 	virtual ~CQtObjectAgent();
 
 	BOOL Create(QThread* pServerObj);
@@ -43,7 +43,7 @@ class CQtExitAgent : public CQtObjectAgent
 	Q_OBJECT
 
 public:
-	CQtExitAgent(QObject *parent);
+	CQtExitAgent(QObject *parent=NULL);
 	virtual ~CQtExitAgent();
 
 	BOOL Create(QThread* pServerObj);
@@ -61,7 +61,7 @@ class CQtTimeAgent : public CQtObjectAgent
 	Q_OBJECT
 
 public:
-	CQtTimeAgent(QObject *parent);
+	CQtTimeAgent(QObject *parent = NULL);
 	virtual ~CQtTimeAgent();
 
 	BOOL Create(QThread* pServerObj, int timeoutMs);

@@ -25,7 +25,6 @@ BOOL CQtObjectAgent::Create(QThread* pServerObj)
 BOOL CQtObjectAgent::OnInit()
 {
 	moveToThread(m_pThreadObj);
-	connect(m_pThreadObj, SIGNAL(finished()), m_pThreadObj, SLOT(deleteLater()));
 	connect(this, SIGNAL(SignalActive()), this, SLOT(OnSignalActive()));
 	
 	return TRUE;
@@ -128,5 +127,10 @@ void CQtTimeAgent::OnActive()
 void CQtTimeAgent::OnTimeout()
 {
 
+}
+
+void CQtTimeAgent::OnSignalTimeout()
+{
+	OnTimeout();
 }
 
