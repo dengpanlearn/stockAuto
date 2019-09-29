@@ -34,8 +34,8 @@ private slots:
 private:
 	QPushButton* m_pBtn;
 	CQtServerTask*	m_pServerTask;
-	CQtExitAgent* m_pExitAgent;
-	CQtStockAgent*	m_pStockAgent;
+	CQtObjectAgent* m_pExitAgent;
+	CQtObjectAgent*	m_pStockAgent;
 };
 
 #endif // !__STOCK_AUTO_WINDOW_H__

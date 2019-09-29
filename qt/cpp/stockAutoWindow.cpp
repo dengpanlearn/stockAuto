@@ -31,23 +31,26 @@ BOOL CStockAutoWindow:: OnInitQtServerAndAgent()
 
 	do
 	{
-		m_pExitAgent = new CQtExitAgent();
-		if (m_pExitAgent == NULL)
+		CQtExitAgent* pExitAgent = new CQtExitAgent();
+		if (pExitAgent == NULL)
 			break;
 
-		m_pStockAgent = new CQtStockAgent();
-		if (m_pStockAgent == NULL)
+		CQtStockAgent* pStockAgent = new CQtStockAgent();
+		if (pStockAgent == NULL)
 			break;
 
 		m_pServerTask->start();
 
-		if (!m_pExitAgent->Create(m_pServerTask))
+		if (!pExitAgent->Create(m_pServerTask))
 			break;
 
-		if (!m_pStockAgent->Create(m_pServerTask, QT_STOCK_AGENT_UPDATE_TIMEOUT))
+		if (!pStockAgent->Create(m_pServerTask, QT_STOCK_AGENT_UPDATE_TIMEOUT))
 			break;
 
 		connect(m_pServerTask, SIGNAL(finished()), m_pServerTask, SLOT(deleteLater()));
+
+		m_pExitAgent = pExitAgent;
+		m_pStockAgent = pStockAgent;
 		return TRUE;
 
 	} while (FALSE);
