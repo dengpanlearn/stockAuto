@@ -9,14 +9,14 @@
 #include <QWidget>
 
 class CQtObjectAgent;
-
+class QText;
 
 class CStockRealWidget : public QWidget
 {
 	Q_OBJECT
 
 public:
-	CStockRealWidget(QObject *parent);
+	CStockRealWidget(QWidget *parent);
 	~CStockRealWidget();
 
 private:
@@ -26,7 +26,8 @@ private:
 private:
 	CQtObjectAgent*		m_pExitAgent;
 	CQtObjectAgent*		m_pStockAgent;
-
+	QText*		m_pTextCode;
+	QText*		m_pTextName;
 };
 
 #endif // !__STOCK_REAL_WIDGET_H__

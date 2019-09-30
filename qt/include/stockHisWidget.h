@@ -16,7 +16,7 @@ class CStockHisWidget : public QWidget
 	Q_OBJECT
 
 public:
-	CStockHisWidget(QObject *parent);
+	CStockHisWidget(QWidget *parent);
 	~CStockHisWidget();
 
 private:

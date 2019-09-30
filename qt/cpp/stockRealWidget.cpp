@@ -1,10 +1,10 @@
-#include "stockTraceWidget.h"
+#include "stockRealWidget.h"
 
-CStockTraceWidget::CStockTraceWidget(QObject *parent)
+CStockRealWidget::CStockRealWidget(QWidget *parent)
 	: QWidget(parent)
 {
 }
 
-CStockTraceWidget::~CStockTraceWidget()
+CStockRealWidget::~CStockRealWidget()
 {
 }
