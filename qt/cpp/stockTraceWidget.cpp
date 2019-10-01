@@ -1,6 +1,6 @@
 #include "stockTraceWidget.h"
 
-CStockTraceWidget::CStockTraceWidget(QObject *parent)
+CStockTraceWidget::CStockTraceWidget(QWidget *parent)
 	: QWidget(parent)
 {
 }

@@ -5,7 +5,7 @@
 #ifndef __STOCK_HIS_WIDGET_H__
 #define	__STOCK_HIS_WIDGET_H__
 
-
+#include <dp.h>
 #include <QWidget>
 
 class CQtObjectAgent;
@@ -20,8 +20,8 @@ public:
 	~CStockHisWidget();
 
 private:
-	void OnInit();
-	void Retranslate();
+//	void OnInit();
+//	void Retranslate();
 
 private:
 	CQtObjectAgent*		m_pExitAgent;

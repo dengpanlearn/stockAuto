@@ -5,10 +5,11 @@
 
 #ifndef __QT_STOCK_AGENT_H__
 #define __QT_STOCK_AGENT_H__
-
+#include <dp.h>
 #include <SyncObj.h>
 #include <dllLibEx.h>
-
+#include <stockCalcDef.h>
+#include "qtStockTraceDef.h"
 #include "qtObjectAgent.h"
 
 class CQtStockAgent: public CQtTimeAgent

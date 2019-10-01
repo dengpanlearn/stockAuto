@@ -2,6 +2,14 @@
 *stockAutoWindow.cpp
 */
 #include <global.h>
+#include <qstyle.h>
+#include <qfile.h>
+#include <qapplication.h>
+#include <qsplitter.h>
+#include <stockCalcDef.h>
+#include "../include/stockHisWidget.h"
+#include "../include/stockRealWidget.h"
+#include "../include/stockTraceWidget.h"
 #include "../include/qtServerTask.h"
 #include "../include/qtStockTraceDef.h"
 #include "../include/qtObjectAgent.h"
@@ -13,13 +21,52 @@ CStockAutoWindow::CStockAutoWindow(QWidget *parent)
 {
 	m_pServerTask = NULL;
 	m_pExitAgent = NULL;
+	m_pStockAgent = NULL;
 	OnInit();
 	RetranlateUi();
+}
+
+CStockAutoWindow::~CStockAutoWindow()
+{
+
 }
 
 void CStockAutoWindow::OnInit()
 {
 	OnInitQtServerAndAgent();
+
+	QFile qssFile(":/CStockAutoWindow/stockAuto.qss");
+	if (qssFile.open(QFile::ReadOnly))
+	{
+		qApp->setStyleSheet(qssFile.readAll());
+		qssFile.close();
+	}
+
+	m_pTraceWidget = new CStockTraceWidget(NULL);
+	m_pRealWidget = new CStockRealWidget(NULL);
+
+	m_pHisWidget = new CStockHisWidget(NULL);
+
+	m_pRealWidget->setObjectName("Stock_Real_Widget");
+	QSplitter* pSplitLeft = new QSplitter(Qt::Horizontal, this);
+	pSplitLeft->addWidget(m_pRealWidget);
+	QSplitter* pSplitRight = new QSplitter(Qt::Horizontal, pSplitLeft);
+
+	
+	
+	pSplitRight->addWidget(m_pTraceWidget);
+	pSplitRight->addWidget(m_pHisWidget);
+	this->setCentralWidget(pSplitLeft);
+}
+
+void CStockAutoWindow::RetranlateUi()
+{
+	if (m_pStockAgent != NULL)
+	{
+		connect(m_pStockAgent, SIGNAL(NotifyUiManagerStep()), this, SLOT(OnNotifyAutoManagerStep()));
+		connect(m_pStockAgent, SIGNAL(NotifyUiStockTrace()), this, SLOT(OnNotifyStockTrace()));
+	}
+
 
 }
 
@@ -76,16 +123,26 @@ BOOL CStockAutoWindow:: OnInitQtServerAndAgent()
 	return FALSE;
 }
 
-void CStockAutoWindow::RetranlateUi()
+void CStockAutoWindow::closeEvent(QCloseEvent * event)
 {
-	if (m_pStockAgent != NULL)
+	if (m_pExitAgent != NULL)
 	{
-		connect(m_pStockAgent, SIGNAL(NotifyUiManagerStep()), this, SLOT(OnNotifyAutoManagerStep()));
-		connect(m_pStockAgent, SIGNAL(NotifyUiStockTrace()), this, SLOT(OnNotifyStockTrace()));
+		if (m_pServerTask->isRunning())
+		{
+			m_pExitAgent->Active();
+			QThread::msleep(QT_STOCK_SERVER_EXIT_WAIT_TIMEOUT);
+			if (m_pServerTask->isRunning())
+				m_pServerTask->quit();
+		}
+
+		delete m_pExitAgent;
+		m_pExitAgent = NULL;
+
+		delete m_pStockAgent;
+		m_pStockAgent = NULL;
 	}
-
-
 }
+
 
 void CStockAutoWindow::OnNotifyAutoManagerStep()
 {

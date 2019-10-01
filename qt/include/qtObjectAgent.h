@@ -3,6 +3,10 @@
 *qt Object »ùÀà
 */
 
+#ifndef __QT_OBJECT_AGENT__
+#define	__QT_OBJECT_AGENT__
+
+
 #include <dp.h>
 #include <QObject>
 #include <qthread.h>
@@ -79,3 +83,4 @@ private:
 	QTimer*	m_pTimer;
 	int		m_timeout;
 };
+#endif // !__QT_OBJECT_AGENT__
