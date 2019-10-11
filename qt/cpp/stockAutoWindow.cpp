@@ -48,6 +48,7 @@ void CStockAutoWindow::OnInit()
 	m_pHisWidget = new CStockHisWidget(NULL);
 
 	m_pRealWidget->setObjectName("Stock_Real_Widget");
+	m_pTraceWidget->setObjectName("Stock_Trace_Widget");
 	QSplitter* pSplitLeft = new QSplitter(Qt::Horizontal, this);
 	pSplitLeft->addWidget(m_pRealWidget);
 	QSplitter* pSplitRight = new QSplitter(Qt::Horizontal, pSplitLeft);

@@ -46,3 +46,49 @@ QWidget#Stock_Real_Widget QLabel{
     font-size: 20px;
     text-align:center;
 }
+
+QWidget#Stock_Trace_Widget{
+    background-color: #000000;
+    min-width: 300px;
+    min-height:300px;
+}
+
+QWidget#Stock_Trace_Widget_Cell {
+    background-color: #000000;
+    min-width: 300px;
+   min-height:100px;
+}
+
+QWidget#Stock_Trace_Widget_Cell QLabel#Stock_Trace_Lab{
+    border: none;
+    min-width: 30px;
+    min-height: 30px;
+    color:#FFD306;
+    padding:2px;
+    font-size: 30px;
+    text-align:center;
+}
+
+QWidget#Stock_Trace_Widget_Cell QTreeWidget{
+    min-width: 300px;
+     min-height:100px;
+     color:#FFD306;
+     background-color: #000000;
+}
+
+QWidget#Stock_Trace_Widget_Cell QTreeWidget::item {
+    min-width: 40px;
+    min-height:20px;
+    margin:5px;
+    padding:0px;
+     font-size: 20px;
+   border: 1px solid #00FF99;
+}
+
+QWidget#Stock_Trace_Widget_Cell QTreeWidget::item:hover {
+    background-color: #FF0088;
+}
+
+QWidget#Stock_Trace_Widget_Cell QTreeWidget::item:selected{
+    background-color: #FF0088;
+}
