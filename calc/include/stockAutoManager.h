@@ -19,6 +19,10 @@ public:
 	BOOL Create(LPCTSTR pNameTask, int stackSize, int priTask, int optTask, int timeoutMs, int maxEvents, int maxEventParamSize);
 	void Close();
 
+public:
+	inline CMultiEventsTask* GetTaskData();
+	inline CMultiEventsTask* GetTaskUpdate();
+
 protected:
 	void InitConfig();
 
@@ -108,6 +112,16 @@ private:
 	STOCK_CALC_TRACE_NODE*			m_pCalcTraceBuf;
 	STOCKAUTO_CONFIG_TRACE			m_traceConfig;
 };
+
+inline CMultiEventsTask* CStockAutoManager::GetTaskData()
+{
+	return m_pDataTask;
+}
+
+inline CMultiEventsTask* CStockAutoManager::GetTaskUpdate()
+{
+	return m_pUpdateTask;
+}
 
 
 #endif // !__STOCK_AUTO_MANAGER_H__

@@ -6,7 +6,7 @@
 #include <qtextcodec.h>
 #include <qlayout.h>
 #include <qlabel.h>
-#include "stockRealWidget.h"
+#include "../include/stockRealWidget.h"
 
 CStockRealWidget::CStockRealWidget(QWidget *parent)
 	: QWidget(parent)
@@ -80,7 +80,7 @@ void CStockRealWidget::OnInit()
 	pLytMain->addLayout(pLytLow);
 	pLytMain->addLayout(pLytMA10);
 	pLytMain->addLayout(pLytRSI7);
-
+	pLytMain->setMargin(0);
 	this->setLayout(pLytMain);
 	this->setObjectName("Stock_Real_Widget");
 }

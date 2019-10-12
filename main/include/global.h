@@ -5,6 +5,9 @@
 #ifndef __GLOBAL_H__
 #define __GLOBAL_H__
 #include <dp.h>
+
+#define	STOCK_AUTO_MANAGER_EXIT_CHECK_TIMEOUT			(100)
+
 /*task param*/
 #define STOCK_AUTO_MANAGER_TASK_NAME					_T("tAutoMan")
 #define STOCK_DATA_TASK_NAME							_T("tData")
@@ -43,4 +46,15 @@
 #define	PYTHON_CLASS_WEEK_KLINE_METHOD_UPDATE_STOCK_LIST	"getAndUpdateStockList"
 #define	PYTHON_CLASS_WEEK_KLINE_METHOD_UPDATE_STOCK_KLINE	"getAndUpdateWeekKLine"
 #define	PYTHON_CLASS_WEEK_KLINE_METHOD_LATEST_STOCK_KLINE	"getCurWeekKLine"
+
+
+#ifdef __cplusplus
+extern "C"{
+#endif
+
+BOOL GlobalInit();
+void GlobalExit();
+#ifdef __cplusplus
+}
+#endif
 #endif

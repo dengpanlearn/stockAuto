@@ -33,7 +33,7 @@ private:
 	QTreeWidget*		m_pTreeWaitSell;
 	QWidget*			m_pWidgetWaitBuy;
 	QWidget*			m_pWidgetWaitSell;
-	QSplitter*				m_pSplitter;
+	QSplitter*			m_pSplitter;
 };
 
 #endif // !__STOCK_TRACE_WIDGET_H__

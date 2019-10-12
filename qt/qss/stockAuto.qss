@@ -4,8 +4,19 @@ QMainWindow {
 
 QWidget#Stock_Real_Widget{
     background-color: #000000;
-    min-width: 300px;
+    min-width: 150px;
     min-height:300px;
+}
+
+
+QSplitter::handle:horizontal {
+  width: 2px;
+  background-color: #00EC00;
+}
+
+QSplitter::handle:vertical {
+  height: 2px;
+  background-color: #00EC00;
 }
 
 QWidget#Stock_Real_Widget QLabel#Stock_Real_Lab_Code{
@@ -49,14 +60,15 @@ QWidget#Stock_Real_Widget QLabel{
 
 QWidget#Stock_Trace_Widget{
     background-color: #000000;
-    min-width: 300px;
+    min-width: 500px;
     min-height:300px;
+    border:0px;
 }
 
 QWidget#Stock_Trace_Widget_Cell {
     background-color: #000000;
-    min-width: 300px;
-   min-height:100px;
+    min-width: 500px;
+    min-height:100px;
 }
 
 QWidget#Stock_Trace_Widget_Cell QLabel#Stock_Trace_Lab{
@@ -64,25 +76,47 @@ QWidget#Stock_Trace_Widget_Cell QLabel#Stock_Trace_Lab{
     min-width: 30px;
     min-height: 30px;
     color:#FFD306;
-    padding:2px;
     font-size: 30px;
     text-align:center;
 }
 
 QWidget#Stock_Trace_Widget_Cell QTreeWidget{
     min-width: 300px;
-     min-height:100px;
-     color:#FFD306;
-     background-color: #000000;
+    min-height:100px;
+    color:#FFD306;
+    background-color: #000000;
+    border: 1px solid #00FF99;
 }
+
+QWidget#Stock_Trace_Widget_Cell QTreeWidget QHeaderView{
+    background-color:#000000;
+    min-height:20px;
+    text-align:center;
+}
+
+
+QWidget#Stock_Trace_Widget_Cell QTreeWidget QHeaderView::section{
+    color:#FFD306;
+    background-color:#000000;
+    color:#CCFFCC;
+    font-size: 13px;
+    border: 1px solid #00FF99;
+    min-height:20px;
+    min-width:50px;
+    text-align:center;
+    alignment:center;
+}
+
+
 
 QWidget#Stock_Trace_Widget_Cell QTreeWidget::item {
     min-width: 40px;
-    min-height:20px;
+    min-height:30px;
     margin:5px;
     padding:0px;
-     font-size: 20px;
-   border: 1px solid #00FF99;
+    font-size: 15px;
+    background-color: #000000;
+    border: 1px solid #00FF99;
 }
 
 QWidget#Stock_Trace_Widget_Cell QTreeWidget::item:hover {
@@ -92,3 +126,91 @@ QWidget#Stock_Trace_Widget_Cell QTreeWidget::item:hover {
 QWidget#Stock_Trace_Widget_Cell QTreeWidget::item:selected{
     background-color: #FF0088;
 }
+
+QWidget#Stock_His_Widget{
+    background-color: #000000;
+    min-width: 500px;
+    min-height:300px;
+    border:0px;
+}
+
+QWidget#Stock_His_Widget QLineEdit{
+   background-color:#ffffff;
+   min-width:90px;
+   min-height:40px;
+   font-size: 20px;
+   border: 2px solid #00FF99;
+   text-align:center;
+   color:#FF0000;
+   margin-top:10px;
+}
+
+QWidget#Stock_His_Widget QLineEdit:hover{
+     border: 2px solid #FF0000;
+}
+
+QWidget#Stock_His_Widget QLineEdit:focus{
+     border: 2px solid #FF0000;
+}
+
+QWidget#Stock_His_Widget QPushButton{
+   background-color:#ffffff;
+   min-width:40px;
+   min-height:40px;
+   border: 1px solid #00FF99;
+   border-radius:10px;
+    margin-top:10px;
+}
+
+QWidget#Stock_His_Widget QPushButton:hover{
+   background-color:#FF0000;
+   min-width:40px;
+   min-height:40px;
+   border: 1px solid#FF0000;
+}
+
+QWidget#Stock_His_Widget  QTreeWidget{
+    
+    min-width: 300px;
+    min-height:100px;
+    margin-top:10px;
+    background-color: #000000;
+    border: 1px solid #00FF99;
+}
+
+QWidget#Stock_His_Widget QHeaderView{
+    background-color:#000000;
+    min-height:20px;
+    text-align:center;
+}
+
+QWidget#Stock_His_Widget QHeaderView::section{
+    color:#FFD306;
+    background-color:#000000;
+    color:#CCFF00;
+    font-size: 13px;
+    border: 1px solid #00FF99;
+    min-height:20px;
+    min-width:50px;
+    text-align:center;
+    alignment:center;
+}
+
+QWidget#Stock_His_Widget QTreeWidget::item {
+    min-width: 40px;
+    min-height:30px;
+    margin:5px;
+    padding:0px;
+    font-size: 15px;
+    background-color: #000000;
+    border: 1px solid #00FF99;
+}
+
+QWidget#Stock_His_Widget QTreeWidget::item:hover {
+    background-color: #FF0088;
+}
+
+QWidget#Stock_His_Widget QTreeWidget::item:selected{
+    background-color: #FF0088;
+}
+

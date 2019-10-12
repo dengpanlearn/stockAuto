@@ -5,7 +5,11 @@
 #include <qtGlobal.h>
 #include <qtextcodec.h>
 #include <qsqlquery.h>
+#include <qtStockAgent.h>
+#include <qtStockTraceDef.h>
 #include "../include/stockDataSqlite.h"
+
+
 #include "../include/stockDataTask.h"
 
 CStockDataTask::CStockDataTask()
@@ -69,6 +73,7 @@ int CStockDataTask::OnEventActive(UINT cmd, void* param, int paramLen)
 		STOCK_CALC_LOAD_TRACELOG* pLoadTraceLog;
 		STOCK_CALC_UPDATE_TRACELOG* pUpdateTraceLog;
 		STOCK_CALC_GET_HISKLINE* pGetHisKLine;
+		QT_STOCK_HISKLINE_QUERY_PARAM* pQueryHisKLine;
 	};
 
 	pGetList = (STOCK_CALC_GET_LIST*)param;
@@ -104,6 +109,11 @@ int CStockDataTask::OnEventActive(UINT cmd, void* param, int paramLen)
 	case STOCK_CALC_EVENT_GET_STOCK_HISKLINE:
 		result = m_pStockData->GetHisKLine(pGetHisKLine->code, pGetHisKLine->pKLineBuf, pGetHisKLine->getCnt);
 		break;
+
+	case STOCK_QT_EVENT_QUERY_STOCK_HISKLINE:
+		result = m_pStockData->GetHisKLine(pQueryHisKLine->code, pQueryHisKLine->pHisKLineBuf, pQueryHisKLine->hisCounts);
+		break;
+
 	default:
 		result = EVENT_COMPLETE_FAIL;
 	}

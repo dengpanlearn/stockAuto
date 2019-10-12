@@ -12,6 +12,8 @@
 #include "qtStockTraceDef.h"
 #include "qtObjectAgent.h"
 
+class CMultiEventsTask;
+
 class CQtStockAgent: public CQtTimeAgent
 {
 	Q_OBJECT
@@ -19,7 +21,7 @@ public:
 	CQtStockAgent(QObject *parent = NULL);
 	virtual ~CQtStockAgent();
 
-	BOOL Create(QThread* pServerObj, int timeoutMs);
+	BOOL Create(QThread* pServerObj, CMultiEventsTask* pDataTask, int timeoutMs);
 	void Close();
 
 public:
@@ -28,10 +30,21 @@ public:
 
 	UINT GetAutoManagerStep();
 	BOOL GetAckStockTrace(QT_STOCK_TRACE_LOG* pTraceLog);
+	int	GetStockHisKLine(int count, int offset, STOCK_CALC_TRACE_KLINE* pKLine);
+
+private:
+	static BOOL QtTaskEventComplete(UINT cmd, int result, void* param, int paramLen);
+
+
+	void OnHisKLineQueryResponse(int result, QT_STOCK_HISKLINE_QUERY_PARAM* pHisKLine);
 
 signals:
 	void NotifyUiManagerStep();
 	void NotifyUiStockTrace();
+	void NotifyUiHisKLineResponese();
+
+private slots:
+	void OnGetQueryHisKLine(QString& code);
 
 protected:
 	virtual BOOL OnInit();
@@ -42,6 +55,7 @@ protected:
 	{
 		QT_STOCK_AGENT_UPDATE_MANAGER_STEP = 0x00000001,
 		QT_STOCK_AGENT_UPDATE_STOCK_TRACE = 0x00000002,
+		QT_STOCK_AGENT_QUERY_HISKLINE_RESPONESE = 0x00000004,
 	};
 
 private:
@@ -49,6 +63,9 @@ private:
 	CCriticalSection	m_cs;
 	UINT				m_autoManagetStep;
 	DL_LIST				m_listTraceLog;
+	QT_STOCK_HISKLINE_QUERY_JOB*	m_pHisKLineQueryJob;
+
+	CMultiEventsTask*		m_pDataTask;
 };
 
 #endif // !__QT_STOCK_AGENT_H__
