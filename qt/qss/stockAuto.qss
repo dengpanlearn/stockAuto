@@ -214,3 +214,27 @@ QWidget#Stock_His_Widget QTreeWidget::item:selected{
     background-color: #FF0088;
 }
 
+QWidget#Stock_His_Widget QMessageBox{
+     min-width: 200px;
+    min-height:100px;
+      background-color:#ffffff;
+}
+
+QWidget#Stock_His_Widget QMessageBox QPushButton{
+    border: 1px solid #555;
+    min-width: 65px;
+    min-height: 40px;
+    border-radius:5px;
+    font-size: 15px;
+    text-align:center;
+}
+
+QWidget#Stock_His_Widget QMessageBox QPushButton:hover{
+	background-color: #999;
+}
+
+QWidget#Stock_His_Widget QMessageBox QLabel{
+   min-width: 100px;
+   min-height:50px;
+   font-size: 15px;
+}

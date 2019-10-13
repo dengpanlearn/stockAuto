@@ -5,6 +5,7 @@
 #include <qlayout.h>
 #include <qheaderview.h>
 #include <qtreewidget.h>
+#include <qmessagebox.h>
 #include "../include/qtStockAgent.h"
 #include "../include/qtResourceDef.h"
 #include "../include/stockHisWidget.h"
@@ -63,6 +64,7 @@ void CStockHisWidget::Retranslate()
 	CQtStockAgent* pStockAgent = (CQtStockAgent*)m_pStockAgent;
 	connect(pStockAgent, SIGNAL(NotifyUiHisKLineResponese()), this, SLOT(OnHisKLineQueryResponse()));
 	connect(m_pBtnSearch, SIGNAL(clicked(bool)), this, SLOT(OnHisKLineQueryClick(bool)));
+	connect(this, SIGNAL(QueryStockHisKLine(QString&)), pStockAgent, SLOT(OnGetQueryHisKLine(QString&)));
 }
 
 void CStockHisWidget::OnHisKLineQueryResponse()
@@ -72,5 +74,22 @@ void CStockHisWidget::OnHisKLineQueryResponse()
 
 void CStockHisWidget::OnHisKLineQueryClick(bool check)
 {
+	QString codeInput = m_pEditCodeName->text();
+	QString code = codeInput.toUpper();
+	
+	if (!code.startsWith("SH") && !code.startsWith("SZ"))
+	{
+		QMessageBox msgBox;
+		QTextCodec* pTextCodec = QTextCodec::codecForLocale();
+		msgBox.setWindowTitle(pTextCodec->toUnicode("提示"));
+		msgBox.setText(pTextCodec->toUnicode("输入有效股票代码"));
 
+		msgBox.setIcon(QMessageBox::Information);
+		msgBox.addButton(QMessageBox::Ok);
+		msgBox.exec();
+	}
+	else 
+	{
+		emit QueryStockHisKLine(code);
+	}
 }

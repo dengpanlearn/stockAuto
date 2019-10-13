@@ -48,7 +48,7 @@ void CStockAutoWindow::OnInit()
 	m_pTraceWidget = new CStockTraceWidget(NULL);
 	m_pRealWidget = new CStockRealWidget(NULL);
 
-	m_pHisWidget = new CStockHisWidget(NULL);
+	m_pHisWidget = new CStockHisWidget(NULL, m_pExitAgent, m_pStockAgent);
 
 	m_pRealWidget->setObjectName("Stock_Real_Widget");
 	m_pTraceWidget->setObjectName("Stock_Trace_Widget");

@@ -22,9 +22,14 @@ public:
 	CStockHisWidget(QWidget *parent, CQtObjectAgent* pExitAgent, CQtObjectAgent* pStockAgent);
 	~CStockHisWidget();
 
+
+signals:
+	void QueryStockHisKLine(QString& code);
 private:
 	void OnInit();
 	void Retranslate();
+
+
 
 private slots:
 	void OnHisKLineQueryClick(bool);
