@@ -11,7 +11,9 @@
 
 CQtStockAgent::CQtStockAgent(QObject* parent): CQtTimeAgent(parent)
 {
-
+	m_updateCmd = 0;
+	memset(&m_loadingManager, 0, sizeof(m_loadingManager));
+	dllInit(&m_listTraceLog);
 }
 
 CQtStockAgent::~CQtStockAgent()
@@ -38,11 +40,12 @@ void CQtStockAgent::Close()
 	}
 }
 
-void CQtStockAgent::UpdateAutoManagerStep(UINT traceStep)
+void CQtStockAgent::UpdateAutoManagerStep(UINT traceStep, int loadProgress)
 {
 	CSingleLock lock(&m_cs, TRUE);
 	m_updateCmd |= QT_STOCK_AGENT_UPDATE_MANAGER_STEP;
-	m_autoManagetStep = traceStep;
+	m_loadingManager.step = traceStep;
+	m_loadingManager.progress = loadProgress;
 }
 
 BOOL CQtStockAgent::UpdateStockTrace(char const* pStockName, STOCK_MANAGER_TRACE_LOG* pTraceLog, UINT updateStat)
@@ -63,10 +66,10 @@ BOOL CQtStockAgent::UpdateStockTrace(char const* pStockName, STOCK_MANAGER_TRACE
 }
 
 
-UINT CQtStockAgent::GetAutoManagerStep()
+void CQtStockAgent::GetAutoManagerLoading(QT_STOCK_LOADING_MANAGER* pLoadingInfo)
 {
 	CSingleLock lock(&m_cs);
-	return m_autoManagetStep;
+	memcpy(pLoadingInfo, &m_loadingManager, sizeof(QT_STOCK_LOADING_MANAGER));
 }
 
 BOOL CQtStockAgent::GetAckStockTrace(QT_STOCK_TRACE_LOG* pTraceLog)
@@ -164,7 +167,6 @@ void CQtStockAgent::OnGetQueryHisKLine(QString& code)
 BOOL CQtStockAgent::OnInit()
 {
 	dllInit(&m_listTraceLog);
-	m_autoManagetStep = 0;
 	return CQtTimeAgent::OnInit();
 }
 
@@ -179,14 +181,14 @@ void CQtStockAgent::OnTimeout()
 	if (m_updateCmd & QT_STOCK_AGENT_UPDATE_MANAGER_STEP)
 	{
 		m_updateCmd &=~QT_STOCK_AGENT_UPDATE_MANAGER_STEP;
-		emit NotifyUiManagerStep();
+		emit NotifyUiManagerLoadingProgress();
 	}
 
 
 	if (m_updateCmd & QT_STOCK_AGENT_QUERY_HISKLINE_RESPONESE)
 	{
 		m_updateCmd  &= ~QT_STOCK_AGENT_QUERY_HISKLINE_RESPONESE;
-		emit NotifyUiManagerStep();
+		emit NotifyUiHisKLineResponese();
 	}
 
 	if (!DLL_IS_EMPTY(&m_listTraceLog))

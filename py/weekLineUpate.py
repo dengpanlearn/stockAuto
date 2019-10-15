@@ -79,7 +79,8 @@ class WeekKLineUpdate:
 
     def getCurWeekKLine(self, stockNo):
         stockKLine = self.getWeekKLine(stockNo, int(time.time())*1000, -80)
-     
+        if (not stockKLine):
+            return {'code':-1,'item':None}
         if (stockKLine.get('error_code', 1)):
             return {'code':-1,'item':None}
         else :
@@ -127,6 +128,8 @@ class WeekKLineUpdate:
             
     def getAndUpdateWeekKLine(self, stockNo, beginTime, counts):
         stockKLine = self.getWeekKLine(stockNo, beginTime*1000, counts)
+        if (not stockKLine):
+            return -1
         if (stockKLine.get('error_code', 1)):
             return -1
         else :
@@ -141,7 +144,6 @@ class WeekKLineUpdate:
         orgUrl = 'https://stock.xueqiu.com/v5/stock/chart/kline.json?symbol={stockNo}&begin={beginTime}&period=week&type=before&count={counts}&indicator=kline,ma'
         url = orgUrl.format(stockNo=stockNo, beginTime = beginTime, counts=counts)
         self.headers["Host"] = "stock.xueqiu.com"
-       
         try:
             response = self.session.get(url, verify=False, headers = self.headers)
         except (ReadTimeout, ConnectTimeout, ConnectionError, TooManyRedirects):
@@ -196,5 +198,5 @@ if __name__ == '__main__':
        
         ret = weekKLine.getCurWeekKLine('SZ300001')
         """
-        ret = weekKLine.getAndUpdateWeekKLine('SZ300599',1567872000, -1)
+        ret = weekKLine.getAndUpdateWeekKLine('SZ300600',1567872000, -1)
         print(ret)

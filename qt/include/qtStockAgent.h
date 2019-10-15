@@ -25,10 +25,10 @@ public:
 	void Close();
 
 public:
-	void UpdateAutoManagerStep(UINT traceStep);
+	void UpdateAutoManagerStep(UINT traceStep, int loadProgress);
 	BOOL UpdateStockTrace(char const* pStockName, STOCK_MANAGER_TRACE_LOG* pTraceLog, UINT updateStat);
 
-	UINT GetAutoManagerStep();
+	void GetAutoManagerLoading(QT_STOCK_LOADING_MANAGER* pLoadingInfo);
 	BOOL GetAckStockTrace(QT_STOCK_TRACE_LOG* pTraceLog);
 	int	GetStockHisKLine(int count, int offset, STOCK_CALC_TRACE_KLINE* pKLine);
 
@@ -39,7 +39,7 @@ private:
 	void OnHisKLineQueryResponse(int result, QT_STOCK_HISKLINE_QUERY_PARAM* pHisKLine);
 
 signals:
-	void NotifyUiManagerStep();
+	void NotifyUiManagerLoadingProgress();
 	void NotifyUiStockTrace();
 	void NotifyUiHisKLineResponese();
 
@@ -61,9 +61,9 @@ protected:
 private:
 	UINT				m_updateCmd;
 	CCriticalSection	m_cs;
-	UINT				m_autoManagetStep;
 	DL_LIST				m_listTraceLog;
 	QT_STOCK_HISKLINE_QUERY_JOB*	m_pHisKLineQueryJob;
+	QT_STOCK_LOADING_MANAGER		m_loadingManager;
 
 	CMultiEventsTask*		m_pDataTask;
 };

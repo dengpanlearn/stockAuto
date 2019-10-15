@@ -2,6 +2,7 @@
 *stockAutoManager.cpp
 */
 #include <qdatetime.h>
+#include <stockAutoWindow.h>
 #include "../include/stockTraceBase.h"
 #include "../include/stockTraceReal.h"
 #include "../include/stockTraceWeek.h"
@@ -27,7 +28,7 @@ CStockAutoManager::~CStockAutoManager()
 	Close();
 }
 
-BOOL CStockAutoManager::Create(LPCTSTR pNameTask, int stackSize, int priTask, int optTask, int timeoutMs, int maxEvents, int maxEventParamSize)
+BOOL CStockAutoManager::Create(LPCTSTR pNameTask, int stackSize, int priTask, int optTask, int timeoutMs, int maxEvents, int maxEventParamSize, CStockAutoWindow* pAutoWindow)
 {
 	int jobListSize = sizeof(STOCK_MANAGER_JOB_LIST) + STOCK_AUTO_COUNTS_MAX * sizeof(STOCK_CODE_NAME);
 	int jobTraceLogSize = sizeof(STOCK_MANAGER_JOB_TRACELOG_LOAD) + 2*STOCK_AUTO_COUNTS_MAX * sizeof(STOCK_MANAGER_TRACE_LOG);
@@ -67,6 +68,7 @@ BOOL CStockAutoManager::Create(LPCTSTR pNameTask, int stackSize, int priTask, in
 
 		InitConfig();
 		m_managerStep = STOCK_AUTO_MANAGER_STEP_LIST_INIT;
+		m_pAutoWindow = pAutoWindow;
 		return TRUE;
 	} while (FALSE);
 
@@ -502,6 +504,7 @@ UINT CStockAutoManager::OnStockAutoManagerInit()
 		nextStep = STOCK_AUTO_MANAGER_STEP_LIST_UPDATING;
 	}
 
+	m_pAutoWindow->UpdateAutoManagerStep(nextStep, 0);
 	return nextStep;
 }
 
@@ -559,7 +562,7 @@ UINT CStockAutoManager::OnStockAutoManagerListUpdate()
 		m_jobListUpdate.jobStep = TASK_EVENT_JOB_STEP_NONE;
 		nextStep = STOCK_AUTO_MANAGER_STEP_ERROR;
 	}
-
+	m_pAutoWindow->UpdateAutoManagerStep(nextStep, 0);
 	return nextStep;
 }
 
@@ -628,7 +631,7 @@ UINT CStockAutoManager::OnStockAutoManagerTraceLogLoad()
 		InitStockTraceByLog(m_pJobTraceLog, m_pJobList);
 		nextStep = STOCK_AUTO_MANAGER_STEP_HISKLINE_UPDATING;
 	}
-
+	m_pAutoWindow->UpdateAutoManagerStep(nextStep, 0);
 	return nextStep;
 }
 
@@ -734,6 +737,8 @@ UINT CStockAutoManager::OnStockAutoManagerHisKLineUpdate()
 		goto _NEXT;
 	}
 
+	float progress = (float)m_jobHisKLineUpdate.stockIdx / m_pJobList->stockCounts;
+	m_pAutoWindow->UpdateAutoManagerStep(nextStep, (int)(progress*100));
 	return nextStep;
 }
 

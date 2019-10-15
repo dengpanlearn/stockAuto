@@ -37,6 +37,13 @@ struct QT_STOCK_HISKLINE_QUERY_JOB
 	STOCK_CALC_TRACE_KLINE hisKLine[STOCK_HIS_KLINE_MAX_COUNTS];
 };
 
+
+struct QT_STOCK_LOADING_MANAGER
+{
+	UINT	step;
+	int		progress;
+};
+
 class CQtStockAgent;
 struct QT_STOCK_HISKLINE_QUERY_PARAM
 {

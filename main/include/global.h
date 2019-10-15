@@ -52,7 +52,8 @@
 extern "C"{
 #endif
 
-BOOL GlobalInit();
+class CStockAutoWindow;
+BOOL GlobalInit(CStockAutoWindow* pAutoWindow);
 void GlobalExit();
 #ifdef __cplusplus
 }

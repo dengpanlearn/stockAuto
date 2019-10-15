@@ -10,13 +10,14 @@
 #include "stockDataTask.h"
 #include "stockUpdateTask.h"
 
+class CStockAutoWindow;
 class CStockAutoManager :public CMultiEventsTask
 {
 public:
 	CStockAutoManager();
 	virtual ~CStockAutoManager();
 
-	BOOL Create(LPCTSTR pNameTask, int stackSize, int priTask, int optTask, int timeoutMs, int maxEvents, int maxEventParamSize);
+	BOOL Create(LPCTSTR pNameTask, int stackSize, int priTask, int optTask, int timeoutMs, int maxEvents, int maxEventParamSize, CStockAutoWindow* pAutoWindow);
 	void Close();
 
 public:
@@ -32,16 +33,6 @@ protected:
 	virtual int OnEventActive(UINT cmd, void* param, int paramLen);
 	virtual BOOL OnEventComplete(UINT cmd, int result, void* param, int paramLen);
 
-	enum STOCK_AUTO_MANAGER_STEP
-	{
-		STOCK_AUTO_MANAGER_STEP_NONE = 0,
-		STOCK_AUTO_MANAGER_STEP_LIST_INIT,
-		STOCK_AUTO_MANAGER_STEP_LIST_UPDATING,
-		STOCK_AUTO_MANAGER_STEP_TRACELOG_LOADING,
-		STOCK_AUTO_MANAGER_STEP_HISKLINE_UPDATING,
-		STOCK_AUTO_MANAGER_STEP_STOCK_TRACING,
-		STOCK_AUTO_MANAGER_STEP_ERROR,
-	};
 
 private:
 	void InitStockTraceByLog(STOCK_MANAGER_JOB_TRACELOG_LOAD* pJobTraceLog, STOCK_MANAGER_JOB_LIST* pJobList);
@@ -111,6 +102,7 @@ private:
 	DL_LIST							m_listTraceReal;
 	STOCK_CALC_TRACE_NODE*			m_pCalcTraceBuf;
 	STOCKAUTO_CONFIG_TRACE			m_traceConfig;
+	CStockAutoWindow*				m_pAutoWindow;
 };
 
 inline CMultiEventsTask* CStockAutoManager::GetTaskData()

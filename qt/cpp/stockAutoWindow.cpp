@@ -7,6 +7,7 @@
 #include <qapplication.h>
 #include <qsplitter.h>
 #include <stockCalcDef.h>
+#include <qtextcodec.h>
 #include <stockAutoManager.h>
 #include "../include/stockHisWidget.h"
 #include "../include/stockRealWidget.h"
@@ -32,6 +33,13 @@ CStockAutoWindow::CStockAutoWindow(QWidget *parent)
 CStockAutoWindow::~CStockAutoWindow()
 {
 
+}
+
+void CStockAutoWindow::UpdateAutoManagerStep(UINT traceStep, int loadProgress)
+{
+	CQtStockAgent* pStockAgent = (CQtStockAgent*)m_pStockAgent;
+	if (pStockAgent != NULL)
+		pStockAgent->UpdateAutoManagerStep(traceStep, loadProgress);
 }
 
 void CStockAutoWindow::OnInit()
@@ -64,17 +72,22 @@ void CStockAutoWindow::OnInit()
 	pSplitRight->setStretchFactor(0, 4);
 	pSplitRight->setStretchFactor(1, 3);
 	this->setCentralWidget(pSplitLeft);
+
+	m_pLoadingDialog = new CStockLoadingDialog(NULL);
+	m_pLoadingDialog->setFixedSize(350, 50);
+	m_pLoadingDialog->setObjectName("Stock_Loading_Dialog");
+
 }
 
 void CStockAutoWindow::RetranlateUi()
 {
 	if (m_pStockAgent != NULL)
 	{
-		connect(m_pStockAgent, SIGNAL(NotifyUiManagerStep()), this, SLOT(OnNotifyAutoManagerStep()));
-		connect(m_pStockAgent, SIGNAL(NotifyUiStockTrace()), this, SLOT(OnNotifyStockTrace()));
+		CQtStockAgent* pStockAgent = (CQtStockAgent* )m_pStockAgent;
+		connect(pStockAgent, SIGNAL(NotifyUiManagerLoadingProgress()), this, SLOT(OnNotifyAutoManagerLoadingProgress()));
+		connect(pStockAgent, SIGNAL(NotifyUiStockTrace()), this, SLOT(OnNotifyStockTrace()));
+		connect(this, SIGNAL(UpdateLoadingProgress(QString&, QString& )), m_pLoadingDialog, SLOT(OnUpdateLoadingProgress(QString&, QString&)));
 	}
-
-
 }
 
 BOOL CStockAutoWindow:: OnInitQtServerAndAgent()
@@ -159,8 +172,55 @@ void CStockAutoWindow::closeEvent(QCloseEvent * event)
 }
 
 
-void CStockAutoWindow::OnNotifyAutoManagerStep()
+void CStockAutoWindow::OnNotifyAutoManagerLoadingProgress()
 {
+	CQtStockAgent* pStockAgent = (CQtStockAgent*)m_pStockAgent;
+	QT_STOCK_LOADING_MANAGER loadingManager;
+
+	pStockAgent->GetAutoManagerLoading(&loadingManager);
+
+	QTextCodec* pCodec = QTextCodec::codecForLocale();
+	QString stat;
+	QString progress;
+
+	if (!m_pLoadingDialog->isVisible())
+		m_pLoadingDialog->exec();
+
+	switch (loadingManager.step)
+	{
+	default:
+	case STOCK_AUTO_MANAGER_STEP_NONE:
+		stat = pCodec->toUnicode(STOCK_LOADING_DIALOG_LAB_STAT_INIT);
+		break;
+
+	case STOCK_AUTO_MANAGER_STEP_LIST_INIT:
+		stat = pCodec->toUnicode(STOCK_LOADING_DIALOG_LAB_STAT_LIST_LOADING);
+		break;
+
+	case STOCK_AUTO_MANAGER_STEP_LIST_UPDATING:
+		stat = pCodec->toUnicode(STOCK_LOADING_DIALOG_LAB_STAT_LIST_UPDATING);
+		break;
+
+	case STOCK_AUTO_MANAGER_STEP_TRACELOG_LOADING:
+		stat = pCodec->toUnicode(STOCK_LOADING_DIALOG_LAB_STAT_TRACELOG_LOADING);
+		break;
+
+	case STOCK_AUTO_MANAGER_STEP_HISKLINE_UPDATING:
+		stat = pCodec->toUnicode(STOCK_LOADING_DIALOG_LAB_STAT_HISKLINE_UPDATING);
+		progress = QString::number(loadingManager.progress) + "%";
+		break;
+
+	case STOCK_AUTO_MANAGER_STEP_STOCK_TRACING:
+		stat = pCodec->toUnicode(STOCK_LOADING_DIALOG_LAB_STAT_STOCK_TRACING);
+		m_pLoadingDialog->close();
+		break;
+
+	case STOCK_AUTO_MANAGER_STEP_ERROR:
+		break;
+	}
+
+
+	emit UpdateLoadingProgress(stat, progress);
 
 }
 

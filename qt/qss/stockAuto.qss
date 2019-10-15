@@ -238,3 +238,13 @@ QWidget#Stock_His_Widget QMessageBox QLabel{
    min-height:50px;
    font-size: 15px;
 }
+
+QDialog#Stock_Loading_Dialog{
+     background-color: #FAF4FF;
+}
+
+QDialog#Stock_Loading_Dialog QLabel{
+    font-size: 25px;
+    text-align: center;
+    margin-left: 20px;
+}

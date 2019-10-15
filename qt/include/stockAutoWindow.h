@@ -10,6 +10,7 @@
 #include "stockHisWidget.h"
 #include "stockRealWidget.h"
 #include "stockTraceWidget.h"
+#include "stockLoadingDialog.h"
 #include "qtServerTask.h"
 #include "qtStockTraceDef.h"
 #include "qtObjectAgent.h"
@@ -22,17 +23,25 @@ class CStockAutoWindow : public QMainWindow
 public:
     CStockAutoWindow(QWidget *parent = Q_NULLPTR);
 	CStockAutoWindow::~CStockAutoWindow();
+
+
+public:
+	void UpdateAutoManagerStep(UINT traceStep, int loadProgress);
+
 private:
 	void OnInit();
 	void RetranlateUi();
 
 	BOOL OnInitQtServerAndAgent();
 
+signals:
+	void UpdateLoadingProgress(QString& stat, QString& progress);
+
 protected:
 	virtual void closeEvent(QCloseEvent * event);
 
 private slots:
-	void OnNotifyAutoManagerStep();
+	void OnNotifyAutoManagerLoadingProgress();
 	void OnNotifyStockTrace();
 
 private:
@@ -42,6 +51,7 @@ private:
 	CStockTraceWidget*	m_pTraceWidget;
 	CStockRealWidget*	m_pRealWidget;
 	CStockHisWidget*	m_pHisWidget;
+	CStockLoadingDialog*	m_pLoadingDialog;
 };
 
 #endif // !__STOCK_AUTO_WINDOW_H__
