@@ -52,6 +52,7 @@ private:
 	CStockRealWidget*	m_pRealWidget;
 	CStockHisWidget*	m_pHisWidget;
 	CStockLoadingDialog*	m_pLoadingDialog;
+	BOOL		m_bLoading;
 };
 
 #endif // !__STOCK_AUTO_WINDOW_H__

@@ -10,6 +10,8 @@
 #include "stockDataTask.h"
 #include "stockUpdateTask.h"
 
+#define	TRACE_MANAGER_TASK_EVENT_NAME_PREFIX	_T("event_traceman_")
+
 class CStockAutoWindow;
 class CStockAutoManager :public CMultiEventsTask
 {
@@ -26,9 +28,16 @@ public:
 
 protected:
 	void InitConfig();
+	void OnEventManager();
+	void ActiveManager();
+	void InactiveManager();
+
+	virtual int GetTaskEvent(DP_EVENT_ID* pEventsBuf, int maxCount)const;
+	virtual int GetTaskEventCount()const;
+	virtual void OnSubEventActive(UINT evnetNum);
 
 	virtual void OnExit();
-	UINT PreActive(UINT timeout);
+	virtual UINT PreActive(UINT timeout);
 	virtual BOOL CheckSelf();
 	virtual int OnEventActive(UINT cmd, void* param, int paramLen);
 	virtual BOOL OnEventComplete(UINT cmd, int result, void* param, int paramLen);
@@ -103,6 +112,7 @@ private:
 	STOCK_CALC_TRACE_NODE*			m_pCalcTraceBuf;
 	STOCKAUTO_CONFIG_TRACE			m_traceConfig;
 	CStockAutoWindow*				m_pAutoWindow;
+	DP_EVENT_ID						m_eventTraceMan;
 };
 
 inline CMultiEventsTask* CStockAutoManager::GetTaskData()

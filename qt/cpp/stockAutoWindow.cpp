@@ -23,16 +23,19 @@ extern CStockAutoManager g_autoManger;;
 CStockAutoWindow::CStockAutoWindow(QWidget *parent)
 	: QMainWindow(parent)
 {
+	m_bLoading = FALSE;
 	m_pServerTask = NULL;
 	m_pExitAgent = NULL;
 	m_pStockAgent = NULL;
+	m_pLoadingDialog = NULL;
 	OnInit();
 	RetranlateUi();
 }
 
 CStockAutoWindow::~CStockAutoWindow()
 {
-
+	if (m_pLoadingDialog != NULL)
+		delete m_pLoadingDialog;
 }
 
 void CStockAutoWindow::UpdateAutoManagerStep(UINT traceStep, int loadProgress)
@@ -76,7 +79,7 @@ void CStockAutoWindow::OnInit()
 	m_pLoadingDialog = new CStockLoadingDialog(NULL);
 	m_pLoadingDialog->setFixedSize(350, 50);
 	m_pLoadingDialog->setObjectName("Stock_Loading_Dialog");
-
+	m_pLoadingDialog->setModal(true);
 }
 
 void CStockAutoWindow::RetranlateUi()
@@ -111,11 +114,11 @@ BOOL CStockAutoWindow:: OnInitQtServerAndAgent()
 		if (!pExitAgent->Create(m_pServerTask))
 			break;
 
-		if (!pStockAgent->Create(m_pServerTask, g_autoManger.GetTaskData(), QT_STOCK_AGENT_UPDATE_TIMEOUT))
+		if (!pStockAgent->Create(m_pServerTask, &g_autoManger, QT_STOCK_AGENT_UPDATE_TIMEOUT))
 			break;
 
+		pStockAgent->Active();
 		connect(m_pServerTask, SIGNAL(finished()), m_pServerTask, SLOT(deleteLater()));
-
 		m_pExitAgent = pExitAgent;
 		m_pStockAgent = pStockAgent;
 		return TRUE;
@@ -149,6 +152,7 @@ void CStockAutoWindow::closeEvent(QCloseEvent * event)
 	{
 		if (m_pServerTask->isRunning())
 		{
+			m_pStockAgent->InActive();
 			m_pExitAgent->Active();
 			int waitTimes = QT_STOCK_SERVER_EXIT_WAIT_TIMEOUT / STOCK_AUTO_MANAGER_EXIT_CHECK_TIMEOUT;
 			while (waitTimes-- > 0)
@@ -183,8 +187,11 @@ void CStockAutoWindow::OnNotifyAutoManagerLoadingProgress()
 	QString stat;
 	QString progress;
 
-	if (!m_pLoadingDialog->isVisible())
-		m_pLoadingDialog->exec();
+	if (!m_bLoading)
+	{
+		m_bLoading = TRUE;
+		m_pLoadingDialog->show();
+	}
 
 	switch (loadingManager.step)
 	{
@@ -212,7 +219,7 @@ void CStockAutoWindow::OnNotifyAutoManagerLoadingProgress()
 
 	case STOCK_AUTO_MANAGER_STEP_STOCK_TRACING:
 		stat = pCodec->toUnicode(STOCK_LOADING_DIALOG_LAB_STAT_STOCK_TRACING);
-		m_pLoadingDialog->close();
+		m_pLoadingDialog->hide();
 		break;
 
 	case STOCK_AUTO_MANAGER_STEP_ERROR:

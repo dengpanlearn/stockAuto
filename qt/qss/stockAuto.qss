@@ -197,13 +197,15 @@ QWidget#Stock_His_Widget QHeaderView::section{
 }
 
 QWidget#Stock_His_Widget QTreeWidget::item {
-    min-width: 40px;
+    min-width: 50px;
     min-height:30px;
-    margin:5px;
     padding:0px;
-    font-size: 15px;
+    font-size: 13px;
+    margin:0px;
+    color:#CCFF00;
     background-color: #000000;
     border: 1px solid #00FF99;
+    text-align:center;
 }
 
 QWidget#Stock_His_Widget QTreeWidget::item:hover {

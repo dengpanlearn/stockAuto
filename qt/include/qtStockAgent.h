@@ -21,7 +21,7 @@ public:
 	CQtStockAgent(QObject *parent = NULL);
 	virtual ~CQtStockAgent();
 
-	BOOL Create(QThread* pServerObj, CMultiEventsTask* pDataTask, int timeoutMs);
+	BOOL Create(QThread* pServerObj, CMultiEventsTask* pManager, int timeoutMs);
 	void Close();
 
 public:
@@ -50,6 +50,7 @@ protected:
 	virtual BOOL OnInit();
 	virtual void OnActive();
 	virtual void OnTimeout();
+	virtual void OnSignalInActive();
 
 	enum
 	{
@@ -64,7 +65,7 @@ private:
 	DL_LIST				m_listTraceLog;
 	QT_STOCK_HISKLINE_QUERY_JOB*	m_pHisKLineQueryJob;
 	QT_STOCK_LOADING_MANAGER		m_loadingManager;
-
+	CMultiEventsTask*		m_pManager;
 	CMultiEventsTask*		m_pDataTask;
 };
 

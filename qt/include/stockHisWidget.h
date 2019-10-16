@@ -7,12 +7,13 @@
 
 #include <dp.h>
 #include <QWidget>
+#include <stockCalcDef.h>
 
+class QTreeWidgetItem;
 class QTreeWidget;
 class QPushButton;
 class QLineEdit;
 class CQtObjectAgent;
-
 
 class CStockHisWidget : public QWidget
 {
@@ -23,13 +24,18 @@ public:
 	~CStockHisWidget();
 
 
+
 signals:
 	void QueryStockHisKLine(QString& code);
 private:
 	void OnInit();
 	void Retranslate();
 
-
+private:
+	static void ShowHisKLineItem(QTreeWidgetItem* pItem, STOCK_CALC_TRACE_KLINE* pKLine);
+	void ShowHisKLine(int offset, int counts, STOCK_CALC_TRACE_KLINE* pKLine);
+	void DeleteUnusedKLineItem(int usedCounts);
+	
 
 private slots:
 	void OnHisKLineQueryClick(bool);
@@ -41,6 +47,7 @@ private:
 	QPushButton*		m_pBtnSearch;
 	QLineEdit*			m_pEditCodeName;
 	QTreeWidget*		m_pTreeHisKLine;
+	STOCK_CALC_TRACE_KLINE m_klineBuf[10];
 
 };
 

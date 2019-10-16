@@ -46,7 +46,6 @@ void CQtObjectAgent::OnSignalActive()
 	OnActive();
 }
 
-
 CQtExitAgent::CQtExitAgent(QObject *parent):CQtObjectAgent(parent)
 {
 }
@@ -104,24 +103,28 @@ void CQtTimeAgent::Close()
 
 }
 
+void CQtTimeAgent::InActive()
+{
+	emit SignalInactive();
+}
+
 BOOL CQtTimeAgent::OnInit()
 {
 	if (!CQtObjectAgent::OnInit())
 		return FALSE;
 
-	m_pTimer = new QTimer(this);
-	if (m_pTimer == NULL)
-		return FALSE;
-
-	connect(m_pTimer, SIGNAL(timeout()), this, SLOT(OnSignalTimeout()));
-	m_pTimer->setInterval(m_timeout);
-	m_pTimer->start();
+	
 	return TRUE;
 }
 
 void CQtTimeAgent::OnActive()
 {
+	m_pTimer = new QTimer(this);
 
+	connect(m_pTimer, SIGNAL(timeout()), this, SLOT(OnSignalTimeout()));
+	connect(this, SIGNAL(SignalInactive()), this, SLOT(OnSignalInActive()));
+	m_pTimer->setInterval(m_timeout);
+	m_pTimer->start();
 }
 
 void CQtTimeAgent::OnTimeout()
@@ -134,3 +137,13 @@ void CQtTimeAgent::OnSignalTimeout()
 	OnTimeout();
 }
 
+
+void CQtTimeAgent::OnSignalInActive()
+{
+	OnInActive();
+}
+
+void CQtTimeAgent::OnInActive()
+{
+	m_pTimer->stop();
+}

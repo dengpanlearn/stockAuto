@@ -25,12 +25,12 @@ public:
 	void Close();
 
 public:
-	void Active();
+	virtual void Active();
+	virtual void InActive() {}
 
 protected:
 	virtual BOOL OnInit();
 	virtual void OnActive()=0;
-	;
 
 signals:
 	void SignalActive();
@@ -71,13 +71,21 @@ public:
 	BOOL Create(QThread* pServerObj, int timeoutMs);
 	void Close();
 
+public:
+	virtual void InActive();
+
 protected:
 	virtual BOOL OnInit();
 	virtual void OnActive();
 	virtual void OnTimeout();
+	virtual void OnInActive();
 	
+signals:
+	void SignalInactive();
+
 private slots:
 	void OnSignalTimeout();
+	void OnSignalInActive();
 
 private:
 	QTimer*	m_pTimer;

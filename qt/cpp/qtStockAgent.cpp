@@ -5,6 +5,7 @@
 
 #include <stockCalcDef.h>
 #include <multiEventsTask.h>
+#include <stockAutoManager.h>
 #include "../include/qtStockTraceDef.h"
 #include "../include/qtGlobal.h"
 #include "../include/qtStockAgent.h"
@@ -12,6 +13,8 @@
 CQtStockAgent::CQtStockAgent(QObject* parent): CQtTimeAgent(parent)
 {
 	m_updateCmd = 0;
+	m_pManager = NULL;
+	m_pDataTask = NULL;
 	memset(&m_loadingManager, 0, sizeof(m_loadingManager));
 	dllInit(&m_listTraceLog);
 }
@@ -21,13 +24,13 @@ CQtStockAgent::~CQtStockAgent()
 	Close();
 }
 
-BOOL CQtStockAgent::Create(QThread* pServerObj, CMultiEventsTask* pDataTask, int timeoutMs)
+BOOL CQtStockAgent::Create(QThread* pServerObj, CMultiEventsTask* pManager, int timeoutMs)
 {
 	m_pHisKLineQueryJob = (QT_STOCK_HISKLINE_QUERY_JOB*)calloc(1, sizeof(QT_STOCK_HISKLINE_QUERY_JOB));
 	if (m_pHisKLineQueryJob == NULL)
 		return FALSE;
 
-	m_pDataTask = pDataTask;
+	m_pManager = pManager;
 	return CQtTimeAgent::Create(pServerObj, timeoutMs);
 }
 
@@ -68,7 +71,7 @@ BOOL CQtStockAgent::UpdateStockTrace(char const* pStockName, STOCK_MANAGER_TRACE
 
 void CQtStockAgent::GetAutoManagerLoading(QT_STOCK_LOADING_MANAGER* pLoadingInfo)
 {
-	CSingleLock lock(&m_cs);
+	CSingleLock lock(&m_cs, TRUE);
 	memcpy(pLoadingInfo, &m_loadingManager, sizeof(QT_STOCK_LOADING_MANAGER));
 }
 
@@ -103,7 +106,7 @@ int	CQtStockAgent:: GetStockHisKLine(int count, int offset, STOCK_CALC_TRACE_KLI
 	if (left > count)
 		left = count;
 
-	memcpy(pKLine, m_pHisKLineQueryJob->hisKLine, sizeof(STOCK_CALC_TRACE_KLINE)*left);
+	memcpy(pKLine, m_pHisKLineQueryJob->hisKLine+offset, sizeof(STOCK_CALC_TRACE_KLINE)*left);
 
 	return left;
 }
@@ -144,6 +147,8 @@ void CQtStockAgent::OnGetQueryHisKLine(QString& code)
 	m_pHisKLineQueryJob->hisCounts = 0;
 	m_pHisKLineQueryJob->jobRsult = 0;
 	QString2Char(code, m_pHisKLineQueryJob->code);
+	if (m_pDataTask == NULL)
+		m_pDataTask = ((CStockAutoManager*)m_pManager)->GetTaskData();
 
 	QT_STOCK_HISKLINE_QUERY_PARAM* pQueryParam = (QT_STOCK_HISKLINE_QUERY_PARAM* )m_pDataTask->AllocPktByEvent(STOCK_QT_EVENT_QUERY_STOCK_HISKLINE, sizeof(QT_STOCK_HISKLINE_QUERY_PARAM),
 		QtTaskEventComplete, NULL);
@@ -172,7 +177,7 @@ BOOL CQtStockAgent::OnInit()
 
 void CQtStockAgent::OnActive()
 {
-
+	CQtTimeAgent::OnActive();
 }
 
 void CQtStockAgent::OnTimeout()
@@ -194,4 +199,9 @@ void CQtStockAgent::OnTimeout()
 	if (!DLL_IS_EMPTY(&m_listTraceLog))
 		emit NotifyUiStockTrace();
 
+}
+
+void CQtStockAgent::OnSignalInActive()
+{
+	CQtTimeAgent::OnInActive();
 }
