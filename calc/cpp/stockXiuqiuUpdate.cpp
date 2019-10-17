@@ -33,7 +33,7 @@ BOOL CStockXiuQiuUpdate::Create(char const* pUpdateDir, char const* pStockListDb
 		return FALSE;
 	}
 
-	strncpy(m_szModuleDir, pModuleDir, sizeof(pModuleDir) - 1);
+	strncpy(m_szModuleDir, pModuleDir, sizeof(m_szModuleDir) - 1);
 	return TRUE;
 }
 
