@@ -112,12 +112,22 @@ QWidget#Stock_Trace_Widget_Cell QTreeWidget QHeaderView::section{
 QWidget#Stock_Trace_Widget_Cell QTreeWidget::item {
     min-width: 40px;
     min-height:30px;
-    margin:5px;
+    margin:0px;
     padding:0px;
     font-size: 15px;
     background-color: #000000;
     border: 1px solid #00FF99;
 }
+
+QWidget#Stock_Trace_Widget_Cell QTreeWidget QLabel {
+    min-width: 35px;
+    min-height:20px;
+    margin:1px;
+    padding:0px;
+    background-color: #FF3300;
+    border: 2px solid #FFFFFF;
+}
+
 
 QWidget#Stock_Trace_Widget_Cell QTreeWidget::item:hover {
     background-color: #FF0088;

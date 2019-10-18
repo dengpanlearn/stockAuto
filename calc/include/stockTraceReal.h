@@ -25,6 +25,7 @@ protected:
 	virtual UINT Next(DL_NODE* pNode);
 	virtual UINT DoTraceWork(STOCK_CALC_TRACE_NODE* pTraceNode);
 	virtual UINT DoTraceUpdate(STOCK_CALC_TRACE_NODE* pTraceNode);
+	virtual BOOL IsActiveManager();
 
 private:
 	BOOL DoPreparerHisKLine(STOCK_CALC_TRACE_NODE* pTraceNode, UINT& prepareStep);

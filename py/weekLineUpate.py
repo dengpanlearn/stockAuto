@@ -96,7 +96,7 @@ class WeekKLineUpdate:
         curSmaAbs = 0
         curSmaGain = 0
         rsiCycle = 7
-        lastClose = 0
+        lastClose = 0.1
         itemList =  data.get('item')
         columns = data.get('column')
 
@@ -111,6 +111,7 @@ class WeekKLineUpdate:
             
             for kline in itemList :
                 difClose = kline[closeIndex]-lastClose
+                kline[percentIndex]=difClose/lastClose
                 curSmaAbs += (math.fabs(difClose)-curSmaAbs)/rsiCycle
                 if (difClose > 0) :
                     curSmaGain += (difClose-curSmaGain)/rsiCycle
@@ -144,6 +145,7 @@ class WeekKLineUpdate:
         orgUrl = 'https://stock.xueqiu.com/v5/stock/chart/kline.json?symbol={stockNo}&begin={beginTime}&period=week&type=before&count={counts}&indicator=kline,ma'
         url = orgUrl.format(stockNo=stockNo, beginTime = beginTime, counts=counts)
         self.headers["Host"] = "stock.xueqiu.com"
+  
         try:
             response = self.session.get(url, verify=False, headers = self.headers)
         except (ReadTimeout, ConnectTimeout, ConnectionError, TooManyRedirects):
@@ -158,13 +160,14 @@ class WeekKLineUpdate:
         curSmaAbs = 0
         curSmaGain = 0
         rsiCycle = 7
-        lastClose = 0
+        lastClose = 0.1
         itemList =  data.get('item')
         columns = data.get('column')
 
         try:
             closeIndex = columns.index('close')
             timestampIndex = columns.index('timestamp')
+            percentIndex = columns.index('percent')
             columns.append('rsi')
             columns.append('time')
             for kline in itemList :
@@ -177,6 +180,7 @@ class WeekKLineUpdate:
                 kline.append(curSmaGain*100/curSmaAbs)
                 kline[timestampIndex] =  kline[timestampIndex]//1000
                 timeVal = time.asctime(time.localtime(kline[timestampIndex]))
+                kline[percentIndex] = difClose*100/lastClose
                 kline.append(timeVal)
                 lastClose = kline[closeIndex]
                 
@@ -198,5 +202,4 @@ if __name__ == '__main__':
        
         ret = weekKLine.getCurWeekKLine('SZ300001')
         """
-        ret = weekKLine.getAndUpdateWeekKLine('SZ300600',1567872000, -1)
-        print(ret)
+        ret = weekKLine.getCurWeekKLine('SH900905')

@@ -2,6 +2,7 @@
 *stockTraceBase.cpp
 */
 
+#include <qtStockTraceDef.h>
 #include "../include/stockTraceBase.h"
 
 CStockTraceBase::CStockTraceBase(CStockAutoManager* pAutoManager, DL_LIST* pTraceList)
@@ -78,7 +79,8 @@ void CStockTraceBase::Trace()
 		m_workStep = Next(m_pCurNode);
 	}
 	
-	
+	if (IsActiveManager())
+		m_pAutoManager->ActiveManager();
 }
 
 void CStockTraceBase::AddTraceStock(STOCK_CALC_TRACE_NODE* pTraceNode)
@@ -93,8 +95,33 @@ void CStockTraceBase::TraceStock(STOCK_CALC_TRACE_NODE* pTraceNode)
 
 }
 
+void CStockTraceBase::UpdateStockTraceStat(int stockIdx, char const* pCode, UINT stat)
+{
+	m_pAutoManager->UpdateStockTraceStat(stockIdx, pCode, stat);
+}
+
+void CStockTraceBase::InitStockTrace(STOCK_CALC_TRACE_NODE* pTraceNode)
+{
+	STOCK_MANAGER_TRACE_LOG* pTraceLog = pTraceNode->pTraceLog;
+	if (pTraceLog->traceStep == CALC_STOCK_TRADE_STEP_CHECK_HIGH)
+	{
+		UpdateStockTraceStat(pTraceNode->stockIdx, pTraceLog->code, QT_STOCK_TRACE_LOG_STAT_RAISE_BALANCED | QT_STOCK_TRACE_LOG_STAT_ADD);
+	}
+	else if (pTraceLog->traceStep == CALC_STOCK_TRADE_STEP_WAIT_BUY)
+	{
+		UpdateStockTraceStat(pTraceNode->stockIdx, pTraceLog->code, QT_STOCK_TRACE_LOG_STAT_HIGH_REACHED | QT_STOCK_TRACE_LOG_STAT_ADD);
+	}
+	else if (pTraceLog->traceStep == CALC_STOCK_TRADE_STEP_WAIT_SELL)
+	{
+		UpdateStockTraceStat(pTraceNode->stockIdx, pTraceLog->code, QT_STOCK_TRACE_LOG_STAT_BUYED | QT_STOCK_TRACE_LOG_STAT_ADD);
+	}
+}
+
 void CStockTraceBase::OnGetKLineResp(STOCK_CALC_GET_HISKLINE_RESP* pGetKLineResp)
 {
+	if (m_jobGetHisKine.jobStep != TASK_EVENT_JOB_STEP_WAITING_RESP)
+		return;
+
 	if (pGetKLineResp->respResult < 0)
 	{
 		m_jobGetHisKine.jobStep = TASK_EVENT_JOB_STEP_COMPLETED_FAIL;
@@ -104,6 +131,7 @@ void CStockTraceBase::OnGetKLineResp(STOCK_CALC_GET_HISKLINE_RESP* pGetKLineResp
 		m_jobGetHisKine.hisCounts = pGetKLineResp->respResult;
 		m_jobGetHisKine.jobStep = TASK_EVENT_JOB_STEP_COMPLETED_OK;
 	}
+	m_pAutoManager->ActiveManager();
 }
 
 BOOL CStockTraceBase::OnGetKLineComplete(int result, void* param, int paramLen)
@@ -121,6 +149,9 @@ BOOL CStockTraceBase::OnGetKLineComplete(int result, void* param, int paramLen)
 
 void CStockTraceBase::OnUpdateTraceLogResp(STOCK_CALC_UPDATE_TRACELOG_RESP* pUpdateTraceLogResp)
 {
+	if (m_jobUpdateTraceLog.jobStep != TASK_EVENT_JOB_STEP_WAITING_RESP)
+		return;
+
 	if (pUpdateTraceLogResp->respResult < 0)
 	{
 		m_jobUpdateTraceLog.jobStep = TASK_EVENT_JOB_STEP_COMPLETED_FAIL;
@@ -129,6 +160,8 @@ void CStockTraceBase::OnUpdateTraceLogResp(STOCK_CALC_UPDATE_TRACELOG_RESP* pUpd
 	{
 		m_jobUpdateTraceLog.jobStep = TASK_EVENT_JOB_STEP_COMPLETED_OK;
 	}
+
+	m_pAutoManager->ActiveManager();
 }
 
 BOOL CStockTraceBase::OnUpdateTraceLogComplete(int result, void* param, int paramLen)
@@ -146,6 +179,9 @@ BOOL CStockTraceBase::OnUpdateTraceLogComplete(int result, void* param, int para
 
 void CStockTraceBase::OnGetCurKLineResp(STOCK_CALC_GET_CUR_HISKLINE_RESP* pGetCurKLineResp)
 {
+	if (m_jobGetCurHisKLine.jobStep != TASK_EVENT_JOB_STEP_WAITING_RESP)
+		return;
+
 	if (pGetCurKLineResp->respResult < 0)
 	{
 		m_jobGetCurHisKLine.jobStep = TASK_EVENT_JOB_STEP_COMPLETED_FAIL;
@@ -154,6 +190,8 @@ void CStockTraceBase::OnGetCurKLineResp(STOCK_CALC_GET_CUR_HISKLINE_RESP* pGetCu
 	{
 		m_jobGetCurHisKLine.jobStep = TASK_EVENT_JOB_STEP_COMPLETED_OK;
 	}
+
+	m_pAutoManager->ActiveManager();
 }
 
 BOOL CStockTraceBase::OnGetCurKLineComplete(int result, void* param, int paramLen)
@@ -328,6 +366,12 @@ UINT CStockTraceBase::DoTraceUpdate(STOCK_CALC_TRACE_NODE* pTraceNode)
 	}
 
 	return nextStep;
+}
+
+BOOL CStockTraceBase::IsActiveManager()
+{
+	return !((m_jobGetHisKine.jobStep == TASK_EVENT_JOB_STEP_WAITING_RESP) || (m_jobUpdateTraceLog.jobStep == TASK_EVENT_JOB_STEP_WAITING_RESP)
+		|| (m_jobGetCurHisKLine.jobStep == TASK_EVENT_JOB_STEP_WAITING_RESP));
 }
 
 BOOL CStockTraceBase::IsReachHigh(STOCK_CALC_TRACE_KLINE const* pStart, STOCK_CALC_TRACE_KLINE const* pCur)

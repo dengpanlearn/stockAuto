@@ -25,12 +25,15 @@ public:
 public:
 	inline CMultiEventsTask* GetTaskData();
 	inline CMultiEventsTask* GetTaskUpdate();
+	void ActiveManager();
+	void InactiveManager();
+
+	BOOL UpdateStockTraceStat(int stockIdx, char const* pStockCode, UINT updateStat);
 
 protected:
 	void InitConfig();
 	void OnEventManager();
-	void ActiveManager();
-	void InactiveManager();
+
 
 	virtual int GetTaskEvent(DP_EVENT_ID* pEventsBuf, int maxCount)const;
 	virtual int GetTaskEventCount()const;

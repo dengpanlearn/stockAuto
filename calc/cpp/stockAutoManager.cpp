@@ -198,6 +198,11 @@ void CStockAutoManager::InactiveManager()
 	dpEventReset(m_eventTraceMan);
 }
 
+BOOL CStockAutoManager::UpdateStockTraceStat(int stockIdx, char const* pStockCode, UINT updateStat)
+{
+	return m_pAutoWindow->UpdateStockTrace(m_pJobList->codeName[stockIdx].name, pStockCode, updateStat);
+}
+
 
 int CStockAutoManager::GetTaskEvent(DP_EVENT_ID* pEventsBuf, int maxCount)const
 {
@@ -251,8 +256,6 @@ UINT CStockAutoManager::PreActive(UINT timeout)
 
 BOOL CStockAutoManager::CheckSelf()
 {
-	if (m_managerStep == STOCK_AUTO_MANAGER_STEP_STOCK_TRACING)
-		OnStockAutoManagerTrace();
 	return TRUE;
 }
 

@@ -3,6 +3,7 @@
 */
 
 #include <qdatetime.h>
+#include <qtStockTraceDef.h>
 #include "../include/stockTraceReal.h"
 
 CStockTraceReal::CStockTraceReal(CStockAutoManager* pAutoManager, DL_LIST* pTraceList):CStockTraceBase(pAutoManager, pTraceList)
@@ -47,6 +48,7 @@ BOOL CStockTraceReal::IsHisKLineRsiContinueLow(STOCK_CALC_TRACE_KLINE const* pHi
 void CStockTraceReal::InitStockTrace(STOCK_CALC_TRACE_NODE* pTraceNode)
 {
 	m_realTraceStep = STOCK_TRACE_REAL_PRPARE_STEP_NONE;
+	CStockTraceBase::InitStockTrace(pTraceNode);
 }
 
 UINT CStockTraceReal::DoPrepareWork(STOCK_CALC_TRACE_NODE* pTraceNode)
@@ -59,6 +61,7 @@ UINT CStockTraceReal::DoPrepareWork(STOCK_CALC_TRACE_NODE* pTraceNode)
 		{
 	_NEXT_END:
 			nextStep = STOCK_TRACE_STEP_END;
+			m_realTraceStep = STOCK_TRACE_REAL_PRPARE_STEP_NONE;
 			break;
 		}
 
@@ -131,7 +134,7 @@ BOOL CStockTraceReal::DoPreparerHisKLine(STOCK_CALC_TRACE_NODE* pTraceNode, UINT
 		break;
 	}
 
-	return (STOCK_TRACE_REAL_PRPARE_STEP_NONE == prepareStep);
+	return (STOCK_TRACE_REAL_PRPARE_STEP_NONE != prepareStep);
 
 }
 
@@ -188,8 +191,9 @@ BOOL CStockTraceReal::DoTraceRealWork(STOCK_CALC_TRACE_NODE* pTraceNode)
 		if (IsReachHigh(pHisKLine+ hisKLineCounts-1, m_iReachHighRanges, pCurKLine))
 		{
 			pTraceLog->traceStep = CALC_STOCK_TRADE_STEP_WAIT_BUY;
-			pTraceLog->highTime = time(NULL);
+			pTraceLog->highTime = pCurKLine->timeVal;
 			pTraceLog->fHighVal = pCurKLine->fHigh;
+			UpdateStockTraceStat(pTraceNode->stockIdx, pTraceLog->code, QT_STOCK_TRACE_LOG_STAT_HIGH_REACHED |QT_STOCK_TRACE_LOG_STAT_MODIFY);
 		}
 		else
 		{
@@ -198,6 +202,7 @@ BOOL CStockTraceReal::DoTraceRealWork(STOCK_CALC_TRACE_NODE* pTraceNode)
 			__TRACE_INIT:
 				pTraceLog->traceStep = CALC_STOCK_TRADE_STEP_CHECK_BALANCE_RAISE;
 				pTraceLog->raiseBalanceCheckTimes = 0;
+				UpdateStockTraceStat(pTraceNode->stockIdx, pTraceLog->code, QT_STOCK_TRACE_LOG_STAT_DEL);
 			}
 		}
 	}
@@ -208,6 +213,10 @@ BOOL CStockTraceReal::DoTraceRealWork(STOCK_CALC_TRACE_NODE* pTraceNode)
 			pTraceLog->traceStep = CALC_STOCK_TRADE_STEP_WAIT_SELL;
 			pTraceLog->buyTime = time(NULL);
 			pTraceLog->fBuyVal = pCurKLine->fClose;
+			UpdateStockTraceStat(pTraceNode->stockIdx, pTraceLog->code, QT_STOCK_TRACE_LOG_STAT_RSI_REACHED | QT_STOCK_TRACE_LOG_STAT_MODIFY);
+			// 没有买入接口，
+			UpdateStockTraceStat(pTraceNode->stockIdx, pTraceLog->code, QT_STOCK_TRACE_LOG_STAT_BUYING | QT_STOCK_TRACE_LOG_STAT_MODIFY);
+			UpdateStockTraceStat(pTraceNode->stockIdx, pTraceLog->code, QT_STOCK_TRACE_LOG_STAT_BUYED | QT_STOCK_TRACE_LOG_STAT_MODIFY);
 		}
 		else
 		{
@@ -263,3 +272,7 @@ UINT CStockTraceReal::DoTraceUpdate(STOCK_CALC_TRACE_NODE* pTraceNode)
 	return CStockTraceBase::DoTraceUpdate(pTraceNode);
 }
 
+BOOL CStockTraceReal::IsActiveManager()
+{
+	return CStockTraceBase::IsActiveManager();
+}

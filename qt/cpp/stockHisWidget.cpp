@@ -42,7 +42,7 @@ void CStockHisWidget::OnInit()
 	char const* header[] = {
 		STOCK_HIS_WIDGET_TREE_HISKLINE_NAME_DATE, STOCK_HIS_WIDGET_TREE_HISKLINE_NAME_HIGH, STOCK_HIS_WIDGET_TREE_HISKLINE_NAME_LOW,
 		STOCK_HIS_WIDGET_TREE_HISKLINE_NAME_CLOSE, STOCK_HIS_WIDGET_TREE_HISKLINE_NAME_OPEN, STOCK_HIS_WIDGET_TREE_HISKLINE_NAME_MA10,
-		STOCK_HIS_WIDGET_TREE_HISKLINE_NAME_RSI
+		STOCK_HIS_WIDGET_TREE_HISKLINE_NAME_RSI,STOCK_HIS_WIDGET_TREE_HISKLINE_NAME_PERCENT
 	};
 
 	for (int i = 0; i < STOCK_HIS_WIDGET_TREE_HISKLINE_INDEX_NUM; i++)
@@ -77,23 +77,27 @@ void CStockHisWidget::ShowHisKLineItem(QTreeWidgetItem* pItem, STOCK_CALC_TRACE_
 	QString date = dateVal.toString("yyyy-MM-d");
 	pItem->setText(STOCK_HIS_WIDGET_TREE_HISKLINE_INDEX_DATE, date);
 
-	QString highVal = QString::number(pKLine->fHigh, 'g', 3);
+	QString highVal = QString::number(pKLine->fHigh, 'g', 4);
 	pItem->setText(STOCK_HIS_WIDGET_TREE_HISKLINE_INDEX_HIGH, highVal);
 
-	QString lowVal = QString::number(pKLine->fLow, 'g', 3);
+	QString lowVal = QString::number(pKLine->fLow, 'g', 4);
 	pItem->setText(STOCK_HIS_WIDGET_TREE_HISKLINE_INDEX_LOW, lowVal);
 
-	QString closeVal = QString::number(pKLine->fClose, 'g', 3);
+	QString closeVal = QString::number(pKLine->fClose, 'g', 4);
 	pItem->setText(STOCK_HIS_WIDGET_TREE_HISKLINE_INDEX_CLOSE, closeVal);
 
-	QString openVal = QString::number(pKLine->fOpen, 'g', 3);
+	QString openVal = QString::number(pKLine->fOpen, 'g', 4);
 	pItem->setText(STOCK_HIS_WIDGET_TREE_HISKLINE_INDEX_OPEN, openVal);
 
-	QString ma10Val = QString::number(pKLine->fMa10, 'g', 3);
+	QString ma10Val = QString::number(pKLine->fMa10, 'g', 4);
 	pItem->setText(STOCK_HIS_WIDGET_TREE_HISKLINE_INDEX_MA10, ma10Val);
 
-	QString rsiVal = QString::number(pKLine->fRsi7, 'g', 3);
+	QString rsiVal = QString::number(pKLine->fRsi7, 'g', 4);
 	pItem->setText(STOCK_HIS_WIDGET_TREE_HISKLINE_INDEX_RSI, rsiVal);
+
+
+	QString perVal = QString::number(pKLine->fPercent, 'g', 4);
+	pItem->setText(STOCK_HIS_WIDGET_TREE_HISKLINE_INDEX_PERCENT, perVal);
 }
 
 void CStockHisWidget::ShowHisKLine(int offset, int counts, STOCK_CALC_TRACE_KLINE* pKLine)

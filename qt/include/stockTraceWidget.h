@@ -12,18 +12,29 @@ class CQtObjectAgent;
 class QTreeWidget;
 class QWidget;
 class QSplitter;
+class QTreeWidgetItem;
 
 class CStockTraceWidget : public QWidget
 {
 	Q_OBJECT
 
 public:
-	CStockTraceWidget(QWidget *parent);
+	CStockTraceWidget(QWidget *parent, CQtObjectAgent* pExitAgent, CQtObjectAgent* pStockAgent);
 	~CStockTraceWidget();
 
 private:
 	void OnInit();
 	void Retranslate();
+
+private slots:
+	void OnNotifyStockTrace();
+
+private:
+	void AddTraceLogItem(char const* pCode, char const* pName, UINT stat);
+	void ModifyTraceLogItem(char const* pCode, char const* pName, UINT stat);
+	void DeleteTraceLogItem(char const* pCode, char const* pName);
+
+	QTreeWidgetItem* FindTraceLogItem(QTreeWidget* pTreeWidget, char const* pCode, char const* pName);
 
 private:
 	CQtObjectAgent*		m_pExitAgent;

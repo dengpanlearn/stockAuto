@@ -26,7 +26,7 @@ public:
 
 public:
 	void UpdateAutoManagerStep(UINT traceStep, int loadProgress);
-	BOOL UpdateStockTrace(char const* pStockName, STOCK_MANAGER_TRACE_LOG* pTraceLog, UINT updateStat);
+	BOOL UpdateStockTrace(char const* pStockName, char const* pStockCode, UINT updateStat);
 
 	void GetAutoManagerLoading(QT_STOCK_LOADING_MANAGER* pLoadingInfo);
 	BOOL GetAckStockTrace(QT_STOCK_TRACE_LOG* pTraceLog);

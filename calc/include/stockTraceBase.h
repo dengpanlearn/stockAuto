@@ -47,12 +47,15 @@ protected:
 	static BOOL IsReachHigh(STOCK_CALC_TRACE_KLINE const* pStart, STOCK_CALC_TRACE_KLINE const* pCur);
 	static BOOL IsReachHigh(STOCK_CALC_TRACE_KLINE const* pKLineEnd, int klines, STOCK_CALC_TRACE_KLINE const* pCurKLine);
 	void TraceStock(STOCK_CALC_TRACE_NODE* pTraceNode);
-	virtual void InitStockTrace(STOCK_CALC_TRACE_NODE* pTraceNode) = 0;
+	void UpdateStockTraceStat(int stockIdx, char const* pCode, UINT stat);
+
+	virtual void InitStockTrace(STOCK_CALC_TRACE_NODE* pTraceNode);
 	virtual UINT DoPrepareWork(STOCK_CALC_TRACE_NODE* pTraceNode);
 	virtual BOOL CheckForPrepare(STOCK_CALC_TRACE_NODE* pTraceNode);
 	virtual UINT Next(DL_NODE* pNode);
 	virtual UINT DoTraceWork(STOCK_CALC_TRACE_NODE* pTraceNode);
 	virtual UINT DoTraceUpdate(STOCK_CALC_TRACE_NODE* pTraceNode);
+	virtual BOOL IsActiveManager();
 	enum
 	{
 		STOCK_TRACE_WORK_WAIT_RESP = 0x01,

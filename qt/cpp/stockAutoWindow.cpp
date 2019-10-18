@@ -45,6 +45,15 @@ void CStockAutoWindow::UpdateAutoManagerStep(UINT traceStep, int loadProgress)
 		pStockAgent->UpdateAutoManagerStep(traceStep, loadProgress);
 }
 
+BOOL CStockAutoWindow::UpdateStockTrace(char const* pStockName, char const* pStockCode, UINT updateStat)
+{
+	CQtStockAgent* pStockAgent = (CQtStockAgent*)m_pStockAgent;
+	if (pStockAgent != NULL)
+		return pStockAgent->UpdateStockTrace(pStockName, pStockCode, updateStat);
+	else
+		return TRUE;
+}
+
 void CStockAutoWindow::OnInit()
 {
 	OnInitQtServerAndAgent();
@@ -56,7 +65,7 @@ void CStockAutoWindow::OnInit()
 		qssFile.close();
 	}
 
-	m_pTraceWidget = new CStockTraceWidget(NULL);
+	m_pTraceWidget = new CStockTraceWidget(NULL,m_pExitAgent, m_pStockAgent);
 	m_pRealWidget = new CStockRealWidget(NULL);
 
 	m_pHisWidget = new CStockHisWidget(NULL, m_pExitAgent, m_pStockAgent);
@@ -88,7 +97,6 @@ void CStockAutoWindow::RetranlateUi()
 	{
 		CQtStockAgent* pStockAgent = (CQtStockAgent* )m_pStockAgent;
 		connect(pStockAgent, SIGNAL(NotifyUiManagerLoadingProgress()), this, SLOT(OnNotifyAutoManagerLoadingProgress()));
-		connect(pStockAgent, SIGNAL(NotifyUiStockTrace()), this, SLOT(OnNotifyStockTrace()));
 		connect(this, SIGNAL(UpdateLoadingProgress(QString&, QString& )), m_pLoadingDialog, SLOT(OnUpdateLoadingProgress(QString&, QString&)));
 	}
 }
@@ -228,10 +236,5 @@ void CStockAutoWindow::OnNotifyAutoManagerLoadingProgress()
 
 
 	emit UpdateLoadingProgress(stat, progress);
-
-}
-
-void CStockAutoWindow::OnNotifyStockTrace()
-{
 
 }

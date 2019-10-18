@@ -51,7 +51,7 @@ void CQtStockAgent::UpdateAutoManagerStep(UINT traceStep, int loadProgress)
 	m_loadingManager.progress = loadProgress;
 }
 
-BOOL CQtStockAgent::UpdateStockTrace(char const* pStockName, STOCK_MANAGER_TRACE_LOG* pTraceLog, UINT updateStat)
+BOOL CQtStockAgent::UpdateStockTrace(char const* pStockName,  char const* pStockCode, UINT updateStat)
 {
 	QT_STOCK_TRACE_LOG_NODE* pTraceLogNode = (QT_STOCK_TRACE_LOG_NODE*)calloc(sizeof(QT_STOCK_TRACE_LOG_NODE), 1);
 	if (pTraceLogNode == NULL)
@@ -59,11 +59,11 @@ BOOL CQtStockAgent::UpdateStockTrace(char const* pStockName, STOCK_MANAGER_TRACE
 
 	pTraceLogNode->traceLogVal.stat = updateStat;
 	strncpy(pTraceLogNode->traceLogVal.stockName, pStockName, STOCK_CODE_NAME_MAX);
-	memcpy(&pTraceLogNode->traceLogVal.traceLog, pTraceLog, sizeof(pTraceLog));
+	strncpy(pTraceLogNode->traceLogVal.code, pStockCode, sizeof(pTraceLogNode->traceLogVal.code)-1);
 
 	CSingleLock lock(&m_cs, TRUE);
 	m_updateCmd |= QT_STOCK_AGENT_UPDATE_STOCK_TRACE;
-	dllInsert(&m_listTraceLog, NULL, &pTraceLogNode->node);
+	dllAdd(&m_listTraceLog,&pTraceLogNode->node);
 
 	return TRUE;
 }

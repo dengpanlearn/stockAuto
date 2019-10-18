@@ -27,6 +27,7 @@ public:
 
 public:
 	void UpdateAutoManagerStep(UINT traceStep, int loadProgress);
+	BOOL UpdateStockTrace(char const* pStockName, char const* pStockCode, UINT updateStat);
 
 private:
 	void OnInit();
@@ -42,7 +43,6 @@ protected:
 
 private slots:
 	void OnNotifyAutoManagerLoadingProgress();
-	void OnNotifyStockTrace();
 
 private:
 	CQtServerTask*	m_pServerTask;
