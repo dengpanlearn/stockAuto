@@ -44,7 +44,7 @@ protected:
 	virtual BOOL CheckSelf();
 	virtual int OnEventActive(UINT cmd, void* param, int paramLen);
 	virtual BOOL OnEventComplete(UINT cmd, int result, void* param, int paramLen);
-
+	virtual void OnTimeout();
 
 private:
 	void InitStockTraceByLog(STOCK_MANAGER_JOB_TRACELOG_LOAD* pJobTraceLog, STOCK_MANAGER_JOB_LIST* pJobList);

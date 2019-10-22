@@ -206,13 +206,14 @@ BOOL CStockTraceWeek::DoTraceWeekWork(STOCK_CALC_TRACE_NODE* pTraceNode)
 			STOCK_CALC_TRACE_KLINE const* pCalcHighStart = pStartTraceKLine - m_iReachHighRanges;
 			if (IsReachHigh((pCalcHighStart <pTraceKLine)? pTraceKLine: pCalcHighStart, pStartTraceKLine))
 			{
-				pTraceLog->highTime = pCalcHighStart->timeVal;
+				pTraceLog->highTime = pStartTraceKLine->timeVal;
+				pTraceLog->fHighVal = pStartTraceKLine->fHigh;
 				pTraceLog->traceStep = CALC_STOCK_TRADE_STEP_WAIT_BUY;
 				UpdateStockTraceStat(pTraceNode->stockIdx, pTraceLog->code, QT_STOCK_TRACE_LOG_STAT_HIGH_REACHED | QT_STOCK_TRACE_LOG_STAT_MODIFY);
 				continue;
 			}
 
-			if (!CALC_IN_DEADZONE(pStartTraceKLine->fPercent, m_fRaisePercent))
+			if (!CALC_IN_DEADZONE(pStartTraceKLine->fPercent, 10))
 			{
 			__TRACE_INIT:
 				pTraceLog->raiseBalanceCheckTimes = 0;
@@ -235,7 +236,7 @@ BOOL CStockTraceWeek::DoTraceWeekWork(STOCK_CALC_TRACE_NODE* pTraceNode)
 
 			QDate curDate = QDateTime::fromTime_t(pStartTraceKLine->timeVal).date();
 
-			if (rsiCheckEndForBuy >= curDate)
+			if (rsiCheckEndForBuy <= curDate)
 				goto __TRACE_INIT;
 
 		}

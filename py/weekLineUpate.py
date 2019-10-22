@@ -111,7 +111,7 @@ class WeekKLineUpdate:
             
             for kline in itemList :
                 difClose = kline[closeIndex]-lastClose
-                kline[percentIndex]=difClose/lastClose
+                kline[percentIndex]=(difClose*100)/lastClose
                 curSmaAbs += (math.fabs(difClose)-curSmaAbs)/rsiCycle
                 if (difClose > 0) :
                     curSmaGain += (difClose-curSmaGain)/rsiCycle

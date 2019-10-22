@@ -346,6 +346,16 @@ BOOL CStockAutoManager::OnEventComplete(UINT cmd, int result, void* param, int p
 	return re;
 }
 
+void CStockAutoManager::OnTimeout()
+{
+	if (m_pTraceReal != NULL)
+	{
+		m_pTraceReal->Trace();
+	}
+
+	return CMultiEventsTask::OnTimeout();
+}
+
 void CStockAutoManager::InitStockTraceByLog(STOCK_MANAGER_JOB_TRACELOG_LOAD* pJobTraceLog, STOCK_MANAGER_JOB_LIST* pJobList)
 {
 	int listSize = pJobList->stockCounts;
@@ -913,10 +923,6 @@ UINT CStockAutoManager::OnStockAutoManagerTrace()
 		m_pTraceWeek->Trace();
 	}
 
-	if (m_pTraceReal != NULL)
-	{
-		m_pTraceReal->Trace();
-	}
 
 	return nextStep;
 }
