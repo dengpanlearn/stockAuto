@@ -197,7 +197,7 @@ BOOL CStockTraceReal::DoTraceRealWork(STOCK_CALC_TRACE_NODE* pTraceNode)
 		}
 		else
 		{
-			if (!CALC_IN_DEADZONE(pCurKLine->fPercent, 10))
+			if (!CALC_IN_DEADZONE(pCurKLine->fPercent, m_fRaisePercent))
 			{
 			__TRACE_INIT:
 				pTraceLog->traceStep = CALC_STOCK_TRADE_STEP_CHECK_BALANCE_RAISE;

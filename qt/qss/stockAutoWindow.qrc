@@ -1,5 +1,6 @@
 <RCC>
     <qresource prefix="/CStockAutoWindow">
         <file>stockAuto.qss</file>
+        <file>waitting.gif</file>
     </qresource>
 </RCC>

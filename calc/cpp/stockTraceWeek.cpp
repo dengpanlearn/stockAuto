@@ -213,7 +213,7 @@ BOOL CStockTraceWeek::DoTraceWeekWork(STOCK_CALC_TRACE_NODE* pTraceNode)
 				continue;
 			}
 
-			if (!CALC_IN_DEADZONE(pStartTraceKLine->fPercent, 10))
+			if (!CALC_IN_DEADZONE(pStartTraceKLine->fPercent, m_fRaisePercent))
 			{
 			__TRACE_INIT:
 				pTraceLog->raiseBalanceCheckTimes = 0;

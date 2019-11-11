@@ -8,6 +8,7 @@
 #include <qmessagebox.h>
 #include <qdatetime.h>
 #include <qmetatype.h>
+#include "../include/qtWaittingDialog.h"
 #include "../include/qtStockAgent.h"
 #include "../include/qtResourceDef.h"
 #include "../include/stockHisWidget.h"
@@ -17,6 +18,7 @@ CStockHisWidget::CStockHisWidget(QWidget *parent, CQtObjectAgent* pExitAgent, CQ
 {
 	m_pExitAgent = pExitAgent;
 	m_pStockAgent = pStockAgent;
+	m_pWaittingDialog = NULL;
 	OnInit();
 	Retranslate();
 }
@@ -157,6 +159,13 @@ void CStockHisWidget::OnHisKLineQueryResponse()
 
 
 	DeleteUnusedKLineItem(offset);
+	if (m_pWaittingDialog != NULL)
+	{
+		m_pWaittingDialog->close();
+		delete m_pWaittingDialog;
+		m_pWaittingDialog = NULL;
+	}
+
 	if (ret < 0)
 	{
 		QMessageBox msgBox;
@@ -188,6 +197,11 @@ void CStockHisWidget::OnHisKLineQueryClick(bool check)
 	}
 	else 
 	{
+
+		m_pWaittingDialog = new CQtWaitting(this);
+		m_pWaittingDialog->setObjectName("Waitting_Dialog");
 		emit QueryStockHisKLine(code);
+		
+		m_pWaittingDialog->exec();
 	}
 }

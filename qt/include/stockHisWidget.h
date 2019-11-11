@@ -14,6 +14,7 @@ class QTreeWidget;
 class QPushButton;
 class QLineEdit;
 class CQtObjectAgent;
+class CQtWaitting;
 
 class CStockHisWidget : public QWidget
 {
@@ -47,6 +48,7 @@ private:
 	QPushButton*		m_pBtnSearch;
 	QLineEdit*			m_pEditCodeName;
 	QTreeWidget*		m_pTreeHisKLine;
+	CQtWaitting*		m_pWaittingDialog;
 	STOCK_CALC_TRACE_KLINE m_klineBuf[10];
 
 };
