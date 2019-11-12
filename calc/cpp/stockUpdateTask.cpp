@@ -4,6 +4,8 @@
 
 #include "../include/stockCalcDef.h"
 #include "../include/stockXueqiuUpdate.h"
+#include <qtStockAgent.h>
+#include <qtStockTraceDef.h>
 #include "../include/stockUpdateTask.h"
 
 CStockUpdateTask::CStockUpdateTask()
@@ -67,6 +69,7 @@ int CStockUpdateTask::OnEventActive(UINT cmd, void* param, int paramLen)
 	{
 		STOCK_CALC_UPDATE_HISKLINE* pHisKLine;
 		STOCK_CALC_GET_CUR_HISKLINE* pCurHisKLine;
+		QT_STOCK_REALKLINE_QUERY_PARAM* pQueryRealKLine;
 	};
 	pHisKLine  = (STOCK_CALC_UPDATE_HISKLINE*)param;
 
@@ -82,6 +85,14 @@ int CStockUpdateTask::OnEventActive(UINT cmd, void* param, int paramLen)
 
 	case STOCK_CALC_EVENT_GET_CUR_STOCK_HISKLINE:
 		result = m_pStockUpdate->GetLatestKLine(pCurHisKLine->code, pCurHisKLine->pCurKLine);
+		break;
+
+	case STOCK_QT_EVENT_QUERY_STOCK_REALKLINE:
+		result = m_pStockUpdate->GetLatestKLine(pQueryRealKLine->code, pQueryRealKLine->pRealKLineBuf);
+		break;
+
+	default:
+		result = FALSE;
 		break;
 	}
 

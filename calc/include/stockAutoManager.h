@@ -29,7 +29,7 @@ public:
 	void InactiveManager();
 
 	BOOL UpdateStockTraceStat(int stockIdx, char const* pStockCode, UINT updateStat);
-
+	const char* GetStockNameByCode(const char* pCode);
 protected:
 	void InitConfig();
 	void OnEventManager();

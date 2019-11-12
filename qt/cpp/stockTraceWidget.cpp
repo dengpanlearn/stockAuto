@@ -100,6 +100,7 @@ void CStockTraceWidget::Retranslate()
 {
 	CQtStockAgent* pStockAgent = (CQtStockAgent*)m_pStockAgent;
 	connect(pStockAgent, SIGNAL(NotifyUiStockTrace()), this, SLOT(OnNotifyStockTrace()));
+	connect(m_pTreeWaitBuy, SIGNAL(itemPressed(QTreeWidgetItem*, int)), this, SLOT(OnSelectStock(QTreeWidgetItem*, int)));
 }
 
 void CStockTraceWidget::OnNotifyStockTrace()
@@ -129,6 +130,15 @@ void CStockTraceWidget::OnNotifyStockTrace()
 
 		}
 	}
+}
+
+void CStockTraceWidget::OnSelectStock(QTreeWidgetItem * pItem, int column)
+{
+	QString codeName = pItem->text(STOCK_TRACE_WIDGET_TREE_WAITSELL_INDEX_CODE_NAME);
+	QStringList list = codeName.split(' ');
+	if (list.size() < 2)
+		return;
+	emit SignalSelectStock(list[0], list[1]);
 }
 
 void CStockTraceWidget::AddTraceLogItem(char const* pCode, char const* pName, UINT stat)

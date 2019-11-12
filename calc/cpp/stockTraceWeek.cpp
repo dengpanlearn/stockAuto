@@ -183,7 +183,6 @@ BOOL CStockTraceWeek::DoTraceWeekWork(STOCK_CALC_TRACE_NODE* pTraceNode)
 			pStartTraceKLine++;
 	}
 
-
 	do
 	{
 		if (pTraceLog->traceStep == CALC_STOCK_TRADE_STEP_CHECK_BALANCE_RAISE)
@@ -210,6 +209,7 @@ BOOL CStockTraceWeek::DoTraceWeekWork(STOCK_CALC_TRACE_NODE* pTraceNode)
 				pTraceLog->fHighVal = pStartTraceKLine->fHigh;
 				pTraceLog->traceStep = CALC_STOCK_TRADE_STEP_WAIT_BUY;
 				UpdateStockTraceStat(pTraceNode->stockIdx, pTraceLog->code, QT_STOCK_TRACE_LOG_STAT_HIGH_REACHED | QT_STOCK_TRACE_LOG_STAT_MODIFY);
+			//	UpdateStockTraceStat(pTraceNode->stockIdx, pTraceLog->code, QT_STOCK_TRACE_LOG_STAT_HIGH_REACHED | QT_STOCK_TRACE_LOG_STAT_ADD);
 				continue;
 			}
 

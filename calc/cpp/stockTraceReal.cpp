@@ -194,6 +194,7 @@ BOOL CStockTraceReal::DoTraceRealWork(STOCK_CALC_TRACE_NODE* pTraceNode)
 			pTraceLog->highTime = pCurKLine->timeVal;
 			pTraceLog->fHighVal = pCurKLine->fHigh;
 			UpdateStockTraceStat(pTraceNode->stockIdx, pTraceLog->code, QT_STOCK_TRACE_LOG_STAT_HIGH_REACHED |QT_STOCK_TRACE_LOG_STAT_MODIFY);
+			//UpdateStockTraceStat(pTraceNode->stockIdx, pTraceLog->code, QT_STOCK_TRACE_LOG_STAT_HIGH_REACHED | QT_STOCK_TRACE_LOG_STAT_ADD);
 		}
 		else
 		{

@@ -202,4 +202,4 @@ if __name__ == '__main__':
        
         ret = weekKLine.getCurWeekKLine('SZ300001')
         """
-        ret = weekKLine.getCurWeekKLine('SH900905')
+        ret = weekKLine.getCurWeekKLine('SZ200488')

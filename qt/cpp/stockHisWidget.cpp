@@ -61,6 +61,7 @@ void CStockHisWidget::OnInit()
 	pLyt->setMargin(0);
 	pLyt->addLayout(pLytCode);
 	pLyt->addWidget(m_pTreeHisKLine);
+	pLyt->setAlignment(Qt::AlignCenter);
 	this->setLayout(pLyt);
 }
 
@@ -177,6 +178,8 @@ void CStockHisWidget::OnHisKLineQueryResponse()
 		msgBox.addButton(QMessageBox::Ok);
 		msgBox.exec();
 	}
+
+	m_pBtnSearch->setEnabled(true);
 }
 
 void CStockHisWidget::OnHisKLineQueryClick(bool check)
@@ -197,7 +200,7 @@ void CStockHisWidget::OnHisKLineQueryClick(bool check)
 	}
 	else 
 	{
-
+		m_pBtnSearch->setEnabled(false);
 		m_pWaittingDialog = new CQtWaitting(this);
 		m_pWaittingDialog->setObjectName("Waitting_Dialog");
 		emit QueryStockHisKLine(code);

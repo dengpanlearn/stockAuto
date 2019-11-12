@@ -25,10 +25,10 @@ QWidget#Stock_Real_Widget QLabel#Stock_Real_Lab_Code{
     min-height: 30px;
     color:#FFD306;
     padding:2px;
-    font-size: 30px;
+    font-size: 15px;
     text-align:center;
-    margin-left:30px;
-    margin-right:30px;
+    margin-left:2px;
+    margin-right:2px;
 }
 
 QWidget#Stock_Real_Widget QLabel#Stock_Real_Lab_Sep{
@@ -42,7 +42,7 @@ QWidget#Stock_Real_Widget QLabel#Stock_Real_Lab_Val{
     border: none;
     min-width: 20px;
     min-height: 20px;
-    color:#28004D;
+    color:#cc00cc;
     padding:2px;
     font-size: 20px;
     text-align:center;
@@ -130,11 +130,11 @@ QWidget#Stock_Trace_Widget_Cell QTreeWidget QLabel {
 
 
 QWidget#Stock_Trace_Widget_Cell QTreeWidget::item:hover {
-    background-color: #FF0088;
+    background-color: #888888;
 }
 
 QWidget#Stock_Trace_Widget_Cell QTreeWidget::item:selected{
-    background-color: #FF0088;
+    background-color: #888888;
 }
 
 QWidget#Stock_His_Widget{
@@ -210,7 +210,7 @@ QWidget#Stock_His_Widget QTreeWidget::item {
     min-width: 50px;
     min-height:30px;
     padding:0px;
-    font-size: 13px;
+    font-size: 10px;
     margin:0px;
     color:#CCFF00;
     background-color: #000000;
@@ -219,11 +219,11 @@ QWidget#Stock_His_Widget QTreeWidget::item {
 }
 
 QWidget#Stock_His_Widget QTreeWidget::item:hover {
-    background-color: #FF0088;
+    background-color: #888888;
 }
 
 QWidget#Stock_His_Widget QTreeWidget::item:selected{
-    background-color: #FF0088;
+    background-color: #888888;
 }
 
 QWidget#Stock_His_Widget QMessageBox{
@@ -262,8 +262,8 @@ QDialog#Stock_Loading_Dialog QLabel{
 }
 
 QDialog#Waitting_Dialog QLabel{
-  min-width:100px;
-  min-height:100px;
+  min-width:150px;
+  min-height:150px;
   margin: 0px;
 }
    

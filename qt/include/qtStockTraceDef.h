@@ -47,6 +47,18 @@ struct QT_STOCK_HISKLINE_QUERY_JOB
 	STOCK_CALC_TRACE_KLINE hisKLine[STOCK_HIS_KLINE_MAX_COUNTS];
 };
 
+struct QT_STOCK_REALKLINE_INFO
+{
+	char	name[STOCK_CODE_NAME_MAX];
+	char	code[STOCK_CODE_NAME_MAX];
+	STOCK_CALC_TRACE_KLINE realKLine;
+};
+
+struct QT_STOCK_REALKLINE_QUERY_JOB
+{
+	int		jobResult;
+	QT_STOCK_REALKLINE_INFO realKLine;
+};
 
 struct QT_STOCK_LOADING_MANAGER
 {
@@ -61,6 +73,15 @@ struct QT_STOCK_HISKLINE_QUERY_PARAM
 	int						hisCounts;
 	char					code[STOCK_CODE_NAME_MAX];
 	STOCK_CALC_TRACE_KLINE* pHisKLineBuf;
+	CQtStockAgent*		pStockAgent;
+};
+
+
+struct QT_STOCK_REALKLINE_QUERY_PARAM
+{
+	TASK_EVENT_PARAM		eventParam;
+	char					code[STOCK_CODE_NAME_MAX];
+	STOCK_CALC_TRACE_KLINE* pRealKLineBuf;
 	CQtStockAgent*		pStockAgent;
 };
 

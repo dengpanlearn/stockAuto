@@ -203,6 +203,16 @@ BOOL CStockAutoManager::UpdateStockTraceStat(int stockIdx, char const* pStockCod
 	return m_pAutoWindow->UpdateStockTrace(m_pJobList->codeName[stockIdx].name, pStockCode, updateStat);
 }
 
+const char* CStockAutoManager::GetStockNameByCode(const char* pCode)
+{
+	for (int i = 0; i < m_pJobList->stockCounts; i++)
+	{
+		if (strcmp(pCode, m_pJobList->codeName[i].code) == 0)
+			return m_pJobList->codeName[i].name;
+	}
+
+	return NULL;
+}
 
 int CStockAutoManager::GetTaskEvent(DP_EVENT_ID* pEventsBuf, int maxCount)const
 {

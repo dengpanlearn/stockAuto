@@ -66,7 +66,7 @@ void CStockAutoWindow::OnInit()
 	}
 
 	m_pTraceWidget = new CStockTraceWidget(NULL,m_pExitAgent, m_pStockAgent);
-	m_pRealWidget = new CStockRealWidget(NULL);
+	m_pRealWidget = new CStockRealWidget(NULL, m_pExitAgent, m_pStockAgent);
 
 	m_pHisWidget = new CStockHisWidget(NULL, m_pExitAgent, m_pStockAgent);
 
@@ -76,13 +76,13 @@ void CStockAutoWindow::OnInit()
 	QSplitter* pSplitLeft = new QSplitter(Qt::Horizontal, this);
 	pSplitLeft->addWidget(m_pRealWidget);
 	QSplitter* pSplitRight = new QSplitter(Qt::Horizontal, pSplitLeft);
-	pSplitLeft->setStretchFactor(0, 1);
-	pSplitLeft->setStretchFactor(1, 4);
+	pSplitLeft->setStretchFactor(0, 2);
+	pSplitLeft->setStretchFactor(1, 3);
 
 	pSplitRight->addWidget(m_pTraceWidget);
 	pSplitRight->addWidget(m_pHisWidget);
-	pSplitRight->setStretchFactor(0, 4);
-	pSplitRight->setStretchFactor(1, 3);
+	pSplitRight->setStretchFactor(0, 3);
+	pSplitRight->setStretchFactor(1, 2);
 	this->setCentralWidget(pSplitLeft);
 
 	m_pLoadingDialog = new CStockLoadingDialog(NULL);
@@ -99,6 +99,8 @@ void CStockAutoWindow::RetranlateUi()
 		connect(pStockAgent, SIGNAL(NotifyUiManagerLoadingProgress()), this, SLOT(OnNotifyAutoManagerLoadingProgress()));
 		connect(this, SIGNAL(UpdateLoadingProgress(QString&, QString& )), m_pLoadingDialog, SLOT(OnUpdateLoadingProgress(QString&, QString&)));
 	}
+
+	connect(m_pTraceWidget, SIGNAL(SignalSelectStock(QString&, QString&)), m_pRealWidget, SLOT(OnSelectStock(QString&, QString&)));
 }
 
 BOOL CStockAutoWindow:: OnInitQtServerAndAgent()

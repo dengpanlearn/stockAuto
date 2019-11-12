@@ -26,8 +26,12 @@ private:
 	void OnInit();
 	void Retranslate();
 
+signals:
+	void SignalSelectStock(QString& code, QString& name);
+
 private slots:
 	void OnNotifyStockTrace();
+	void OnSelectStock(QTreeWidgetItem * pItem, int column);
 
 private:
 	void AddTraceLogItem(char const* pCode, char const* pName, UINT stat);

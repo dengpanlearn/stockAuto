@@ -31,20 +31,24 @@ public:
 	void GetAutoManagerLoading(QT_STOCK_LOADING_MANAGER* pLoadingInfo);
 	BOOL GetAckStockTrace(QT_STOCK_TRACE_LOG* pTraceLog);
 	int	GetStockHisKLine(int count, int offset, STOCK_CALC_TRACE_KLINE* pKLine);
+	BOOL GetStockRealKLine(QT_STOCK_REALKLINE_INFO* pKLineInfo);
 
 private:
 	static BOOL QtTaskEventComplete(UINT cmd, int result, void* param, int paramLen);
 
 
 	void OnHisKLineQueryResponse(int result, QT_STOCK_HISKLINE_QUERY_PARAM* pHisKLine);
+	void OnRealKLineQueryResponse(int result, QT_STOCK_REALKLINE_QUERY_PARAM* pRealKLine);
 
 signals:
 	void NotifyUiManagerLoadingProgress();
 	void NotifyUiStockTrace();
 	void NotifyUiHisKLineResponese();
+	void NotifyUiRealKLineResponese();
 
 private slots:
 	void OnGetQueryHisKLine(QString& code);
+	void OnGetQueryRealKLine(QString& code, QString& name);
 
 protected:
 	virtual BOOL OnInit();
@@ -57,6 +61,7 @@ protected:
 		QT_STOCK_AGENT_UPDATE_MANAGER_STEP = 0x00000001,
 		QT_STOCK_AGENT_UPDATE_STOCK_TRACE = 0x00000002,
 		QT_STOCK_AGENT_QUERY_HISKLINE_RESPONESE = 0x00000004,
+		QT_STOCK_AGENT_QUERY_REALKLINE_RESPONESE = 0x00000008,
 	};
 
 private:
@@ -64,9 +69,11 @@ private:
 	CCriticalSection	m_cs;
 	DL_LIST				m_listTraceLog;
 	QT_STOCK_HISKLINE_QUERY_JOB*	m_pHisKLineQueryJob;
+	QT_STOCK_REALKLINE_QUERY_JOB	m_realKLineQueryJob;
 	QT_STOCK_LOADING_MANAGER		m_loadingManager;
 	CMultiEventsTask*		m_pManager;
 	CMultiEventsTask*		m_pDataTask;
+	CMultiEventsTask*		m_pUpdateTask;
 };
 
 #endif // !__QT_STOCK_AGENT_H__

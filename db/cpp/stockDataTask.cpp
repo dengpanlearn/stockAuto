@@ -8,8 +8,6 @@
 #include <qtStockAgent.h>
 #include <qtStockTraceDef.h>
 #include "../include/stockDataSqlite.h"
-
-
 #include "../include/stockDataTask.h"
 
 CStockDataTask::CStockDataTask()
