@@ -8,7 +8,11 @@
 #include <qsplitter.h>
 #include <stockCalcDef.h>
 #include <qtextcodec.h>
+#include <qmenu.h>
+#include <qmenubar.h>
+#include <qaction.h>
 #include <stockAutoManager.h>
+#include "../include/stockSettingDialog.h"
 #include "../include/stockHisWidget.h"
 #include "../include/stockRealWidget.h"
 #include "../include/stockTraceWidget.h"
@@ -89,6 +93,11 @@ void CStockAutoWindow::OnInit()
 	m_pLoadingDialog->setFixedSize(350, 50);
 	m_pLoadingDialog->setObjectName("Stock_Loading_Dialog");
 	m_pLoadingDialog->setModal(true);
+
+	QMenuBar* pMenuBar = this->menuBar();
+	QTextCodec* pCodec = QTextCodec::codecForLocale();
+	QMenu* pMenu = pMenuBar->addMenu(pCodec->toUnicode(STOCK_AUTO_WINDOW_MEUNU_FUNC));
+	m_pActSetting = pMenu->addAction(pCodec->toUnicode(STOCK_AUTO_WINDOW_ACTION_SETTING));
 }
 
 void CStockAutoWindow::RetranlateUi()
@@ -101,6 +110,7 @@ void CStockAutoWindow::RetranlateUi()
 	}
 
 	connect(m_pTraceWidget, SIGNAL(SignalSelectStock(QString&, QString&)), m_pRealWidget, SLOT(OnSelectStock(QString&, QString&)));
+	connect(m_pActSetting, SIGNAL(triggered(bool)), this, SLOT(OnEnterSettingDialog(bool)));
 }
 
 BOOL CStockAutoWindow:: OnInitQtServerAndAgent()
@@ -239,4 +249,12 @@ void CStockAutoWindow::OnNotifyAutoManagerLoadingProgress()
 
 	emit UpdateLoadingProgress(stat, progress);
 
+}
+
+void CStockAutoWindow::OnEnterSettingDialog(bool check)
+{
+	CStockSettingDilaog* pSettingDialog = new CStockSettingDilaog(NULL, m_pStockAgent);
+	pSettingDialog->setObjectName("Stock_Setting_Dialog");
+	pSettingDialog->exec();
+	delete pSettingDialog;
 }

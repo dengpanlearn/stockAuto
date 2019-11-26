@@ -16,6 +16,8 @@
 #include "qtObjectAgent.h"
 #include "qtStockAgent.h"
 
+class QAction;
+
 class CStockAutoWindow : public QMainWindow
 {
     Q_OBJECT
@@ -43,6 +45,7 @@ protected:
 
 private slots:
 	void OnNotifyAutoManagerLoadingProgress();
+	void OnEnterSettingDialog(bool check);
 
 private:
 	CQtServerTask*	m_pServerTask;
@@ -53,6 +56,7 @@ private:
 	CStockHisWidget*	m_pHisWidget;
 	CStockLoadingDialog*	m_pLoadingDialog;
 	BOOL		m_bLoading;
+	QAction*	m_pActSetting;
 };
 
 #endif // !__STOCK_AUTO_WINDOW_H__

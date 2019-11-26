@@ -9,6 +9,7 @@
 #include <SyncObj.h>
 #include <dllLibEx.h>
 #include <stockCalcDef.h>
+#include <stockConfigTask.h>
 #include "qtStockTraceDef.h"
 #include "qtObjectAgent.h"
 
@@ -32,6 +33,10 @@ public:
 	BOOL GetAckStockTrace(QT_STOCK_TRACE_LOG* pTraceLog);
 	int	GetStockHisKLine(int count, int offset, STOCK_CALC_TRACE_KLINE* pKLine);
 	BOOL GetStockRealKLine(QT_STOCK_REALKLINE_INFO* pKLineInfo);
+
+	void GetConfigPython(STOCKAUTO_CONFIG_PYTHON* pConfigPython);
+	void GetConfigData(STOCKAUTO_CONFIG_DATA* pConfigData);
+	void GetConfigTrace(STOCKAUTO_CONFIG_TRACE* pConfigTrace);
 
 private:
 	static BOOL QtTaskEventComplete(UINT cmd, int result, void* param, int paramLen);

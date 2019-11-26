@@ -10,6 +10,9 @@
 #include "../include/qtGlobal.h"
 #include "../include/qtStockAgent.h"
 
+/*EXTERN*/
+extern CStockConfigTask g_configTask;
+
 CQtStockAgent::CQtStockAgent(QObject* parent): CQtTimeAgent(parent)
 {
 	m_updateCmd = 0;
@@ -120,6 +123,21 @@ BOOL CQtStockAgent::GetStockRealKLine(QT_STOCK_REALKLINE_INFO* pKLineInfo)
 
 	memcpy(pKLineInfo, &m_realKLineQueryJob.realKLine, sizeof(QT_STOCK_REALKLINE_INFO));
 	return TRUE;
+}
+
+void CQtStockAgent::GetConfigPython(STOCKAUTO_CONFIG_PYTHON* pConfigPython)
+{
+	g_configTask.GetConfigPython(pConfigPython);
+}
+
+void CQtStockAgent::GetConfigData(STOCKAUTO_CONFIG_DATA* pConfigData)
+{
+	g_configTask.GetConfigData(pConfigData);
+}
+
+void CQtStockAgent::GetConfigTrace(STOCKAUTO_CONFIG_TRACE* pConfigTrace)
+{
+	g_configTask.GetConfigTrace(pConfigTrace);
 }
 
 BOOL CQtStockAgent::QtTaskEventComplete(UINT cmd, int result, void* param, int paramLen)
