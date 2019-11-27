@@ -188,13 +188,13 @@ QWidget#Stock_His_Widget  QTreeWidget{
     border: 1px solid #00FF99;
 }
 
-QWidget#Stock_His_Widget QTreeWidget QHeaderView{
+QWidget#Stock_His_Widget  QHeaderView{
     background-color:#000000;
     min-height:20px;
     text-align:center;
 }
 
-QWidget#Stock_His_Widget QTreeWidget QHeaderView::section{
+QWidget#Stock_His_Widget  QHeaderView::section{
     color:#FFD306;
     background-color:#000000;
     color:#CCFF00;
@@ -267,30 +267,29 @@ QDialog#Waitting_Dialog QLabel{
   margin: 0px;
 }
 
-QDialog#Stock_Setting_Dialog  QTreeWidget{
-    min-width: 700px;
-    min-height:200px;
-    margin-top:10px;
-    background-color: #000000;
-    border: 1px solid #00FF99;
-}
 
 QDialog#Stock_Setting_Dialog QHeaderView{
     background-color:#000000;
     min-height:40px;
     text-align:center;
+    color:#CCFF00;
 }
 
-QDialog#Stock_Setting_Dialog QHeaderView::section{
-    color:#CCFF00;
+QDialog#Stock_Setting_Dialog QHeaderView::section:horizontal {
     background-color:#000000;
     color:#CCFF00;
     font-size: 15px;
     border: 1px solid #00FF99;
     min-height:30px;
     min-width:100px;
-    text-align:center;
-    alignment:center;
+}
+
+QDialog#Stock_Setting_Dialog  QTreeWidget{
+    min-width: 700px;
+    min-height:200px;
+    margin-top:10px;
+    background-color: #000000;
+    border: 1px solid #00FF99;
 }
 
 QDialog#Stock_Setting_Dialog QTreeWidget::item {

@@ -6,6 +6,10 @@
 #include <qlayout.h>
 #include <qtreewidget.h>
 #include <qheaderview.h>
+#include <qfiledialog.h>
+#include <qfile.h>
+#include <qdir.h>
+#include <qfileinfo.h>
 #include <qtextcodec.h>
 #include "../include/qtObjectAgent.h"
 #include "../include/qtStockAgent.h"
@@ -13,6 +17,9 @@
 
 CStockSettingDilaog::CStockSettingDilaog(QWidget* parent, CQtObjectAgent* pStockAgent):QDialog(parent)
 {
+	m_pPythonSelectItem = NULL;
+	m_pDataSelectItem = NULL;
+	m_pTraceSelectItem = NULL;
 	m_pStockAgent = pStockAgent;
 	InitUi();
 	RetranslateUi();
@@ -49,7 +56,17 @@ void CStockSettingDilaog::InitUi()
 
 void CStockSettingDilaog::RetranslateUi()
 {
+	connect(m_pTreePython, SIGNAL(itemDoubleClicked(QTreeWidgetItem *, int )), this, SLOT(OnPythonDoubleClicked(QTreeWidgetItem *, int)));
+	connect(m_pTreePython, SIGNAL(itemChanged(QTreeWidgetItem *, int)), this, SLOT(OnPythonChanged(QTreeWidgetItem *, int)));
+	connect(m_pTreePython, SIGNAL(itemSelectionChanged()), this, SLOT(OnPythonSelectChanged()));
 
+	connect(m_pTreeData, SIGNAL(itemDoubleClicked(QTreeWidgetItem *, int)), this, SLOT(OnDataDoubleClicked(QTreeWidgetItem *, int)));
+	connect(m_pTreeData, SIGNAL(itemChanged(QTreeWidgetItem *, int)), this, SLOT(OnDataChanged(QTreeWidgetItem *, int)));
+	connect(m_pTreeData, SIGNAL(itemSelectionChanged()), this, SLOT(OnDataSelectChanged()));
+
+	connect(m_pTreeTrace, SIGNAL(itemDoubleClicked(QTreeWidgetItem *, int)), this, SLOT(OnTraceDoubleClicked(QTreeWidgetItem *, int)));
+	connect(m_pTreeTrace, SIGNAL(itemChanged(QTreeWidgetItem *, int)), this, SLOT(OnTraceChanged(QTreeWidgetItem *, int)));
+	connect(m_pTreeTrace, SIGNAL(itemSelectionChanged()), this, SLOT(OnTraceSelectChanged()));
 }
 
 void CStockSettingDilaog::InitPythonTreeWidget(QTreeWidget* pTreeWidget, STOCKAUTO_CONFIG_PYTHON* pConfigPython)
@@ -59,7 +76,7 @@ void CStockSettingDilaog::InitPythonTreeWidget(QTreeWidget* pTreeWidget, STOCKAU
 	headerList << pCodec->toUnicode(STOCK_SETTING_DIALOG_EDIT_PYTHON_NAME);
 	headerList << "value";
 	pTreeWidget->setHeaderLabels(headerList);
-	pTreeWidget->setColumnCount(2);
+//	pTreeWidget->setColumnCount(2);
 	pTreeWidget->header()->setSectionResizeMode(QHeaderView::Stretch);
 	pTreeWidget->header()->setStretchLastSection(false);
 	pTreeWidget->header()->setDefaultAlignment(Qt::AlignCenter);
@@ -68,7 +85,7 @@ void CStockSettingDilaog::InitPythonTreeWidget(QTreeWidget* pTreeWidget, STOCKAU
 	pItemLab->setText(0, pCodec->toUnicode(STOCK_SETTING_DIALOG_EDIT_PYTHON_MODULE_DIR_NAME));
 	pItemLab->setText(1, pCodec->toUnicode(pConfigPython->moduleDir));
 	pTreeWidget->addTopLevelItem(pItemLab);
-
+	
 	pItemLab = new QTreeWidgetItem();
 	pItemLab->setText(0, pCodec->toUnicode(STOCK_SETTING_DIALOG_EDIT_PYTHON_KLINE_MODULE_NAME));
 	pItemLab->setText(1, pCodec->toUnicode(pConfigPython->klineModule));
@@ -97,7 +114,7 @@ void CStockSettingDilaog::InitDataTreeWidget(QTreeWidget* pTreeWidget, STOCKAUTO
 	headerList << pCodec->toUnicode(STOCK_SETTING_DIALOG_EDIT_DATA_NAME);
 	headerList << "value";
 	pTreeWidget->setHeaderLabels(headerList);
-	pTreeWidget->setColumnCount(2);
+//	pTreeWidget->setColumnCount(2);
 	pTreeWidget->header()->setSectionResizeMode(QHeaderView::Stretch);
 	pTreeWidget->header()->setStretchLastSection(false);
 	pTreeWidget->header()->setDefaultAlignment(Qt::AlignCenter);
@@ -129,10 +146,10 @@ void CStockSettingDilaog::InitTraceTreeWidget(QTreeWidget* pTreeWidget, STOCKAUT
 {
 	QTextCodec* pCodec = QTextCodec::codecForLocale();
 	QStringList headerList;
-	headerList << pCodec->toUnicode(STOCK_SETTING_DIALOG_EDIT_TRACE_NAME);
-	headerList << "value";
+	headerList <<pCodec->toUnicode(STOCK_SETTING_DIALOG_EDIT_TRACE_NAME);
+	headerList <<"value";
 	pTreeWidget->setHeaderLabels(headerList);
-	pTreeWidget->setColumnCount(2);
+//	pTreeWidget->setColumnCount(2);
 	pTreeWidget->header()->setSectionResizeMode(QHeaderView::Stretch);
 	pTreeWidget->header()->setStretchLastSection(false);
 	pTreeWidget->header()->setDefaultAlignment(Qt::AlignCenter);
@@ -177,4 +194,111 @@ void CStockSettingDilaog::InitTraceTreeWidget(QTreeWidget* pTreeWidget, STOCKAUT
 	pItem->setText(0, pCodec->toUnicode(STOCK_SETTING_DIALOG_EDIT_TRACE_CUTLOSS_PERCENT_NAME));
 	pItem->setText(1, QString::number(pConfigTrace->fCutLossPercent, 'g', 4));
 	pTreeWidget->addTopLevelItem(pItem);
+}
+
+void CStockSettingDilaog::OnPythonDoubleClicked(QTreeWidgetItem* pItem, int column)
+{
+	if (column == 1)
+	{
+		int index = m_pTreePython->indexOfTopLevelItem(pItem);
+		if ((index == STOCK_SETTING_DIALOG_EDIT_PYTHON_IDX_MODULE_DIR) || (index == STOCK_SETTING_DIALOG_EDIT_PYTHON_IDX_UPDATE_DIR))
+		{
+			m_pTreePython->openPersistentEditor(pItem, 1);
+			m_pPythonSelectItem = pItem;
+
+			QString curDir = pItem->text(column);
+			if (curDir.isEmpty())
+			{
+				curDir = QDir::currentPath();
+			}
+
+			QTextCodec* pCodec = QTextCodec::codecForLocale();
+			QString selectDir = QFileDialog::getExistingDirectory(this, pCodec->toUnicode(STOCK_SETTING_DIALOG_SELECT_PYTHON_DIR), curDir, QFileDialog::DontResolveSymlinks);
+
+			if (!selectDir.isEmpty())
+			{
+				pItem->setText(column, selectDir);
+			}
+		}
+	}
+}
+
+void CStockSettingDilaog::OnDataDoubleClicked(QTreeWidgetItem* pItem, int column)
+{
+	if (column == 1)
+	{
+		int index = m_pTreeData->indexOfTopLevelItem(pItem);
+		if ((index == STOCK_SETTING_DIALOG_EDIT_DATA_IDX_DATA_DIR))
+		{
+			m_pTreeData->openPersistentEditor(pItem, 1);
+			m_pDataSelectItem = pItem;
+		}
+	}
+}
+
+void CStockSettingDilaog::OnTraceDoubleClicked(QTreeWidgetItem* pItem, int column)
+{
+	if (column == 1)
+	{
+		int index = m_pTreeTrace->indexOfTopLevelItem(pItem);
+		if ((index <  STOCK_SETTING_DIALOG_EDIT_DTRACE_IDX_NUM))
+		{
+			m_pTreeData->openPersistentEditor(pItem, 1);
+			m_pTraceSelectItem = pItem;
+		}
+	}
+}
+
+void CStockSettingDilaog::OnPythonChanged(QTreeWidgetItem* pItem, int column)
+{
+	if (column == 1)
+	{
+		int index = m_pTreePython->indexOfTopLevelItem(pItem);
+		if ((index == STOCK_SETTING_DIALOG_EDIT_PYTHON_IDX_MODULE_DIR) || (index == STOCK_SETTING_DIALOG_EDIT_PYTHON_IDX_UPDATE_DIR))
+		{
+			QString text = pItem->text(column);
+		}
+	}
+}
+
+void CStockSettingDilaog::OnDataChanged(QTreeWidgetItem* pItem, int column)
+{
+	if (column == 1)
+	{
+		int index = m_pTreeData->indexOfTopLevelItem(pItem);
+		if ((index == STOCK_SETTING_DIALOG_EDIT_DATA_IDX_DATA_DIR))
+		{
+			
+		}
+	}
+}
+
+void CStockSettingDilaog::OnTraceChanged(QTreeWidgetItem* pItem, int column)
+{
+	if (column == 1)
+	{
+		int index = m_pTreeTrace->indexOfTopLevelItem(pItem);
+		if ((index <  STOCK_SETTING_DIALOG_EDIT_DTRACE_IDX_NUM))
+		{
+	
+		}
+	}
+}
+
+void CStockSettingDilaog::OnPythonSelectChanged()
+{
+	if (m_pPythonSelectItem != NULL)
+		m_pTreePython->closePersistentEditor(m_pPythonSelectItem, 1);
+}
+
+void CStockSettingDilaog::OnDataSelectChanged()
+{
+	if (m_pDataSelectItem != NULL)
+		m_pTreeData->closePersistentEditor(m_pDataSelectItem, 1);
+}
+
+void CStockSettingDilaog::OnTraceSelectChanged()
+{
+	if (m_pTraceSelectItem != NULL)
+		m_pTreeTrace->closePersistentEditor(m_pTraceSelectItem, 1);
 }
