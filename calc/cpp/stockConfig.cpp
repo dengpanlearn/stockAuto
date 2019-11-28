@@ -264,13 +264,13 @@ void CStockConfig::SaveConfigTrace(QSettings* pConfigSettings, STOCKAUTO_CONFIG_
 {
 	QTextCodec* pCodec = QTextCodec::codecForLocale();
 	pConfigSettings->beginGroup(pCodec->toUnicode(STOCKAUTO_CONFIG_TRACE_GROUP_NAME));
-	pConfigSettings->setValue(STOCKAUTO_CONFIG_TRACE_GROUP_RAISE_PERCENT, pConfigTrace->fRaisePercent);
-	pConfigSettings->setValue(STOCKAUTO_CONFIG_TRACE_GROUP_RAISE_BALANCES, pConfigTrace->raiseBalances);
-	pConfigSettings->setValue(STOCKAUTO_CONFIG_TRACE_GROUP_HIGH_RANGES, pConfigTrace->reachHighRanges);
-	pConfigSettings->setValue(STOCKAUTO_CONFIG_TRACE_GROUP_RSI_BUYWAITS, pConfigTrace->rsiBuyWaits);
-	pConfigSettings->setValue(STOCKAUTO_CONFIG_TRACE_GROUP_RSI_BUY, pConfigTrace->fRsiBuy);
-	pConfigSettings->setValue(STOCKAUTO_CONFIG_TRACE_GROUP_RSI_SELL, pConfigTrace->fRsiSell);
-	pConfigSettings->setValue(STOCKAUTO_CONFIG_TRACE_GROUP_RSI_SELLWAITS, pConfigTrace->rsiSellWaits);
-	pConfigSettings->setValue(STOCKAUTO_CONFIG_TRACE_GROUP_CUTLOSS_PERCENT, pConfigTrace->fCutLossPercent);
+	pConfigSettings->setValue(STOCKAUTO_CONFIG_TRACE_GROUP_RAISE_PERCENT, QString::number(pConfigTrace->fRaisePercent, 'g', 4));
+	pConfigSettings->setValue(STOCKAUTO_CONFIG_TRACE_GROUP_RAISE_BALANCES, QString::number(pConfigTrace->raiseBalances));
+	pConfigSettings->setValue(STOCKAUTO_CONFIG_TRACE_GROUP_HIGH_RANGES, QString::number(pConfigTrace->reachHighRanges));
+	pConfigSettings->setValue(STOCKAUTO_CONFIG_TRACE_GROUP_RSI_BUYWAITS, QString::number(pConfigTrace->rsiBuyWaits));
+	pConfigSettings->setValue(STOCKAUTO_CONFIG_TRACE_GROUP_RSI_BUY, QString::number(pConfigTrace->fRsiBuy,'g', 4));
+	pConfigSettings->setValue(STOCKAUTO_CONFIG_TRACE_GROUP_RSI_SELL, QString::number(pConfigTrace->fRsiSell,'g', 4));
+	pConfigSettings->setValue(STOCKAUTO_CONFIG_TRACE_GROUP_RSI_SELLWAITS, QString::number(pConfigTrace->rsiSellWaits));
+	pConfigSettings->setValue(STOCKAUTO_CONFIG_TRACE_GROUP_CUTLOSS_PERCENT, QString::number(pConfigTrace->fCutLossPercent,'g', 4));
 	pConfigSettings->endGroup();
 }

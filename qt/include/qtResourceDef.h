@@ -153,4 +153,6 @@ enum
 
 #define	STOCK_SETTING_DIALOG_SELECT_PYTHON_DIR		"选择python模块路径"
 #define	STOCK_SETTING_DIALOG_SELECT_DATA_DIR		"选择数据库路径"
+#define STOCK_SETTING_DIALOG_BTN_SAVE				"保存"
+#define STOCK_SETTING_DIALOG_BTN_CANCLE				"取消"
 #endif // !__QT_RESOURCE_DEF_H__

@@ -75,13 +75,18 @@ void CStockConfigTask::UpdateConfigTrace(STOCKAUTO_CONFIG_TRACE const* pConfigTr
 	m_updateMask |= STOCK_CONFIG_UPDATE_TRACE;
 }
 
+void CStockConfigTask::SyncConfig()
+{
+	CSingleLock(&m_cs, TRUE);
+	m_updateMask |= STOCK_CONFIG_UPDATE_SYNC;
+}
+
 void CStockConfigTask::OnTimeout()
 {
 	CSingleLock(&m_cs, TRUE);
-	if (m_updateMask != 0)
+	if (m_updateMask & STOCK_CONFIG_UPDATE_SYNC)
 	{
 		m_config.SaveConfig(m_szFileName);
+		m_updateMask = 0;
 	}
-
-	m_updateMask = 0;
 }

@@ -38,6 +38,11 @@ public:
 	void GetConfigData(STOCKAUTO_CONFIG_DATA* pConfigData);
 	void GetConfigTrace(STOCKAUTO_CONFIG_TRACE* pConfigTrace);
 
+	void UpdateConfigPython(STOCKAUTO_CONFIG_PYTHON* pConfigPython);
+	void UpdateConfigData(STOCKAUTO_CONFIG_DATA* pConfigData);
+	void UpdateConfigTrace(STOCKAUTO_CONFIG_TRACE* pConfigTrace);
+	void SyncConfig();
+
 private:
 	static BOOL QtTaskEventComplete(UINT cmd, int result, void* param, int paramLen);
 

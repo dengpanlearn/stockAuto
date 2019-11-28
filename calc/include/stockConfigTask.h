@@ -28,6 +28,7 @@ public:
 	void UpdateConfigData(STOCKAUTO_CONFIG_DATA const* pConfigData);
 	void UpdateConfigTrace(STOCKAUTO_CONFIG_TRACE const* pConfigTrace);
 
+	void SyncConfig();
 protected:
 	virtual void OnTimeout();
 
@@ -36,7 +37,8 @@ private:
 	{
 		STOCK_CONFIG_UPDATE_PYTHON = 0x01,
 		STOCK_CONFIG_UPDATE_DATA = 0x02,
-		STOCK_CONFIG_UPDATE_TRACE = 0x04
+		STOCK_CONFIG_UPDATE_TRACE = 0x04,
+		STOCK_CONFIG_UPDATE_SYNC = 0x08
 	};
 
 	CStockConfig	m_config;

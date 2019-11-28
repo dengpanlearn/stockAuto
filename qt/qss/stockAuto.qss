@@ -312,5 +312,19 @@ QDialog#Stock_Setting_Dialog QTreeWidget::item:selected{
     background-color: #888888;
 }
 
+QDialog#Stock_Setting_Dialog QPushButton{
+    min-width: 60px;
+    min-height:40px;
+    border: 1px solid #000000;
+    color:#000000
+    background-color: #ffffff;
+    border-radius:10px;
+}
+
+QDialog#Stock_Setting_Dialog QPushButton:hover{
+    border: 1px solid #00FF99;
+    background-color: #00FF99;
+}
+
 
    

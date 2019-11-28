@@ -140,6 +140,26 @@ void CQtStockAgent::GetConfigTrace(STOCKAUTO_CONFIG_TRACE* pConfigTrace)
 	g_configTask.GetConfigTrace(pConfigTrace);
 }
 
+void CQtStockAgent::UpdateConfigPython(STOCKAUTO_CONFIG_PYTHON* pConfigPython)
+{
+	g_configTask.UpdateConfigPython(pConfigPython);
+}
+
+void CQtStockAgent::UpdateConfigData(STOCKAUTO_CONFIG_DATA* pConfigData)
+{
+	g_configTask.UpdateConfigData(pConfigData);
+}
+
+void CQtStockAgent::UpdateConfigTrace(STOCKAUTO_CONFIG_TRACE* pConfigTrace)
+{
+	g_configTask.UpdateConfigTrace(pConfigTrace);
+}
+
+void CQtStockAgent::SyncConfig()
+{
+	g_configTask.SyncConfig();
+}
+
 BOOL CQtStockAgent::QtTaskEventComplete(UINT cmd, int result, void* param, int paramLen)
 {
 	union

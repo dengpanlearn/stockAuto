@@ -12,6 +12,7 @@ class QLineEdit;
 class QTreeWidget;
 class CQtObjectAgent;
 class QTreeWidgetItem;
+class QPushButton;
 
 struct STOCKAUTO_CONFIG_PYTHON;
 struct STOCKAUTO_CONFIG_DATA;
@@ -32,6 +33,10 @@ private:
 	void InitDataTreeWidget(QTreeWidget* pTreeWidget, STOCKAUTO_CONFIG_DATA* pConfigData);
 	void InitTraceTreeWidget(QTreeWidget* pTreeWidget, STOCKAUTO_CONFIG_TRACE* pConfigTrace);
 
+	void GetPythonConfig(QTreeWidget* pTreeWidget, STOCKAUTO_CONFIG_PYTHON* pConfigPython);
+	void GetDataConfig(QTreeWidget* pTreeWidget, STOCKAUTO_CONFIG_DATA* pConfigData);
+	void GetTraceConfig(QTreeWidget* pTreeWidget, STOCKAUTO_CONFIG_TRACE* pConfigTrace);
+
 private slots:
 	void OnPythonDoubleClicked(QTreeWidgetItem* pItem, int column);
 	void OnDataDoubleClicked(QTreeWidgetItem* pItem, int column);
@@ -44,6 +49,9 @@ private slots:
 	void OnPythonSelectChanged();
 	void OnDataSelectChanged();
 	void OnTraceSelectChanged();
+
+	void OnSaveConfig(bool check);
+	void OnCancleConfig(bool check);
 private:
 	QTreeWidget* m_pTreePython;
 	QTreeWidget* m_pTreeData;
@@ -53,6 +61,9 @@ private:
 	QTreeWidgetItem* m_pDataSelectItem;
 	QTreeWidgetItem* m_pTraceSelectItem;
 	CQtObjectAgent*	m_pStockAgent;
+
+	QPushButton* m_pBtnSave;
+	QPushButton* m_pBtnCancle;
 };
 #endif // !__STOCK_SETTING_H__
 
