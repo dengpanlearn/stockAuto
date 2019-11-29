@@ -4,6 +4,7 @@
 
 #include <qdatetime.h>
 #include <qtStockTraceDef.h>
+#include "../include/stockConfigDef.h"
 #include "../include/stockTraceWeek.h"
 
 CStockTraceWeek::CStockTraceWeek(CStockAutoManager* pAutoManager, DL_LIST* pTraceList):CStockTraceBase(pAutoManager, pTraceList)
@@ -30,6 +31,16 @@ BOOL CStockTraceWeek::Init(int hisKLineCounts, STOCKAUTO_CONFIG_TRACE const* pCo
 void CStockTraceWeek::Close()
 {
 	CStockTraceBase::Close();
+}
+
+void CStockTraceWeek::UpdateConfigTrace(STOCKAUTO_CONFIG_TRACE const* pConfigTrace)
+{
+	m_fRaisePercent = pConfigTrace->fRaisePercent;
+	m_iRaiseBalances = pConfigTrace->raiseBalances;
+	m_iReachHighRanges = pConfigTrace->reachHighRanges;
+	m_fRsiBuy = pConfigTrace->fRsiBuy;
+	m_iRsiBuyWaits = pConfigTrace->rsiBuyWaits;
+	m_fRsiSell = pConfigTrace->fRsiSell;
 }
 
 void CStockTraceWeek::InitStockTrace(STOCK_CALC_TRACE_NODE* pTraceNode)

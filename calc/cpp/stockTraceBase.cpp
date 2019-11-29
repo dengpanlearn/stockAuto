@@ -3,6 +3,7 @@
 */
 
 #include <qtStockTraceDef.h>
+#include "../include/stockConfigDef.h"
 #include "../include/stockTraceBase.h"
 
 CStockTraceBase::CStockTraceBase(CStockAutoManager* pAutoManager, DL_LIST* pTraceList)

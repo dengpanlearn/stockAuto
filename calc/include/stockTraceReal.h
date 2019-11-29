@@ -16,6 +16,8 @@ public:
 	BOOL Init(int hisHighCounts, STOCKAUTO_CONFIG_TRACE const* pConfigTrace);
 	void Close();
 
+	void UpdateConfigTrace(STOCKAUTO_CONFIG_TRACE const* pConfigTrace);
+
 protected:
 	static BOOL IsHisKLineRsiContinueLow(STOCK_CALC_TRACE_KLINE const* pHisKLineEnd, int times, float fRsiLimit);
 

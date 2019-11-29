@@ -15,6 +15,7 @@ public:
 
 	BOOL Init(int hisKLineCounts, STOCKAUTO_CONFIG_TRACE const* pConfigTrace);
 	void Close();
+	void UpdateConfigTrace(STOCKAUTO_CONFIG_TRACE const* pConfigTrace);
 
 protected:
 	static STOCK_CALC_TRACE_KLINE const* GetStartHisKLinePtr(STOCK_CALC_TRACE_KLINE const* pHisKLineEnd, int findLimits, int lastHisTime, BOOL& bLostHis);

@@ -4,6 +4,7 @@
 
 #include <qdatetime.h>
 #include <qtStockTraceDef.h>
+#include "../include/stockConfigDef.h"
 #include "../include/stockTraceReal.h"
 
 CStockTraceReal::CStockTraceReal(CStockAutoManager* pAutoManager, DL_LIST* pTraceList):CStockTraceBase(pAutoManager, pTraceList)
@@ -33,6 +34,16 @@ void CStockTraceReal::Close()
 	CStockTraceBase::Close();
 }
 
+void CStockTraceReal::UpdateConfigTrace(STOCKAUTO_CONFIG_TRACE const* pConfigTrace)
+{
+	m_fRsiBuy = pConfigTrace->fRsiBuy;
+	m_fRsiSell = pConfigTrace->fRsiSell;
+	m_iRsiBuyWaits = pConfigTrace->rsiBuyWaits;
+	m_iRsiSellWaits = pConfigTrace->rsiSellWaits;
+	m_iReachHighRanges = pConfigTrace->reachHighRanges;
+	m_fCutLossPercent = pConfigTrace->fCutLossPercent;
+	m_fRaisePercent = pConfigTrace->fRaisePercent;
+}
 
 BOOL CStockTraceReal::IsHisKLineRsiContinueLow(STOCK_CALC_TRACE_KLINE const* pHisKLineEnd, int times, float fRsiLimit)
 {

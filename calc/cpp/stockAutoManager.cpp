@@ -2,11 +2,15 @@
 *stockAutoManager.cpp
 */
 #include <qdatetime.h>
+#include "../include/stockConfigTask.h"
 #include <stockAutoWindow.h>
 #include "../include/stockTraceBase.h"
 #include "../include/stockTraceReal.h"
 #include "../include/stockTraceWeek.h"
 #include "../include/stockAutoManager.h"
+
+/*EXTERN*/
+extern CStockConfigTask g_configTask;
 
 CStockAutoManager::CStockAutoManager()
 {
@@ -144,6 +148,8 @@ void CStockAutoManager::Close()
 
 void CStockAutoManager::InitConfig()
 {
+	g_configTask.GetConfigTrace(&m_traceConfig);
+#if 0
 	m_traceConfig.raiseBalances = STOCKAUTO_CONFIG_TRACE_RAISE_BALANCES_DFT;
 	m_traceConfig.fRaisePercent = STOCKAUTO_CONFIG_TRACE_RAISE_PERCENT_DFT;
 	m_traceConfig.rsiBuyWaits = STOCKAUTO_CONFIG_TRACE_RSI_BUY_WAIT_DFT;
@@ -152,6 +158,7 @@ void CStockAutoManager::InitConfig()
 	m_traceConfig.rsiSellWaits = STOCKAUTO_CONFIG_TRACE_RSI_SELL_WAITS_DFT;
 	m_traceConfig.fRsiSell = STOCKAUTO_CONFIG_TRACE_RSI_SELL_DFT;
 	m_traceConfig.fCutLossPercent = STOCKAUTO_CONFIG_TRACE_CUTLOSS_PERCENT_DFT;
+#endif
 }
 
 void CStockAutoManager::OnEventManager()
@@ -212,6 +219,17 @@ const char* CStockAutoManager::GetStockNameByCode(const char* pCode)
 	}
 
 	return NULL;
+}
+
+BOOL CStockAutoManager::UpdateCalcTraceConfig(STOCKAUTO_CONFIG_TRACE const* pConfigTrace)
+{
+	STOCK_CALC_UPDATE_CONFIG_TRACE* pPkt = (STOCK_CALC_UPDATE_CONFIG_TRACE* )AllocPktByEvent(STOCK_CALC_EVENT_UPDATE_CONFIG_TRACE, sizeof(STOCK_CALC_UPDATE_CONFIG_TRACE), NULL, NULL);
+	if (pPkt == NULL)
+		return FALSE;
+
+	memcpy(&pPkt->configTrace, pConfigTrace, sizeof(STOCKAUTO_CONFIG_TRACE));
+	PostPktByEvent(pPkt);
+	return TRUE;
 }
 
 int CStockAutoManager::GetTaskEvent(DP_EVENT_ID* pEventsBuf, int maxCount)const
@@ -281,6 +299,7 @@ int CStockAutoManager::OnEventActive(UINT cmd, void* param, int paramLen)
 		STOCK_CALC_GET_HISKLINE_RESP* pGetHisKLineResp;
 		STOCK_CALC_UPDATE_TRACELOG_RESP* pUpdateTraceLogResp;
 		STOCK_CALC_GET_CUR_HISKLINE_RESP* pGetCurHisKLineResp;
+		STOCK_CALC_UPDATE_CONFIG_TRACE*	pUpdateConfigTrace;
 	};
 
 	pGetListResp = (STOCK_CALC_GET_LIST_RESP*)param;
@@ -313,6 +332,10 @@ int CStockAutoManager::OnEventActive(UINT cmd, void* param, int paramLen)
 
 	case STOCK_CALC_EVENT_GET_CUR_STOCK_HISKLINE_RESP:
 		OnCurHisKLineGetResp(pGetCurHisKLineResp);
+		break;
+
+	case STOCK_CALC_EVENT_UPDATE_CONFIG_TRACE:
+		OnUpdateConfigTrace(pUpdateConfigTrace);
 		break;
 	}
 
@@ -923,6 +946,16 @@ BOOL CStockAutoManager::OnCurHisKLineGetComplete(int result, void* param, int pa
 	STOCK_CALC_GET_CUR_HISKLINE* pGetHisKLine = (STOCK_CALC_GET_CUR_HISKLINE*)param;
 	CStockTraceBase* pTraceBase = pGetHisKLine->pTraceBase;
 	return pTraceBase->OnGetCurKLineComplete(result, param, paramLen);
+}
+
+void CStockAutoManager::OnUpdateConfigTrace(STOCK_CALC_UPDATE_CONFIG_TRACE* pUpdateConfigTrace)
+{
+	memcpy(&m_traceConfig, &pUpdateConfigTrace->configTrace, sizeof(STOCKAUTO_CONFIG_TRACE));
+	if (m_pTraceWeek != NULL)
+		m_pTraceWeek->UpdateConfigTrace(&m_traceConfig);
+
+	if (m_pTraceReal != NULL)
+		m_pTraceReal->UpdateConfigTrace(&m_traceConfig);
 }
 
 UINT CStockAutoManager::OnStockAutoManagerTrace()

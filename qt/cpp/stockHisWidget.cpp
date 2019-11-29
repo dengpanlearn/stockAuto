@@ -8,6 +8,7 @@
 #include <qmessagebox.h>
 #include <qdatetime.h>
 #include <qmetatype.h>
+#include "../include/stockConfigDef.h"
 #include "../include/qtWaittingDialog.h"
 #include "../include/qtStockAgent.h"
 #include "../include/qtResourceDef.h"

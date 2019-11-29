@@ -7,8 +7,12 @@
 #include <qsqlquery.h>
 #include <qtStockAgent.h>
 #include <qtStockTraceDef.h>
+#include <stockConfigTask.h>
 #include "../include/stockDataSqlite.h"
 #include "../include/stockDataTask.h"
+
+/*EXTERN*/
+extern CStockConfigTask g_configTask;
 
 CStockDataTask::CStockDataTask()
 {
@@ -57,6 +61,18 @@ void CStockDataTask::Close()
 	}
 }
 
+BOOL CStockDataTask::UpdateConfigData()
+{
+	STOCK_CALC_UPDATE_CONFIG_DATA* pUpdateConfigData = (STOCK_CALC_UPDATE_CONFIG_DATA*)AllocPktByEvent(STOCK_CALC_EVENT_UPDATE_CONFIG_DATA,
+		sizeof(STOCK_CALC_UPDATE_CONFIG_DATA), NULL, NULL);
+
+	if (pUpdateConfigData == NULL)
+		return FALSE;
+
+	PostPktByEvent(pUpdateConfigData);
+	return TRUE;
+}
+
 void CStockDataTask::OnActive()
 {
 	CMultiEventsTask::OnActive();
@@ -72,6 +88,7 @@ int CStockDataTask::OnEventActive(UINT cmd, void* param, int paramLen)
 		STOCK_CALC_UPDATE_TRACELOG* pUpdateTraceLog;
 		STOCK_CALC_GET_HISKLINE* pGetHisKLine;
 		QT_STOCK_HISKLINE_QUERY_PARAM* pQueryHisKLine;
+		STOCK_CALC_UPDATE_CONFIG_DATA* pUpdateConfigData;
 	};
 
 	pGetList = (STOCK_CALC_GET_LIST*)param;
@@ -112,6 +129,10 @@ int CStockDataTask::OnEventActive(UINT cmd, void* param, int paramLen)
 		result = m_pStockData->GetHisKLine(pQueryHisKLine->code, pQueryHisKLine->pHisKLineBuf, pQueryHisKLine->hisCounts);
 		break;
 
+	case STOCK_CALC_EVENT_UPDATE_CONFIG_DATA:
+		result = EVENT_COMPLETE_OK;
+		break;
+
 	default:
 		result = EVENT_COMPLETE_FAIL;
 	}
@@ -123,6 +144,8 @@ int CStockDataTask::OnEventActive(UINT cmd, void* param, int paramLen)
 void CStockDataTask::InitConfig(STOCKAUTO_CONFIG_DATA* pConfigData)
 {
 	// 从配置文件中读取
+	g_configTask.GetConfigData(pConfigData);
+#if 0
 	if (pConfigData->dataDir[0] == '\0')
 		memcpy(pConfigData->dataDir, STOCKAUTO_CONFIG_DATA_DATADIR_DFT, sizeof(STOCKAUTO_CONFIG_DATA_DATADIR_DFT));
 
@@ -135,4 +158,7 @@ void CStockDataTask::InitConfig(STOCKAUTO_CONFIG_DATA* pConfigData)
 
 	if (pConfigData->tracelogFileName[0] == '\0')
 		memcpy(pConfigData->tracelogFileName, STOCKAUTO_CONFIG_DATA_TRACELOG_FILENAME_DFT, sizeof(STOCKAUTO_CONFIG_DATA_TRACELOG_FILENAME_DFT));
+#endif
+
+
 }

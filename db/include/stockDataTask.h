@@ -20,6 +20,9 @@ public:
 	BOOL Create(LPCTSTR pNameTask, int stackSize, int priTask, int optTask, int timeoutMs, int maxEvents, int maxEventParamSize);
 	void Close();
 
+public:
+	BOOL UpdateConfigData();
+
 protected:
 	virtual void OnActive();
 	virtual int OnEventActive(UINT cmd, void* param, int paramLen);

@@ -133,7 +133,15 @@ int CStockDataSqlite::UpdateTraceLog(STOCK_MANAGER_TRACE_LOG* pTraceLogBuf)
 	QString selSql = QString("select code from trace where code =\'%1\'").arg(pTextCode->toUnicode(pTraceLogBuf->code));
 
 	if (!sqlQuery.exec(selSql))
-		return -1;
+	{
+		if (m_traceLogDb.tables().contains("trace"))
+			return -1;
+
+		QString createTab = QString("create table trace (step int, code varchar(9), hightime int, highval decimal, buytime int, buyval decimal, selltime int, sellval decimal, histime int, updatetime int, realtime int, raisebalances int)");
+		if (!sqlQuery.exec(createTab))
+			return -1;
+	}
+		
 
 	if (!sqlQuery.next())
 	{

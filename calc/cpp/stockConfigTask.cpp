@@ -2,7 +2,11 @@
 *stockConfigTask.cpp
 */
 
+#include "../include/stockConfigDef.h"
+#include "../include/stockAutoManager.h"
 #include "../include/stockConfigTask.h"
+
+extern CStockAutoManager g_autoManger;
 
 CStockConfigTask::CStockConfigTask()
 {
@@ -87,6 +91,13 @@ void CStockConfigTask::OnTimeout()
 	if (m_updateMask & STOCK_CONFIG_UPDATE_SYNC)
 	{
 		m_config.SaveConfig(m_szFileName);
-		m_updateMask = 0;
+		m_updateMask &= ~STOCK_CONFIG_UPDATE_SYNC;
+	}
+
+
+	if (m_updateMask & STOCK_CONFIG_UPDATE_TRACE)
+	{
+		if (g_autoManger.UpdateCalcTraceConfig(m_config.GetConfigTracePtr()))
+			m_updateMask &= ~STOCK_CONFIG_UPDATE_TRACE;
 	}
 }

@@ -1,12 +1,16 @@
 /*
 *stockUpdateTask.cpp
 */
-
+#include "../include/stockConfigDef.h"
 #include "../include/stockCalcDef.h"
 #include "../include/stockXueqiuUpdate.h"
 #include <qtStockAgent.h>
 #include <qtStockTraceDef.h>
+#include <stockConfigTask.h>
 #include "../include/stockUpdateTask.h"
+
+/*EXTERN*/
+extern CStockConfigTask g_configTask;
 
 CStockUpdateTask::CStockUpdateTask()
 {
@@ -103,6 +107,7 @@ int CStockUpdateTask::OnEventActive(UINT cmd, void* param, int paramLen)
 void CStockUpdateTask::InitConfig(STOCKAUTO_CONFIG_PYTHON* pConfigPython)
 {
 	// 从配置文件中读取
+#if 0
 	if (pConfigPython->moduleDir[0] == '\0')
 		memcpy(pConfigPython->moduleDir, STOCKAUTO_CONFIG_PYTHON_MODULEDIR_DFT, sizeof(STOCKAUTO_CONFIG_PYTHON_MODULEDIR_DFT));
 	
@@ -118,4 +123,7 @@ void CStockUpdateTask::InitConfig(STOCKAUTO_CONFIG_PYTHON* pConfigPython)
 
 	if (pConfigPython->dbStockKLine[0] == '\0')
 		memcpy(pConfigPython->dbStockKLine, STOCKAUTO_CONFIG_PYTHON_DB_STOCKKLINE_DFT, sizeof(STOCKAUTO_CONFIG_PYTHON_DB_STOCKKLINE_DFT));
+#endif
+
+	g_configTask.GetConfigPython(pConfigPython);
 }

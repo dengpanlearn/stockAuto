@@ -3,7 +3,7 @@
 *股票行情接口
 *股票交易接口
 */
-
+#include "../include/stockConfigDef.h"
 #include "../include/stockAutoManager.h"
 #include "../include/stockTraceBase.h"
 #include "../include/stockCalcDef.h"

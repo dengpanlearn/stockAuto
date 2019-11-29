@@ -15,6 +15,7 @@ public:
 	BOOL Init(int hisKLineCounts);
 	void Close();
 
+	virtual void UpdateConfigTrace(STOCKAUTO_CONFIG_TRACE const* pConfigTrace) {}
 public:
 	void Trace();
 	void AddTraceStock(STOCK_CALC_TRACE_NODE* pTraceNode);

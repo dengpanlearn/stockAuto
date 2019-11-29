@@ -3,6 +3,7 @@
 */
 
 #include <global.h>
+#include "../include/stockConfigDef.h"
 #include "../include/stockPython.h"
 
 

@@ -30,6 +30,9 @@ public:
 
 	BOOL UpdateStockTraceStat(int stockIdx, char const* pStockCode, UINT updateStat);
 	const char* GetStockNameByCode(const char* pCode);
+
+	BOOL UpdateCalcTraceConfig(STOCKAUTO_CONFIG_TRACE const* pConfigTrace);
+
 protected:
 	void InitConfig();
 	void OnEventManager();
@@ -97,7 +100,7 @@ private:
 	void OnCurHisKLineGetResp(STOCK_CALC_GET_CUR_HISKLINE_RESP* pGetCurHisKLineResp);
 	BOOL OnCurHisKLineGetComplete(int result, void* param, int paramLen);
 
-
+	void OnUpdateConfigTrace(STOCK_CALC_UPDATE_CONFIG_TRACE* pUpdateConfigTrace);
 	UINT OnStockAutoManagerTrace();
 private:
 	CStockDataTask * m_pDataTask;
