@@ -24,6 +24,7 @@ CStockAutoManager::CStockAutoManager()
 	m_eventTraceMan = INVALID_DP_EVENT_ID;
 	memset(&m_jobListUpdate, 0, sizeof(m_jobListUpdate));
 	memset(&m_jobHisKLineUpdate, 0, sizeof(m_jobHisKLineUpdate));
+	memset(&m_jobResetTrace, 0, sizeof(m_jobResetTrace));
 	dllInit(&m_listTraceWeek);
 	dllInit(&m_listTraceReal);
 }
@@ -192,6 +193,9 @@ void CStockAutoManager::OnEventManager()
 	case STOCK_AUTO_MANAGER_STEP_STOCK_TRACING:
 		m_managerStep = OnStockAutoManagerTrace();
 		break;
+
+	case STOCK_AUTO_MANAGER_STEP_RESET_TRACE:
+		break;
 	}
 }
 
@@ -300,6 +304,8 @@ int CStockAutoManager::OnEventActive(UINT cmd, void* param, int paramLen)
 		STOCK_CALC_UPDATE_TRACELOG_RESP* pUpdateTraceLogResp;
 		STOCK_CALC_GET_CUR_HISKLINE_RESP* pGetCurHisKLineResp;
 		STOCK_CALC_UPDATE_CONFIG_TRACE*	pUpdateConfigTrace;
+		STOCK_CALC_RESET_TRACE_CALC*	pResetTraceCalc;
+		STOCK_CALC_CLEAR_TRACE_HISTIME_RESP*	pClearHisTimeResp;
 	};
 
 	pGetListResp = (STOCK_CALC_GET_LIST_RESP*)param;
@@ -337,6 +343,14 @@ int CStockAutoManager::OnEventActive(UINT cmd, void* param, int paramLen)
 	case STOCK_CALC_EVENT_UPDATE_CONFIG_TRACE:
 		OnUpdateConfigTrace(pUpdateConfigTrace);
 		break;
+
+	case STOCK_CALC_EVENT_RESET_TRACE_CALC:
+		OnResetTraceCalc(pResetTraceCalc);
+		break;
+
+	case STOCK_CALC_EVENT_CLEAR_TRACE_HISTIME_RESP:
+		OnClearTraceHistimeResp(pClearHisTimeResp);
+		break;
 	}
 
 	return result;
@@ -373,6 +387,10 @@ BOOL CStockAutoManager::OnEventComplete(UINT cmd, int result, void* param, int p
 
 	case STOCK_CALC_EVENT_GET_CUR_STOCK_HISKLINE:
 		re = OnCurHisKLineGetComplete(result, param, paramLen);
+		break;
+
+	case STOCK_CALC_EVENT_CLEAR_TRACE_HISTIME:
+		re = OnClearTraceHistimeComplete(result, param, paramLen);
 		break;
 	}
 
@@ -956,6 +974,83 @@ void CStockAutoManager::OnUpdateConfigTrace(STOCK_CALC_UPDATE_CONFIG_TRACE* pUpd
 
 	if (m_pTraceReal != NULL)
 		m_pTraceReal->UpdateConfigTrace(&m_traceConfig);
+}
+
+void CStockAutoManager::OnClearTraceHistimeResp(STOCK_CALC_CLEAR_TRACE_HISTIME_RESP* pClearResp)
+{
+	if (pClearResp->respResult == EVENT_COMPLETE_FAIL)
+	{
+		m_jobResetTrace.jobStep = TASK_EVENT_JOB_STEP_COMPLETED_FAIL;
+	}
+	else
+	{
+		m_jobResetTrace.jobStep = TASK_EVENT_JOB_STEP_COMPLETED_OK;
+	}
+
+	ActiveManager();
+}
+
+BOOL CStockAutoManager::OnClearTraceHistimeComplete(int result, void* param, int paramLen)
+{
+	STOCK_CALC_CLEAR_TRACE_HISTIME_RESP* pClearResp = (STOCK_CALC_CLEAR_TRACE_HISTIME_RESP*)AllocPktByEvent(STOCK_CALC_EVENT_CLEAR_TRACE_HISTIME_RESP,
+		sizeof(STOCK_CALC_CLEAR_TRACE_HISTIME_RESP), NULL, this);
+	if (pClearResp == NULL)
+		return FALSE;
+
+	pClearResp->respResult = result;
+	PostPktByEvent(pClearResp);
+	return TRUE;
+}
+
+UINT CStockAutoManager::OnStockAutoManagerResetTrace()
+{
+	UINT nextStep = STOCK_AUTO_MANAGER_STEP_RESET_TRACE;
+	if (m_jobResetTrace.jobStep == TASK_EVENT_JOB_STEP_WAITING_RESP)
+	{
+		return nextStep;
+	}
+
+	if (m_jobResetTrace.jobStep == TASK_EVENT_JOB_STEP_NONE)
+	{
+		STOCK_CALC_CLEAR_TRACE_HISTIME* pClearHisTime = (STOCK_CALC_CLEAR_TRACE_HISTIME*)m_pDataTask->AllocPktByEvent(STOCK_CALC_EVENT_CLEAR_TRACE_HISTIME,
+			sizeof(STOCK_CALC_CLEAR_TRACE_HISTIME), MultiTaskEventComplete, this);
+		if (pClearHisTime == NULL)
+			return nextStep;
+
+		m_pDataTask->PostPktByEvent(pClearHisTime);
+	}
+	else
+	{
+		STOCK_MANAGER_TRACE_LOG* pTraceLog = m_pJobTraceLog->traceLog + STOCK_AUTO_COUNTS_MAX;
+		for (int i = 0; i < m_pJobList->stockCounts; i++)
+		{
+			if (pTraceLog->traceStep < CALC_STOCK_TRADE_STEP_WAIT_SELL)
+			{
+				pTraceLog->traceStep = CALC_STOCK_TRADE_STEP_CHECK_BALANCE_RAISE;
+				pTraceLog->buyTime = 0;
+			}
+		}
+
+
+		m_pTraceWeek->ResetTrace();
+		m_pTraceReal->ResetTrace();
+
+		nextStep = m_jobResetTrace.lastEventStep;
+		ActiveManager();
+	}
+
+	return nextStep;
+}
+
+void CStockAutoManager::OnResetTraceCalc(STOCK_CALC_RESET_TRACE_CALC* pResetTrace)
+{
+	if (m_managerStep < STOCK_AUTO_MANAGER_STEP_STOCK_TRACING)
+		return;
+
+	m_jobResetTrace.jobStep = TASK_EVENT_JOB_STEP_NONE;
+	m_jobResetTrace.lastEventStep = m_managerStep;
+	m_managerStep = STOCK_AUTO_MANAGER_STEP_RESET_TRACE;
+	ActiveManager();
 }
 
 UINT CStockAutoManager::OnStockAutoManagerTrace()

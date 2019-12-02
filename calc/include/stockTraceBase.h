@@ -16,6 +16,7 @@ public:
 	void Close();
 
 	virtual void UpdateConfigTrace(STOCKAUTO_CONFIG_TRACE const* pConfigTrace) {}
+	virtual void ResetTrace();
 public:
 	void Trace();
 	void AddTraceStock(STOCK_CALC_TRACE_NODE* pTraceNode);

@@ -55,6 +55,30 @@ void CStockTraceBase::Close()
 	}
 }
 
+void CStockTraceBase::ResetTrace()
+{
+	m_workStep = STOCK_TRACE_STEP_PRPARING;
+
+	m_pCurNode = DLL_FIRST(m_pTraceList);
+	union
+	{
+		STOCK_CALC_TRACE_NODE* pTraceNode;
+		DL_NODE*			pNode;
+	};
+
+	pNode = m_pCurNode;
+	m_workStep = STOCK_TRACE_STEP_PRPARING;
+	while (pNode)
+	{
+		InitStockTrace(pTraceNode);
+		pNode = pNode->next;
+	}
+
+	m_jobGetHisKine.jobStep = TASK_EVENT_JOB_STEP_NONE;
+	m_jobUpdateTraceLog.jobStep = TASK_EVENT_JOB_STEP_NONE;
+	m_jobGetHisKine.jobStep = TASK_EVENT_JOB_STEP_NONE;
+}
+
 void CStockTraceBase::Trace()
 {
 	if (m_pCurNode == NULL)

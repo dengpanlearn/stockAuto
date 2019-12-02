@@ -133,6 +133,10 @@ int CStockDataTask::OnEventActive(UINT cmd, void* param, int paramLen)
 		result = EVENT_COMPLETE_OK;
 		break;
 
+	case STOCK_CALC_EVENT_CLEAR_TRACE_HISTIME:
+		result = m_pStockData->ClearTraceLogHisTime();
+		break;
+
 	default:
 		result = EVENT_COMPLETE_FAIL;
 	}

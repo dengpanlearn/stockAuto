@@ -43,6 +43,11 @@ void CStockTraceWeek::UpdateConfigTrace(STOCKAUTO_CONFIG_TRACE const* pConfigTra
 	m_fRsiSell = pConfigTrace->fRsiSell;
 }
 
+void CStockTraceWeek::ResetTrace()
+{
+	CStockTraceBase::ResetTrace();
+}
+
 void CStockTraceWeek::InitStockTrace(STOCK_CALC_TRACE_NODE* pTraceNode)
 {
 	STOCK_MANAGER_TRACE_LOG* pTraceLog = pTraceNode->pTraceLog;

@@ -45,6 +45,12 @@ void CStockTraceReal::UpdateConfigTrace(STOCKAUTO_CONFIG_TRACE const* pConfigTra
 	m_fRaisePercent = pConfigTrace->fRaisePercent;
 }
 
+void CStockTraceReal::ResetTrace()
+{
+	m_realTraceStep = 0;
+	CStockTraceBase::ResetTrace();
+}
+
 BOOL CStockTraceReal::IsHisKLineRsiContinueLow(STOCK_CALC_TRACE_KLINE const* pHisKLineEnd, int times, float fRsiLimit)
 {
 	for (int i = 0; i < times; pHisKLineEnd--)

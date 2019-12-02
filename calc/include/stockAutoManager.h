@@ -101,7 +101,13 @@ private:
 	BOOL OnCurHisKLineGetComplete(int result, void* param, int paramLen);
 
 	void OnUpdateConfigTrace(STOCK_CALC_UPDATE_CONFIG_TRACE* pUpdateConfigTrace);
+
+	void OnClearTraceHistimeResp(STOCK_CALC_CLEAR_TRACE_HISTIME_RESP* pClearResp);
+	BOOL OnClearTraceHistimeComplete(int result, void* param, int paramLen);
+	void OnResetTraceCalc(STOCK_CALC_RESET_TRACE_CALC* pResetTrace);
 	UINT OnStockAutoManagerTrace();
+
+	UINT OnStockAutoManagerResetTrace();
 private:
 	CStockDataTask * m_pDataTask;
 	CStockUpdateTask*	m_pUpdateTask;
@@ -113,6 +119,7 @@ private:
 	STOCK_MANAGER_JOB_TRACELOG_LOAD*	m_pJobTraceLog;
 	STOCK_MANAGER_JOB_LIST_UPDATE	m_jobListUpdate;
 	STOCK_MANAGER_JOB_HISKLINE_UPDATE m_jobHisKLineUpdate;
+	STOCK_TRACE_JOB_RESET_TRACECLAC m_jobResetTrace;
 	DL_LIST							m_listTraceWeek;
 	DL_LIST							m_listTraceReal;
 	STOCK_CALC_TRACE_NODE*			m_pCalcTraceBuf;

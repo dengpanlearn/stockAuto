@@ -122,6 +122,19 @@ int CStockDataSqlite::GetTraceLog(STOCK_MANAGER_TRACE_LOG* pTraceLogBuf, int buf
 	return logCounts;
 }
 
+int CStockDataSqlite::ClearTraceLogHisTime()
+{
+	if (!m_traceLogDb.isOpen())
+		return -1;
+
+
+	QSqlQuery sqlQuery(m_traceLogDb);
+
+	QString updateSql = QString("update trace set step=1, histime = 0 where step < 4");
+
+	return sqlQuery.exec() ? 0 : -1;
+}
+
 int CStockDataSqlite::UpdateTraceLog(STOCK_MANAGER_TRACE_LOG* pTraceLogBuf)
 {
 	if (!m_traceLogDb.isOpen())

@@ -19,6 +19,7 @@ public:
 
 	virtual BOOL TraceLogIsOn() = 0;
 	virtual int GetTraceLog(STOCK_MANAGER_TRACE_LOG* pTraceLogBuf, int bufCounts) = 0;
+	virtual int ClearTraceLogHisTime() = 0;
 	virtual int UpdateTraceLog(STOCK_MANAGER_TRACE_LOG* pTraceLogBuf) = 0;
 	virtual int GetHisKLine(char const* pStockCode, STOCK_CALC_TRACE_KLINE* pHisKLineBuf, int bufCounts)=0;
 };
