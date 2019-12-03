@@ -108,6 +108,7 @@ void CStockConfig::LoadConfigPython(QSettings* pConfigSettings, STOCKAUTO_CONFIG
 	if (keys.contains(tmpKey))
 	{
 		QString val = pConfigSettings->value(tmpKey).toString();
+		memset(pConfigPython->moduleDir, 0, STOCK_CONFIG_NAME_MAX);
 		QString2Char(val, pConfigPython->moduleDir);
 	}
 
@@ -115,6 +116,7 @@ void CStockConfig::LoadConfigPython(QSettings* pConfigSettings, STOCKAUTO_CONFIG
 	if (keys.contains(tmpKey))
 	{
 		QString val = pConfigSettings->value(tmpKey).toString();
+		memset(pConfigPython->klineModule, 0, STOCK_CONFIG_NAME_MAX);
 		QString2Char(val, pConfigPython->klineModule);
 	}
 
@@ -122,6 +124,7 @@ void CStockConfig::LoadConfigPython(QSettings* pConfigSettings, STOCKAUTO_CONFIG
 	if (keys.contains(tmpKey))
 	{
 		QString val = pConfigSettings->value(tmpKey).toString();
+		memset(pConfigPython->updateDir, 0, STOCK_CONFIG_NAME_MAX);
 		QString2Char(val, pConfigPython->updateDir);
 	}
 
@@ -129,6 +132,7 @@ void CStockConfig::LoadConfigPython(QSettings* pConfigSettings, STOCKAUTO_CONFIG
 	if (keys.contains(tmpKey))
 	{
 		QString val = pConfigSettings->value(tmpKey).toString();
+		memset(pConfigPython->dbStockList, 0, STOCK_CONFIG_NAME_MAX);
 		QString2Char(val, pConfigPython->dbStockList);
 	}
 
@@ -136,6 +140,7 @@ void CStockConfig::LoadConfigPython(QSettings* pConfigSettings, STOCKAUTO_CONFIG
 	if (keys.contains(tmpKey))
 	{
 		QString val = pConfigSettings->value(tmpKey).toString();
+		memset(pConfigPython->dbStockKLine, 0, STOCK_CONFIG_NAME_MAX);
 		QString2Char(val, pConfigPython->dbStockKLine);
 	}
 
@@ -152,6 +157,7 @@ void CStockConfig::LoadConfigData(QSettings* pConfigSettings, STOCKAUTO_CONFIG_D
 	if (keys.contains(tmpKey))
 	{
 		QString val = pConfigSettings->value(tmpKey).toString();
+		memset(pConfigData->dataDir, 0, STOCK_CONFIG_NAME_MAX);
 		QString2Char(val, pConfigData->dataDir);
 	}
 
@@ -159,6 +165,7 @@ void CStockConfig::LoadConfigData(QSettings* pConfigSettings, STOCKAUTO_CONFIG_D
 	if (keys.contains(tmpKey))
 	{
 		QString val = pConfigSettings->value(tmpKey).toString();
+		memset(pConfigData->listFileName, 0, STOCK_CONFIG_NAME_MAX);
 		QString2Char(val, pConfigData->listFileName);
 	}
 
@@ -166,6 +173,7 @@ void CStockConfig::LoadConfigData(QSettings* pConfigSettings, STOCKAUTO_CONFIG_D
 	if (keys.contains(tmpKey))
 	{
 		QString val = pConfigSettings->value(tmpKey).toString();
+		memset(pConfigData->klineFileName, 0, STOCK_CONFIG_NAME_MAX);
 		QString2Char(val, pConfigData->klineFileName);
 	}
 
@@ -173,6 +181,7 @@ void CStockConfig::LoadConfigData(QSettings* pConfigSettings, STOCKAUTO_CONFIG_D
 	if (keys.contains(tmpKey))
 	{
 		QString val = pConfigSettings->value(tmpKey).toString();
+		memset(pConfigData->tracelogFileName, 0, STOCK_CONFIG_NAME_MAX);
 		QString2Char(val, pConfigData->tracelogFileName);
 	}
 

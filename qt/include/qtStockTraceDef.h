@@ -66,6 +66,11 @@ struct QT_STOCK_LOADING_MANAGER
 	int		progress;
 };
 
+struct QT_STOCK_RESET_TRACE_JOB
+{
+	int		jobResult;
+};
+
 class CQtStockAgent;
 struct QT_STOCK_HISKLINE_QUERY_PARAM
 {

@@ -17,11 +17,12 @@ public:
 	void Close();
 
 	virtual void UpdateConfigTrace(STOCKAUTO_CONFIG_TRACE const* pConfigTrace);
-	virtual void ResetTrace();
 protected:
 	static BOOL IsHisKLineRsiContinueLow(STOCK_CALC_TRACE_KLINE const* pHisKLineEnd, int times, float fRsiLimit);
 
 	virtual void InitStockTrace(STOCK_CALC_TRACE_NODE* pTraceNode);
+	virtual void ResetStockTrace(STOCK_CALC_TRACE_NODE* pTraceNode);
+	virtual BOOL IsActiveManagerAfterAddNode();
 	virtual UINT DoPrepareWork(STOCK_CALC_TRACE_NODE* pTraceNode);
 	virtual BOOL CheckForPrepare(STOCK_CALC_TRACE_NODE* pTraceNode);
 	virtual UINT Next(DL_NODE* pNode);

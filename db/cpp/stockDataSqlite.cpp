@@ -130,9 +130,9 @@ int CStockDataSqlite::ClearTraceLogHisTime()
 
 	QSqlQuery sqlQuery(m_traceLogDb);
 
-	QString updateSql = QString("update trace set step=1, histime = 0 where step < 4");
+	QString updateSql = QString("update trace set step=1, histime = 0 where step < 4;");
 
-	return sqlQuery.exec() ? 0 : -1;
+	return sqlQuery.exec(updateSql) ? 0 : -1;
 }
 
 int CStockDataSqlite::UpdateTraceLog(STOCK_MANAGER_TRACE_LOG* pTraceLogBuf)

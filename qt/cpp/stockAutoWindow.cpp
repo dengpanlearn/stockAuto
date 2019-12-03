@@ -16,6 +16,7 @@
 #include "../include/stockHisWidget.h"
 #include "../include/stockRealWidget.h"
 #include "../include/stockTraceWidget.h"
+#include "../include/qtWaittingDialog.h"
 #include "../include/qtServerTask.h"
 #include "../include/qtStockTraceDef.h"
 #include "../include/qtObjectAgent.h"
@@ -31,6 +32,7 @@ CStockAutoWindow::CStockAutoWindow(QWidget *parent)
 	m_pServerTask = NULL;
 	m_pExitAgent = NULL;
 	m_pStockAgent = NULL;
+	m_pWaitDialog = NULL;
 	m_pLoadingDialog = NULL;
 	OnInit();
 	RetranlateUi();
@@ -56,6 +58,13 @@ BOOL CStockAutoWindow::UpdateStockTrace(char const* pStockName, char const* pSto
 		return pStockAgent->UpdateStockTrace(pStockName, pStockCode, updateStat);
 	else
 		return TRUE;
+}
+
+void CStockAutoWindow::UpdateResetTraceResult(int result)
+{
+	CQtStockAgent* pStockAgent = (CQtStockAgent*)m_pStockAgent;
+	if (pStockAgent != NULL)
+		pStockAgent->UpdateResetTraceResult(result);
 }
 
 void CStockAutoWindow::OnInit()
@@ -98,6 +107,7 @@ void CStockAutoWindow::OnInit()
 	QTextCodec* pCodec = QTextCodec::codecForLocale();
 	QMenu* pMenu = pMenuBar->addMenu(pCodec->toUnicode(STOCK_AUTO_WINDOW_MEUNU_FUNC));
 	m_pActSetting = pMenu->addAction(pCodec->toUnicode(STOCK_AUTO_WINDOW_ACTION_SETTING));
+	m_pActResetTrace = pMenu->addAction(pCodec->toUnicode(STOCK_AUTO_WINDOW_ACTION_RESET_TRACE));
 }
 
 void CStockAutoWindow::RetranlateUi()
@@ -107,10 +117,13 @@ void CStockAutoWindow::RetranlateUi()
 		CQtStockAgent* pStockAgent = (CQtStockAgent* )m_pStockAgent;
 		connect(pStockAgent, SIGNAL(NotifyUiManagerLoadingProgress()), this, SLOT(OnNotifyAutoManagerLoadingProgress()));
 		connect(this, SIGNAL(UpdateLoadingProgress(QString&, QString& )), m_pLoadingDialog, SLOT(OnUpdateLoadingProgress(QString&, QString&)));
+		connect(pStockAgent, SIGNAL(NotifyResetTraceResponese()), this, SLOT(OnResetTraceResponese()));
+		connect(this, SIGNAL(SignalResetTrace()), pStockAgent, SLOT(OnRequestResetTrace()));
 	}
 
 	connect(m_pTraceWidget, SIGNAL(SignalSelectStock(QString&, QString&)), m_pRealWidget, SLOT(OnSelectStock(QString&, QString&)));
 	connect(m_pActSetting, SIGNAL(triggered(bool)), this, SLOT(OnEnterSettingDialog(bool)));
+	connect(m_pActResetTrace, SIGNAL(triggered(bool)), this, SLOT(OnSelectResetTrace(bool)));
 }
 
 BOOL CStockAutoWindow:: OnInitQtServerAndAgent()
@@ -257,4 +270,25 @@ void CStockAutoWindow::OnEnterSettingDialog(bool check)
 	pSettingDialog->setObjectName("Stock_Setting_Dialog");
 	pSettingDialog->exec();
 	delete pSettingDialog;
+}
+
+void CStockAutoWindow::OnSelectResetTrace(bool check)
+{
+	if (m_pWaitDialog)
+		return;
+
+	m_pWaitDialog = new CQtWaitting(NULL);
+	emit SignalResetTrace();
+
+	m_pWaitDialog->exec();
+}
+
+void CStockAutoWindow::OnResetTraceResponese()
+{
+	if (m_pWaitDialog != NULL)
+	{
+		m_pWaitDialog->close();
+		delete m_pWaitDialog;
+		m_pWaitDialog = NULL;
+	}
 }

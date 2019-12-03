@@ -17,6 +17,7 @@
 #include "qtStockAgent.h"
 
 class QAction;
+class CQtWaitting;
 
 class CStockAutoWindow : public QMainWindow
 {
@@ -30,6 +31,7 @@ public:
 public:
 	void UpdateAutoManagerStep(UINT traceStep, int loadProgress);
 	BOOL UpdateStockTrace(char const* pStockName, char const* pStockCode, UINT updateStat);
+	void UpdateResetTraceResult(int result);
 
 private:
 	void OnInit();
@@ -39,6 +41,7 @@ private:
 
 signals:
 	void UpdateLoadingProgress(QString& stat, QString& progress);
+	void SignalResetTrace();
 
 protected:
 	virtual void closeEvent(QCloseEvent * event);
@@ -46,6 +49,8 @@ protected:
 private slots:
 	void OnNotifyAutoManagerLoadingProgress();
 	void OnEnterSettingDialog(bool check);
+	void OnSelectResetTrace(bool check);
+	void OnResetTraceResponese();
 
 private:
 	CQtServerTask*	m_pServerTask;
@@ -57,6 +62,8 @@ private:
 	CStockLoadingDialog*	m_pLoadingDialog;
 	BOOL		m_bLoading;
 	QAction*	m_pActSetting;
+	QAction*	m_pActResetTrace;
+	CQtWaitting*	m_pWaitDialog;
 };
 
 #endif // !__STOCK_AUTO_WINDOW_H__

@@ -43,6 +43,8 @@ public:
 	void UpdateConfigTrace(STOCKAUTO_CONFIG_TRACE* pConfigTrace);
 	void SyncConfig();
 
+	void UpdateResetTraceResult(int result);
+
 private:
 	static BOOL QtTaskEventComplete(UINT cmd, int result, void* param, int paramLen);
 
@@ -55,10 +57,12 @@ signals:
 	void NotifyUiStockTrace();
 	void NotifyUiHisKLineResponese();
 	void NotifyUiRealKLineResponese();
-
+	void NotifyResetTraceResponese();
+	
 private slots:
 	void OnGetQueryHisKLine(QString& code);
 	void OnGetQueryRealKLine(QString& code, QString& name);
+	void OnRequestResetTrace();
 
 protected:
 	virtual BOOL OnInit();
@@ -72,6 +76,7 @@ protected:
 		QT_STOCK_AGENT_UPDATE_STOCK_TRACE = 0x00000002,
 		QT_STOCK_AGENT_QUERY_HISKLINE_RESPONESE = 0x00000004,
 		QT_STOCK_AGENT_QUERY_REALKLINE_RESPONESE = 0x00000008,
+		QT_STOCK_AGENT_REQUEST_RESET_TRACE_RESPONESE = 0x00000010
 	};
 
 private:
@@ -80,6 +85,7 @@ private:
 	DL_LIST				m_listTraceLog;
 	QT_STOCK_HISKLINE_QUERY_JOB*	m_pHisKLineQueryJob;
 	QT_STOCK_REALKLINE_QUERY_JOB	m_realKLineQueryJob;
+	QT_STOCK_RESET_TRACE_JOB		m_resetTraceJob;
 	QT_STOCK_LOADING_MANAGER		m_loadingManager;
 	CMultiEventsTask*		m_pManager;
 	CMultiEventsTask*		m_pDataTask;

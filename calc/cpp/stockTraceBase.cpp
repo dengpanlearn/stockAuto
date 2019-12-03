@@ -57,21 +57,21 @@ void CStockTraceBase::Close()
 
 void CStockTraceBase::ResetTrace()
 {
-	m_workStep = STOCK_TRACE_STEP_PRPARING;
-
 	m_pCurNode = DLL_FIRST(m_pTraceList);
 	union
 	{
 		STOCK_CALC_TRACE_NODE* pTraceNode;
 		DL_NODE*			pNode;
 	};
-
+	DL_NODE* pNextNode;
 	pNode = m_pCurNode;
 	m_workStep = STOCK_TRACE_STEP_PRPARING;
 	while (pNode)
-	{
+	{ 
+		pNextNode = pNode->next;
+		ResetStockTrace(pTraceNode);
 		InitStockTrace(pTraceNode);
-		pNode = pNode->next;
+		pNode = pNextNode;
 	}
 
 	m_jobGetHisKine.jobStep = TASK_EVENT_JOB_STEP_NONE;
@@ -112,7 +112,12 @@ void CStockTraceBase::AddTraceStock(STOCK_CALC_TRACE_NODE* pTraceNode)
 {
 	dllAdd(m_pTraceList, &pTraceNode->node);
 	if (m_pCurNode == NULL)
+	{
 		m_pCurNode = &pTraceNode->node;
+
+		if (IsActiveManagerAfterAddNode())
+			m_pAutoManager->ActiveManager();
+	}
 }
 
 void CStockTraceBase::TraceStock(STOCK_CALC_TRACE_NODE* pTraceNode)
@@ -140,6 +145,40 @@ void CStockTraceBase::InitStockTrace(STOCK_CALC_TRACE_NODE* pTraceNode)
 	{
 		UpdateStockTraceStat(pTraceNode->stockIdx, pTraceLog->code, QT_STOCK_TRACE_LOG_STAT_BUYED | QT_STOCK_TRACE_LOG_STAT_ADD);
 	}
+}
+
+void CStockTraceBase::ResetStockTrace(STOCK_CALC_TRACE_NODE* pTraceNode)
+{
+	STOCK_MANAGER_TRACE_LOG* pTraceLog = pTraceNode->pTraceLog;
+	if ((pTraceLog->traceStep == CALC_STOCK_TRADE_STEP_CHECK_BALANCE_RAISE) || (pTraceLog->traceStep == 0))
+	{
+		pTraceLog->traceStep = CALC_STOCK_TRADE_STEP_CHECK_BALANCE_RAISE;
+		pTraceLog->hisTime = 0;
+		pTraceLog->realTime = 0;
+	}
+	else if (pTraceLog->traceStep == CALC_STOCK_TRADE_STEP_CHECK_HIGH)
+	{
+		UpdateStockTraceStat(pTraceNode->stockIdx, pTraceLog->code, QT_STOCK_TRACE_LOG_STAT_RAISE_BALANCED | QT_STOCK_TRACE_LOG_STAT_DEL);
+		pTraceLog->traceStep = CALC_STOCK_TRADE_STEP_CHECK_BALANCE_RAISE;
+		pTraceLog->hisTime = 0;
+		pTraceLog->realTime = 0;
+	}
+	else if (pTraceLog->traceStep == CALC_STOCK_TRADE_STEP_WAIT_BUY)
+	{
+		UpdateStockTraceStat(pTraceNode->stockIdx, pTraceLog->code, QT_STOCK_TRACE_LOG_STAT_HIGH_REACHED | QT_STOCK_TRACE_LOG_STAT_DEL);
+		pTraceLog->traceStep = CALC_STOCK_TRADE_STEP_CHECK_BALANCE_RAISE;
+		pTraceLog->hisTime = 0;
+		pTraceLog->realTime = 0;
+	}
+	else if (pTraceLog->traceStep == CALC_STOCK_TRADE_STEP_WAIT_SELL)
+	{
+		UpdateStockTraceStat(pTraceNode->stockIdx, pTraceLog->code, QT_STOCK_TRACE_LOG_STAT_BUYED | QT_STOCK_TRACE_LOG_STAT_DEL);
+	}
+}
+
+BOOL CStockTraceBase::IsActiveManagerAfterAddNode()
+{
+	return FALSE;
 }
 
 void CStockTraceBase::OnGetKLineResp(STOCK_CALC_GET_HISKLINE_RESP* pGetKLineResp)

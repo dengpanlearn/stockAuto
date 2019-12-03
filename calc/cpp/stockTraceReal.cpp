@@ -45,12 +45,6 @@ void CStockTraceReal::UpdateConfigTrace(STOCKAUTO_CONFIG_TRACE const* pConfigTra
 	m_fRaisePercent = pConfigTrace->fRaisePercent;
 }
 
-void CStockTraceReal::ResetTrace()
-{
-	m_realTraceStep = 0;
-	CStockTraceBase::ResetTrace();
-}
-
 BOOL CStockTraceReal::IsHisKLineRsiContinueLow(STOCK_CALC_TRACE_KLINE const* pHisKLineEnd, int times, float fRsiLimit)
 {
 	for (int i = 0; i < times; pHisKLineEnd--)
@@ -66,6 +60,19 @@ void CStockTraceReal::InitStockTrace(STOCK_CALC_TRACE_NODE* pTraceNode)
 {
 	m_realTraceStep = STOCK_TRACE_REAL_PRPARE_STEP_NONE;
 	CStockTraceBase::InitStockTrace(pTraceNode);
+}
+
+void CStockTraceReal::ResetStockTrace(STOCK_CALC_TRACE_NODE* pTraceNode)
+{
+	CStockTraceBase::ResetStockTrace(pTraceNode);
+	STOCK_MANAGER_TRACE_LOG* pTraceLog = pTraceNode->pTraceLog;
+	if (pTraceLog->traceStep == CALC_STOCK_TRADE_STEP_CHECK_BALANCE_RAISE)
+		RemoveTraceNode(pTraceNode);
+}
+
+BOOL CStockTraceReal::IsActiveManagerAfterAddNode()
+{
+	return FALSE;
 }
 
 UINT CStockTraceReal::DoPrepareWork(STOCK_CALC_TRACE_NODE* pTraceNode)

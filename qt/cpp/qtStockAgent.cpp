@@ -20,6 +20,7 @@ CQtStockAgent::CQtStockAgent(QObject* parent): CQtTimeAgent(parent)
 	m_pDataTask = NULL;
 	m_pUpdateTask = NULL;
 	memset(&m_loadingManager, 0, sizeof(m_loadingManager));
+	memset(&m_resetTraceJob, 0, sizeof(m_resetTraceJob));
 	dllInit(&m_listTraceLog);
 }
 
@@ -160,6 +161,13 @@ void CQtStockAgent::SyncConfig()
 	g_configTask.SyncConfig();
 }
 
+void CQtStockAgent::UpdateResetTraceResult(int result)
+{
+	CSingleLock lock(&m_cs, TRUE);
+	m_resetTraceJob.jobResult = result;
+	m_updateCmd |= QT_STOCK_AGENT_REQUEST_RESET_TRACE_RESPONESE;
+}
+
 BOOL CQtStockAgent::QtTaskEventComplete(UINT cmd, int result, void* param, int paramLen)
 {
 	union
@@ -259,6 +267,22 @@ void CQtStockAgent::OnGetQueryRealKLine(QString& code, QString& name)
 	m_pUpdateTask->PostPktByEvent(pQueryParam);
 }
 
+void CQtStockAgent::OnRequestResetTrace()
+{
+	STOCK_CALC_RESET_TRACE_CALC* pResetTrace = (STOCK_CALC_RESET_TRACE_CALC*)m_pManager->AllocPktByEvent(STOCK_CALC_EVENT_RESET_TRACE_CALC, 
+		sizeof(STOCK_CALC_RESET_TRACE_CALC), NULL, NULL);
+	if (pResetTrace == NULL)
+	{
+		CSingleLock lock(&m_cs, TRUE);
+		m_resetTraceJob.jobResult = -1;
+		m_updateCmd |= QT_STOCK_AGENT_REQUEST_RESET_TRACE_RESPONESE;
+
+		return;
+	}
+
+	m_pManager->PostPktByEvent(pResetTrace);
+}
+
 BOOL CQtStockAgent::OnInit()
 {
 	dllInit(&m_listTraceLog);
@@ -290,6 +314,12 @@ void CQtStockAgent::OnTimeout()
 	{
 		m_updateCmd &= ~QT_STOCK_AGENT_QUERY_REALKLINE_RESPONESE;
 		emit NotifyUiRealKLineResponese();
+	}
+
+	if (m_updateCmd & QT_STOCK_AGENT_REQUEST_RESET_TRACE_RESPONESE)
+	{
+		m_updateCmd &= ~QT_STOCK_AGENT_REQUEST_RESET_TRACE_RESPONESE;
+		emit NotifyResetTraceResponese();
 	}
 
 	if (!DLL_IS_EMPTY(&m_listTraceLog))

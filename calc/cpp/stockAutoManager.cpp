@@ -195,6 +195,7 @@ void CStockAutoManager::OnEventManager()
 		break;
 
 	case STOCK_AUTO_MANAGER_STEP_RESET_TRACE:
+		m_managerStep = OnStockAutoManagerResetTrace();
 		break;
 	}
 }
@@ -399,7 +400,7 @@ BOOL CStockAutoManager::OnEventComplete(UINT cmd, int result, void* param, int p
 
 void CStockAutoManager::OnTimeout()
 {
-	if (m_pTraceReal != NULL)
+	if ((m_pTraceReal != NULL) && m_managerStep != STOCK_AUTO_MANAGER_STEP_RESET_TRACE)
 	{
 		m_pTraceReal->Trace();
 	}
@@ -1021,21 +1022,13 @@ UINT CStockAutoManager::OnStockAutoManagerResetTrace()
 	}
 	else
 	{
-		STOCK_MANAGER_TRACE_LOG* pTraceLog = m_pJobTraceLog->traceLog + STOCK_AUTO_COUNTS_MAX;
-		for (int i = 0; i < m_pJobList->stockCounts; i++)
-		{
-			if (pTraceLog->traceStep < CALC_STOCK_TRADE_STEP_WAIT_SELL)
-			{
-				pTraceLog->traceStep = CALC_STOCK_TRADE_STEP_CHECK_BALANCE_RAISE;
-				pTraceLog->buyTime = 0;
-			}
-		}
-
-
 		m_pTraceWeek->ResetTrace();
 		m_pTraceReal->ResetTrace();
 
+		m_jobResetTrace.jobStep = TASK_EVENT_JOB_STEP_NONE;
 		nextStep = m_jobResetTrace.lastEventStep;
+
+		m_pAutoWindow->UpdateResetTraceResult(1);
 		ActiveManager();
 	}
 

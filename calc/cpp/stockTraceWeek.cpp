@@ -43,11 +43,6 @@ void CStockTraceWeek::UpdateConfigTrace(STOCKAUTO_CONFIG_TRACE const* pConfigTra
 	m_fRsiSell = pConfigTrace->fRsiSell;
 }
 
-void CStockTraceWeek::ResetTrace()
-{
-	CStockTraceBase::ResetTrace();
-}
-
 void CStockTraceWeek::InitStockTrace(STOCK_CALC_TRACE_NODE* pTraceNode)
 {
 	STOCK_MANAGER_TRACE_LOG* pTraceLog = pTraceNode->pTraceLog;
@@ -55,6 +50,16 @@ void CStockTraceWeek::InitStockTrace(STOCK_CALC_TRACE_NODE* pTraceNode)
 		pTraceLog->traceStep = CALC_STOCK_TRADE_STEP_CHECK_BALANCE_RAISE;
 
 	CStockTraceBase::InitStockTrace(pTraceNode);
+}
+
+void CStockTraceWeek::ResetStockTrace(STOCK_CALC_TRACE_NODE* pTraceNode)
+{
+	CStockTraceBase::ResetStockTrace(pTraceNode);
+}
+
+BOOL CStockTraceWeek::IsActiveManagerAfterAddNode()
+{
+	return TRUE;
 }
 
 BOOL CStockTraceWeek::CheckForPrepare(STOCK_CALC_TRACE_NODE* pTraceNode)
