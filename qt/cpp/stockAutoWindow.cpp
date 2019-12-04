@@ -292,3 +292,4 @@ void CStockAutoWindow::OnResetTraceResponese()
 		m_pWaitDialog = NULL;
 	}
 }
+

@@ -6,6 +6,7 @@
 #include <qtextcodec.h>
 #include <qdatetime.h>
 #include <qlayout.h>
+#include <qsplitter.h>
 #include <qtimer.h>
 #include <qlabel.h>
 #include <qtStockAgent.h>
@@ -29,14 +30,33 @@ CStockRealWidget::~CStockRealWidget()
 
 void CStockRealWidget::OnInit()
 {
+	QWidget* pRealWidget = new QWidget();
+	QWidget* pTraceWidget = new QWidget();
+	m_pSpliter = new QSplitter(Qt::Vertical);
+	m_pSpliter->addWidget(pRealWidget);
+	m_pSpliter->addWidget(pTraceWidget);
+
+	QVBoxLayout* pLyt = new QVBoxLayout();
+	pLyt->setMargin(0);
+	pLyt->addWidget(m_pSpliter);
+	this->setLayout(pLyt);
+	OnInitRealWidget(pRealWidget);
+	OnInitTraceWidget(pTraceWidget);
+	m_pTimer = new QTimer(this);
+	m_pTimer->setInterval(STOCK_REAL_WIDGET_FRESH_TIMEOUT);
+	m_pTimer->start();
+}
+
+void CStockRealWidget::OnInitRealWidget(QWidget* pWidget)
+{
 	QTextCodec* pCodec = QTextCodec::codecForLocale();
-	for (int i = 0; i < STOCK_REAL_WIDGET_IDEX_NUM; i++)
+	for (int i = 0; i < STOCK_REAL_WIDGET_INDEX_NUM; i++)
 	{
 		m_pLabCode[i] = new QLabel();
 		m_pLabCode[i]->setText(pCodec->toUnicode(STOCK_REAL_WIDGET_TEXT_DFT));
 		m_pLabCode[i]->setObjectName("Stock_Real_Lab_Val");
 	}
-	 
+
 
 	QLabel* pLabClose = new QLabel(pCodec->toUnicode(STOCK_REAL_WIDGET_LAB_CLOSE));
 	QLabel* pLabOpen = new QLabel(pCodec->toUnicode(STOCK_REAL_WIDGET_LAB_OPEN));
@@ -47,38 +67,38 @@ void CStockRealWidget::OnInit()
 	QLabel* pLabData = new QLabel(pCodec->toUnicode(STOCK_REAL_WIDGET_LAB_DATE));
 	QHBoxLayout* pLytCode = new QHBoxLayout();
 	pLytCode->setAlignment(Qt::AlignHCenter);
-	pLytCode->addWidget(m_pLabCode[STOCK_REAL_WIDGET_IDEX_CODE]);
-	pLytCode->addWidget(m_pLabCode[STOCK_REAL_WIDGET_IDEX_NAME]);
-	m_pLabCode[STOCK_REAL_WIDGET_IDEX_CODE]->setObjectName("Stock_Real_Lab_Code");
-	m_pLabCode[STOCK_REAL_WIDGET_IDEX_NAME]->setObjectName("Stock_Real_Lab_Code");
+	pLytCode->addWidget(m_pLabCode[STOCK_REAL_WIDGET_INDEX_CODE]);
+	pLytCode->addWidget(m_pLabCode[STOCK_REAL_WIDGET_INDEX_NAME]);
+	m_pLabCode[STOCK_REAL_WIDGET_INDEX_CODE]->setObjectName("Stock_Real_Lab_Code");
+	m_pLabCode[STOCK_REAL_WIDGET_INDEX_NAME]->setObjectName("Stock_Real_Lab_Code");
 
 	QHBoxLayout* pLytClose = new QHBoxLayout();
 	pLytClose->addWidget(pLabClose);
-	pLytClose->addWidget(m_pLabCode[STOCK_REAL_WIDGET_IDEX_CLOSE]);
+	pLytClose->addWidget(m_pLabCode[STOCK_REAL_WIDGET_INDEX_CLOSE]);
 
 	QHBoxLayout* pLytOpen = new QHBoxLayout();
 	pLytOpen->addWidget(pLabOpen);
-	pLytOpen->addWidget(m_pLabCode[STOCK_REAL_WIDGET_IDEX_OPEN]);
+	pLytOpen->addWidget(m_pLabCode[STOCK_REAL_WIDGET_INDEX_OPEN]);
 
 	QHBoxLayout* pLytHigh = new QHBoxLayout();
 	pLytHigh->addWidget(pLabHigh);
-	pLytHigh->addWidget(m_pLabCode[STOCK_REAL_WIDGET_IDEX_HIGH]);
+	pLytHigh->addWidget(m_pLabCode[STOCK_REAL_WIDGET_INDEX_HIGH]);
 
 	QHBoxLayout* pLytLow = new QHBoxLayout();
 	pLytLow->addWidget(pLabLow);
-	pLytLow->addWidget(m_pLabCode[STOCK_REAL_WIDGET_IDEX_LOW]);
+	pLytLow->addWidget(m_pLabCode[STOCK_REAL_WIDGET_INDEX_LOW]);
 
 	QHBoxLayout* pLytMA10 = new QHBoxLayout();
 	pLytMA10->addWidget(pLabMA10);
-	pLytMA10->addWidget(m_pLabCode[STOCK_REAL_WIDGET_IDEX_MA10]);
+	pLytMA10->addWidget(m_pLabCode[STOCK_REAL_WIDGET_INDEX_MA10]);
 
 	QHBoxLayout* pLytRSI7 = new QHBoxLayout();
 	pLytRSI7->addWidget(pLabRSI7);
-	pLytRSI7->addWidget(m_pLabCode[STOCK_REAL_WIDGET_IDEX_RSI7]);
+	pLytRSI7->addWidget(m_pLabCode[STOCK_REAL_WIDGET_INDEX_RSI7]);
 
 	QHBoxLayout* pLytData = new QHBoxLayout();
 	pLytData->addWidget(pLabData);
-	pLytData->addWidget(m_pLabCode[STOCK_REAL_WIDGET_IDEX_DATE]);
+	pLytData->addWidget(m_pLabCode[STOCK_REAL_WIDGET_INDEX_DATE]);
 
 	QVBoxLayout* pLytMain = new QVBoxLayout();
 	pLytMain->setAlignment(Qt::AlignTop);
@@ -94,11 +114,77 @@ void CStockRealWidget::OnInit()
 	pLytMain->addLayout(pLytRSI7);
 	pLytMain->addLayout(pLytData);
 	pLytMain->setMargin(0);
-	this->setLayout(pLytMain);
-	this->setObjectName("Stock_Real_Widget");
-	m_pTimer = new QTimer(this);
-	m_pTimer->setInterval(STOCK_REAL_WIDGET_FRESH_TIMEOUT);
-	m_pTimer->start();
+	pWidget->setLayout(pLytMain);
+	pWidget->setObjectName("Stock_Real_Widget");
+}
+
+void CStockRealWidget::OnInitTraceWidget(QWidget* pWidget)
+{
+	QVBoxLayout* pLytMain = new QVBoxLayout();
+	QTextCodec* pCodec = QTextCodec::codecForLocale();
+	for (int i = 0; i < STOCK_REAL_WIDGET_TRACE_INDEX_NUM; i++)
+	{
+		m_pTraceLabCode[i] = new QLabel();
+		m_pTraceLabCode[i]->setText(pCodec->toUnicode(STOCK_REAL_WIDGET_TRACE_TEXT_DFT));
+		m_pTraceLabCode[i]->setObjectName("Stock_Real_Lab_Val");
+	}
+
+	QHBoxLayout* pLytLab = new QHBoxLayout();
+	pLytLab->addWidget(m_pTraceLabCode[STOCK_REAL_WIDGET_TRACE_INDEX_CODE]);
+	pLytLab->addWidget(m_pTraceLabCode[STOCK_REAL_WIDGET_TRACE_INDEX_NAME]);
+	pLytLab->setAlignment(Qt::AlignCenter);
+	m_pTraceLabCode[STOCK_REAL_WIDGET_TRACE_INDEX_CODE]->setObjectName("Stock_Real_Lab_Code");
+	m_pTraceLabCode[STOCK_REAL_WIDGET_TRACE_INDEX_NAME]->setObjectName("Stock_Real_Lab_Code");
+	pLytMain->addLayout(pLytLab);
+
+	QLabel* pSeperator = new QLabel();
+	pSeperator->setObjectName("Stock_Real_Lab_Sep");
+	pLytMain->addWidget(pSeperator);
+
+	pLytLab = new QHBoxLayout();
+	QLabel* pLabTitle = new QLabel(pCodec->toUnicode(STOCK_REAL_WIDGET_TRACE_NAME_HIGHTIME));
+	
+	pLytLab->addWidget(pLabTitle);
+	pLytLab->addWidget(m_pTraceLabCode[STOCK_REAL_WIDGET_TRACE_INDEX_HIGHTIME]);
+	pLytMain->addLayout(pLytLab);
+
+	pLytLab = new QHBoxLayout();
+	pLabTitle = new QLabel(pCodec->toUnicode(STOCK_REAL_WIDGET_TRACE_NAME_HIGHVAL));
+
+	pLytLab->addWidget(pLabTitle);
+	pLytLab->addWidget(m_pTraceLabCode[STOCK_REAL_WIDGET_TRACE_INDEX_HIGHVAL]);
+	pLytMain->addLayout(pLytLab);
+
+	pLytLab = new QHBoxLayout();
+	pLabTitle = new QLabel(pCodec->toUnicode(STOCK_REAL_WIDGET_TRACE_NAME_BUYTIME));
+
+	pLytLab->addWidget(pLabTitle);
+	pLytLab->addWidget(m_pTraceLabCode[STOCK_REAL_WIDGET_TRACE_INDEX_BUYTIME]);
+	pLytMain->addLayout(pLytLab);
+
+	pLytLab = new QHBoxLayout();
+	pLabTitle = new QLabel(pCodec->toUnicode(STOCK_REAL_WIDGET_TRACE_NAME_BUYVAL));
+
+	pLytLab->addWidget(pLabTitle);
+	pLytLab->addWidget(m_pTraceLabCode[STOCK_REAL_WIDGET_TRACE_INDEX_BUYVAL]);
+	pLytMain->addLayout(pLytLab);
+
+	pLytLab = new QHBoxLayout();
+	pLabTitle = new QLabel(pCodec->toUnicode(STOCK_REAL_WIDGET_TRACE_NAME_SELLTIME));
+
+	pLytLab->addWidget(pLabTitle);
+	pLytLab->addWidget(m_pTraceLabCode[STOCK_REAL_WIDGET_TRACE_INDEX_SELLTIME]);
+	pLytMain->addLayout(pLytLab);
+
+	pLytLab = new QHBoxLayout();
+	pLabTitle = new QLabel(pCodec->toUnicode(STOCK_REAL_WIDGET_TRACE_NAME_SELLVAL));
+
+	pLytLab->addWidget(pLabTitle);
+	pLytLab->addWidget(m_pTraceLabCode[STOCK_REAL_WIDGET_TRACE_INDEX_SELLVAL]);
+	pLytMain->addLayout(pLytLab);
+	pLytMain->setMargin(0);
+	pWidget->setLayout(pLytMain);
+	pWidget->setObjectName("Stock_Real_Widget");
 }
 
 void CStockRealWidget::Retranslate()
@@ -131,35 +217,35 @@ void CStockRealWidget::OnUpdateStockRealKLine()
 	QT_STOCK_REALKLINE_INFO realKLineInfo;
 	if (!pStockAgent->GetStockRealKLine(&realKLineInfo))
 	{
-		for (int i = 0; i < STOCK_REAL_WIDGET_IDEX_NUM; i++)
+		for (int i = 0; i < STOCK_REAL_WIDGET_INDEX_NUM; i++)
 		{
 			m_pLabCode[i] = new QLabel();
 			m_pLabCode[i]->setText(pCodec->toUnicode(STOCK_REAL_WIDGET_TEXT_DFT));
 		}
 	}
 
-	m_pLabCode[STOCK_REAL_WIDGET_IDEX_CODE]->setText(pCodec->toUnicode(realKLineInfo.code));
-	m_pLabCode[STOCK_REAL_WIDGET_IDEX_NAME]->setText(pCodec->toUnicode(realKLineInfo.name));
+	m_pLabCode[STOCK_REAL_WIDGET_INDEX_CODE]->setText(pCodec->toUnicode(realKLineInfo.code));
+	m_pLabCode[STOCK_REAL_WIDGET_INDEX_NAME]->setText(pCodec->toUnicode(realKLineInfo.name));
 
 	QString close = QString::number(realKLineInfo.realKLine.fClose, 'g', 4);
-	m_pLabCode[STOCK_REAL_WIDGET_IDEX_CLOSE]->setText(close);
+	m_pLabCode[STOCK_REAL_WIDGET_INDEX_CLOSE]->setText(close);
 
 	QString open = QString::number(realKLineInfo.realKLine.fOpen, 'g', 4);
-	m_pLabCode[STOCK_REAL_WIDGET_IDEX_OPEN]->setText(open);
+	m_pLabCode[STOCK_REAL_WIDGET_INDEX_OPEN]->setText(open);
 
 	QString high = QString::number(realKLineInfo.realKLine.fHigh, 'g', 4);
-	m_pLabCode[STOCK_REAL_WIDGET_IDEX_HIGH]->setText(high);
+	m_pLabCode[STOCK_REAL_WIDGET_INDEX_HIGH]->setText(high);
 
 	QString low = QString::number(realKLineInfo.realKLine.fLow, 'g', 4);
-	m_pLabCode[STOCK_REAL_WIDGET_IDEX_LOW]->setText(low);
+	m_pLabCode[STOCK_REAL_WIDGET_INDEX_LOW]->setText(low);
 
 	QString ma10 = QString::number(realKLineInfo.realKLine.fMa10, 'g', 4);
-	m_pLabCode[STOCK_REAL_WIDGET_IDEX_MA10]->setText(ma10);
+	m_pLabCode[STOCK_REAL_WIDGET_INDEX_MA10]->setText(ma10);
 
 	QString rsi7 = QString::number(realKLineInfo.realKLine.fRsi7, 'g', 4);
-	m_pLabCode[STOCK_REAL_WIDGET_IDEX_RSI7]->setText(rsi7);
+	m_pLabCode[STOCK_REAL_WIDGET_INDEX_RSI7]->setText(rsi7);
 
 	QDateTime dateVal = QDateTime::fromTime_t(realKLineInfo.realKLine.timeVal);
 	QString date = dateVal.toString("yyyy-MM-d");
-	m_pLabCode[STOCK_REAL_WIDGET_IDEX_DATE]->setText(date);
+	m_pLabCode[STOCK_REAL_WIDGET_INDEX_DATE]->setText(date);
 }

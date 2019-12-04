@@ -19,6 +19,7 @@
 class QAction;
 class CQtWaitting;
 
+
 class CStockAutoWindow : public QMainWindow
 {
     Q_OBJECT
@@ -51,6 +52,7 @@ private slots:
 	void OnEnterSettingDialog(bool check);
 	void OnSelectResetTrace(bool check);
 	void OnResetTraceResponese();
+
 
 private:
 	CQtServerTask*	m_pServerTask;

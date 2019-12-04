@@ -13,7 +13,6 @@ class QTreeWidget;
 class QWidget;
 class QSplitter;
 class QTreeWidgetItem;
-
 class CStockTraceWidget : public QWidget
 {
 	Q_OBJECT
@@ -28,6 +27,7 @@ private:
 
 signals:
 	void SignalSelectStock(QString& code, QString& name);
+	void SignalShowTraceInfo(QString& code);
 
 private slots:
 	void OnNotifyStockTrace();
