@@ -76,7 +76,7 @@ void CStockTraceBase::ResetTrace()
 
 	m_jobGetHisKine.jobStep = TASK_EVENT_JOB_STEP_NONE;
 	m_jobUpdateTraceLog.jobStep = TASK_EVENT_JOB_STEP_NONE;
-	m_jobGetHisKine.jobStep = TASK_EVENT_JOB_STEP_NONE;
+	m_jobGetCurHisKLine.jobStep = TASK_EVENT_JOB_STEP_NONE;
 }
 
 void CStockTraceBase::Trace()
@@ -172,7 +172,7 @@ void CStockTraceBase::ResetStockTrace(STOCK_CALC_TRACE_NODE* pTraceNode)
 	}
 	else if (pTraceLog->traceStep == CALC_STOCK_TRADE_STEP_WAIT_SELL)
 	{
-		UpdateStockTraceStat(pTraceNode->stockIdx, pTraceLog->code, QT_STOCK_TRACE_LOG_STAT_BUYED | QT_STOCK_TRACE_LOG_STAT_DEL);
+		//UpdateStockTraceStat(pTraceNode->stockIdx, pTraceLog->code, QT_STOCK_TRACE_LOG_STAT_BUYED | QT_STOCK_TRACE_LOG_STAT_DEL);
 	}
 }
 

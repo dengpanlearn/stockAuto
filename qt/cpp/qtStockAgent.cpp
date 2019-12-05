@@ -21,6 +21,8 @@ CQtStockAgent::CQtStockAgent(QObject* parent): CQtTimeAgent(parent)
 	m_pUpdateTask = NULL;
 	memset(&m_loadingManager, 0, sizeof(m_loadingManager));
 	memset(&m_resetTraceJob, 0, sizeof(m_resetTraceJob));
+	memset(&m_realKLineQueryJob, 0, sizeof(m_realKLineQueryJob));
+	memset(&m_traceInfoQueryJob, 0, sizeof(m_traceInfoQueryJob));
 	dllInit(&m_listTraceLog);
 }
 
@@ -126,6 +128,16 @@ BOOL CQtStockAgent::GetStockRealKLine(QT_STOCK_REALKLINE_INFO* pKLineInfo)
 	return TRUE;
 }
 
+BOOL CQtStockAgent::GetStockTraceInfo(QT_STOCK_TRACE_INFO* pTraceInfo)
+{
+	CSingleLock lock(&m_cs, TRUE);
+	if (m_traceInfoQueryJob.jobResult < 0)
+		return FALSE;
+
+	memcpy(pTraceInfo, &m_traceInfoQueryJob.traceInfo, sizeof(QT_STOCK_TRACE_INFO));
+	return TRUE;
+}
+
 void CQtStockAgent::GetConfigPython(STOCKAUTO_CONFIG_PYTHON* pConfigPython)
 {
 	g_configTask.GetConfigPython(pConfigPython);
@@ -174,6 +186,7 @@ BOOL CQtStockAgent::QtTaskEventComplete(UINT cmd, int result, void* param, int p
 	{
 		QT_STOCK_HISKLINE_QUERY_PARAM* pQueryHisKLine;
 		QT_STOCK_REALKLINE_QUERY_PARAM* pQueryRealKLine;
+		QT_STOCK_TRACEINFO_QUERY_PARAM*	pQueryTraceInfo;
 	};
 
 	pQueryHisKLine = (QT_STOCK_HISKLINE_QUERY_PARAM*)param;
@@ -189,6 +202,11 @@ BOOL CQtStockAgent::QtTaskEventComplete(UINT cmd, int result, void* param, int p
 
 	case STOCK_QT_EVENT_QUERY_STOCK_REALKLINE:
 		pQueryRealKLine->pStockAgent->OnRealKLineQueryResponse(result, pQueryRealKLine);
+		break;
+
+
+	case STOCK_QT_EVENT_QUERY_STOCK_TRACEINFO:
+		pQueryTraceInfo->pStockAgent->OnTraceInfoQueryResponse(result, pQueryTraceInfo);
 		break;
 	}
 
@@ -212,8 +230,29 @@ void CQtStockAgent::OnRealKLineQueryResponse(int result, QT_STOCK_REALKLINE_QUER
 	m_updateCmd |= QT_STOCK_AGENT_QUERY_REALKLINE_RESPONESE;
 }
 
+void CQtStockAgent::OnTraceInfoQueryResponse(int result, QT_STOCK_TRACEINFO_QUERY_PARAM* pTraceInfo)
+{
+	CSingleLock lock(&m_cs, TRUE);
+	m_traceInfoQueryJob.jobResult = result;
+	m_traceInfoQueryJob.traceInfo.traceStep = pTraceInfo->traceStep;
+	m_traceInfoQueryJob.traceInfo.highTime = pTraceInfo->highTime;
+	m_traceInfoQueryJob.traceInfo.fHighVal = pTraceInfo->fHighVal;
+	m_traceInfoQueryJob.traceInfo.buyTime = pTraceInfo->buyTime;
+	m_traceInfoQueryJob.traceInfo.fBuyVal = pTraceInfo->fBuyVal;
+	m_traceInfoQueryJob.traceInfo.sellTime = pTraceInfo->sellTime;
+	m_traceInfoQueryJob.traceInfo.fSellVal = pTraceInfo->fSellVal;
+	m_updateCmd |= QT_STOCK_AGENT_QUERY_TRACEINFO_RESPONESE;
+}
+
 void CQtStockAgent::OnGetQueryHisKLine(QString& code)
 {
+	{
+		CSingleLock lock(&m_cs, TRUE);
+		if (m_pHisKLineQueryJob->bInWorking)
+			return;
+		else
+			m_pHisKLineQueryJob->bInWorking = TRUE;
+	}
 	m_pHisKLineQueryJob->hisCounts = 0;
 	m_pHisKLineQueryJob->jobRsult = 0;
 	QString2Char(code, m_pHisKLineQueryJob->code);
@@ -241,6 +280,14 @@ void CQtStockAgent::OnGetQueryHisKLine(QString& code)
 
 void CQtStockAgent::OnGetQueryRealKLine(QString& code, QString& name)
 {
+	{
+		CSingleLock lock(&m_cs, TRUE);
+		if (m_realKLineQueryJob.bInWorking)
+			return;
+		else
+			m_realKLineQueryJob.bInWorking = TRUE;
+	}
+
 	m_realKLineQueryJob.jobResult = 0;
 	memset(&m_realKLineQueryJob.realKLine, 0, sizeof(m_realKLineQueryJob.realKLine));
 	QString2Char(code, m_realKLineQueryJob.realKLine.code);
@@ -265,6 +312,38 @@ void CQtStockAgent::OnGetQueryRealKLine(QString& code, QString& name)
 	pQueryParam->pRealKLineBuf = &m_realKLineQueryJob.realKLine.realKLine;
 	pQueryParam->pStockAgent = this;
 	m_pUpdateTask->PostPktByEvent(pQueryParam);
+}
+
+void CQtStockAgent::OnGetQueryTraceInfo(QString& code, QString& name)
+{
+	{
+		CSingleLock lock(&m_cs, TRUE);
+		if (m_traceInfoQueryJob.bInWorking)
+			return;
+		else
+			m_traceInfoQueryJob.bInWorking = TRUE;
+	}
+
+
+	m_traceInfoQueryJob.jobResult = 0;
+	memset(&m_traceInfoQueryJob.traceInfo, 0, sizeof(m_traceInfoQueryJob.traceInfo));
+	QString2Char(code, m_traceInfoQueryJob.traceInfo.code);
+	QString2Char(name, m_traceInfoQueryJob.traceInfo.name);
+
+	QT_STOCK_TRACEINFO_QUERY_PARAM* pQueryParam = (QT_STOCK_TRACEINFO_QUERY_PARAM*)m_pManager->AllocPktByEvent(STOCK_QT_EVENT_QUERY_STOCK_TRACEINFO, sizeof(QT_STOCK_TRACEINFO_QUERY_PARAM),
+		QtTaskEventComplete, NULL);
+
+	if (pQueryParam == NULL)
+	{
+		CSingleLock lock(&m_cs, TRUE);
+		m_traceInfoQueryJob.jobResult = -1;
+		m_updateCmd |= QT_STOCK_AGENT_QUERY_TRACEINFO_RESPONESE;
+
+		return;
+	}
+	pQueryParam->pStockAgent = this;
+	memcpy(pQueryParam->code, m_traceInfoQueryJob.traceInfo.code, sizeof(pQueryParam->code));
+	m_pManager->PostPktByEvent(pQueryParam);
 }
 
 void CQtStockAgent::OnRequestResetTrace()
@@ -307,12 +386,14 @@ void CQtStockAgent::OnTimeout()
 	if (m_updateCmd & QT_STOCK_AGENT_QUERY_HISKLINE_RESPONESE)
 	{
 		m_updateCmd  &= ~QT_STOCK_AGENT_QUERY_HISKLINE_RESPONESE;
+		m_pHisKLineQueryJob->bInWorking = FALSE;
 		emit NotifyUiHisKLineResponese();
 	}
 
 	if (m_updateCmd & QT_STOCK_AGENT_QUERY_REALKLINE_RESPONESE)
 	{
 		m_updateCmd &= ~QT_STOCK_AGENT_QUERY_REALKLINE_RESPONESE;
+		m_realKLineQueryJob.bInWorking = FALSE;
 		emit NotifyUiRealKLineResponese();
 	}
 
@@ -320,6 +401,13 @@ void CQtStockAgent::OnTimeout()
 	{
 		m_updateCmd &= ~QT_STOCK_AGENT_REQUEST_RESET_TRACE_RESPONESE;
 		emit NotifyResetTraceResponese();
+	}
+
+	if (m_updateCmd & QT_STOCK_AGENT_QUERY_TRACEINFO_RESPONESE)
+	{
+		m_updateCmd &= ~QT_STOCK_AGENT_QUERY_TRACEINFO_RESPONESE;
+		m_traceInfoQueryJob.bInWorking = FALSE;
+		emit NotifyUiTraceInfoResponse();
 	}
 
 	if (!DLL_IS_EMPTY(&m_listTraceLog))

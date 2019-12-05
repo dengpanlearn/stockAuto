@@ -307,6 +307,7 @@ int CStockAutoManager::OnEventActive(UINT cmd, void* param, int paramLen)
 		STOCK_CALC_UPDATE_CONFIG_TRACE*	pUpdateConfigTrace;
 		STOCK_CALC_RESET_TRACE_CALC*	pResetTraceCalc;
 		STOCK_CALC_CLEAR_TRACE_HISTIME_RESP*	pClearHisTimeResp;
+		QT_STOCK_TRACEINFO_QUERY_PARAM* pQueryTraceInfo;
 	};
 
 	pGetListResp = (STOCK_CALC_GET_LIST_RESP*)param;
@@ -351,6 +352,10 @@ int CStockAutoManager::OnEventActive(UINT cmd, void* param, int paramLen)
 
 	case STOCK_CALC_EVENT_CLEAR_TRACE_HISTIME_RESP:
 		OnClearTraceHistimeResp(pClearHisTimeResp);
+		break;
+
+	case STOCK_QT_EVENT_QUERY_STOCK_TRACEINFO:
+		result = OnQueryTraceInfo(pQueryTraceInfo);
 		break;
 	}
 
@@ -1044,6 +1049,29 @@ void CStockAutoManager::OnResetTraceCalc(STOCK_CALC_RESET_TRACE_CALC* pResetTrac
 	m_jobResetTrace.lastEventStep = m_managerStep;
 	m_managerStep = STOCK_AUTO_MANAGER_STEP_RESET_TRACE;
 	ActiveManager();
+}
+
+int CStockAutoManager::OnQueryTraceInfo(QT_STOCK_TRACEINFO_QUERY_PARAM* pQueryTraceInfo)
+{
+	STOCK_MANAGER_TRACE_LOG* pTraceLog = &m_pJobTraceLog->traceLog[STOCK_AUTO_COUNTS_MAX];
+	int logCounts = m_pJobList->stockCounts;
+
+	for (int i = 0; i < logCounts; i++, pTraceLog++)
+	{
+		if (strcmp(pTraceLog->code, pQueryTraceInfo->code) == 0)
+		{
+			pQueryTraceInfo->traceStep = pTraceLog->traceStep;
+			pQueryTraceInfo->highTime = pTraceLog->highTime;
+			pQueryTraceInfo->fHighVal = pTraceLog->fHighVal;
+			pQueryTraceInfo->buyTime = pTraceLog->buyTime;
+			pQueryTraceInfo->fBuyVal = pTraceLog->fBuyVal;
+			pQueryTraceInfo->sellTime = pTraceLog->sellTime;
+			pQueryTraceInfo->fSellVal = pTraceLog->sellTime;
+			return EVENT_COMPLETE_OK;
+		}
+	}
+
+	return EVENT_COMPLETE_FAIL;
 }
 
 UINT CStockAutoManager::OnStockAutoManagerTrace()

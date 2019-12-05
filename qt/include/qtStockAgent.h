@@ -33,6 +33,7 @@ public:
 	BOOL GetAckStockTrace(QT_STOCK_TRACE_LOG* pTraceLog);
 	int	GetStockHisKLine(int count, int offset, STOCK_CALC_TRACE_KLINE* pKLine);
 	BOOL GetStockRealKLine(QT_STOCK_REALKLINE_INFO* pKLineInfo);
+	BOOL GetStockTraceInfo(QT_STOCK_TRACE_INFO* pTraceInfo);
 
 	void GetConfigPython(STOCKAUTO_CONFIG_PYTHON* pConfigPython);
 	void GetConfigData(STOCKAUTO_CONFIG_DATA* pConfigData);
@@ -51,17 +52,19 @@ private:
 
 	void OnHisKLineQueryResponse(int result, QT_STOCK_HISKLINE_QUERY_PARAM* pHisKLine);
 	void OnRealKLineQueryResponse(int result, QT_STOCK_REALKLINE_QUERY_PARAM* pRealKLine);
-
+	void OnTraceInfoQueryResponse(int result, QT_STOCK_TRACEINFO_QUERY_PARAM* pTraceInfo);
 signals:
 	void NotifyUiManagerLoadingProgress();
 	void NotifyUiStockTrace();
 	void NotifyUiHisKLineResponese();
 	void NotifyUiRealKLineResponese();
 	void NotifyResetTraceResponese();
+	void NotifyUiTraceInfoResponse();
 	
 private slots:
 	void OnGetQueryHisKLine(QString& code);
 	void OnGetQueryRealKLine(QString& code, QString& name);
+	void OnGetQueryTraceInfo(QString& code, QString& name);
 	void OnRequestResetTrace();
 
 protected:
@@ -76,7 +79,8 @@ protected:
 		QT_STOCK_AGENT_UPDATE_STOCK_TRACE = 0x00000002,
 		QT_STOCK_AGENT_QUERY_HISKLINE_RESPONESE = 0x00000004,
 		QT_STOCK_AGENT_QUERY_REALKLINE_RESPONESE = 0x00000008,
-		QT_STOCK_AGENT_REQUEST_RESET_TRACE_RESPONESE = 0x00000010
+		QT_STOCK_AGENT_REQUEST_RESET_TRACE_RESPONESE = 0x00000010,
+		QT_STOCK_AGENT_QUERY_TRACEINFO_RESPONESE = 0x00000020,
 	};
 
 private:
@@ -85,6 +89,7 @@ private:
 	DL_LIST				m_listTraceLog;
 	QT_STOCK_HISKLINE_QUERY_JOB*	m_pHisKLineQueryJob;
 	QT_STOCK_REALKLINE_QUERY_JOB	m_realKLineQueryJob;
+	QT_STOCK_TRACEINFO_QUERY_JOB	m_traceInfoQueryJob;
 	QT_STOCK_RESET_TRACE_JOB		m_resetTraceJob;
 	QT_STOCK_LOADING_MANAGER		m_loadingManager;
 	CMultiEventsTask*		m_pManager;

@@ -13,6 +13,7 @@
 #define	TRACE_MANAGER_TASK_EVENT_NAME_PREFIX	_T("event_traceman_")
 
 class CStockAutoWindow;
+struct QT_STOCK_TRACEINFO_QUERY_PARAM;
 class CStockAutoManager :public CMultiEventsTask
 {
 public:
@@ -105,6 +106,8 @@ private:
 	void OnClearTraceHistimeResp(STOCK_CALC_CLEAR_TRACE_HISTIME_RESP* pClearResp);
 	BOOL OnClearTraceHistimeComplete(int result, void* param, int paramLen);
 	void OnResetTraceCalc(STOCK_CALC_RESET_TRACE_CALC* pResetTrace);
+
+	int OnQueryTraceInfo(QT_STOCK_TRACEINFO_QUERY_PARAM* pQueryTraceInfo);
 	UINT OnStockAutoManagerTrace();
 
 	UINT OnStockAutoManagerResetTrace();

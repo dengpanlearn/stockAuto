@@ -193,6 +193,9 @@ void CStockRealWidget::Retranslate()
 	connect(m_pTimer, SIGNAL(timeout()), this, SLOT(OnFreshTimeout()));
 	connect(pStockAgent, SIGNAL(NotifyUiRealKLineResponese()), this, SLOT(OnUpdateStockRealKLine()));
 	connect(this, SIGNAL(QueryStockRealKLine(QString& ,QString&)), pStockAgent, SLOT(OnGetQueryRealKLine(QString&, QString&)));
+
+	connect(pStockAgent, SIGNAL(NotifyUiTraceInfoResponse()), this, SLOT(OnUpdateStockTraceInfo()));
+	connect(this, SIGNAL(QueryStockTraceInfo(QString&, QString&)), pStockAgent, SLOT(OnGetQueryTraceInfo(QString&, QString&)));
 }
 
 void CStockRealWidget::OnSelectStock(QString& code, QString& name)
@@ -207,6 +210,7 @@ void CStockRealWidget::OnFreshTimeout()
 		return;
 
 	emit  QueryStockRealKLine(m_curStockCode, m_curStockName);
+	emit QueryStockTraceInfo(m_curStockCode, m_curStockName);
 }
 
 void CStockRealWidget::OnUpdateStockRealKLine()
@@ -219,9 +223,10 @@ void CStockRealWidget::OnUpdateStockRealKLine()
 	{
 		for (int i = 0; i < STOCK_REAL_WIDGET_INDEX_NUM; i++)
 		{
-			m_pLabCode[i] = new QLabel();
 			m_pLabCode[i]->setText(pCodec->toUnicode(STOCK_REAL_WIDGET_TEXT_DFT));
 		}
+
+		return;
 	}
 
 	m_pLabCode[STOCK_REAL_WIDGET_INDEX_CODE]->setText(pCodec->toUnicode(realKLineInfo.code));
@@ -248,4 +253,40 @@ void CStockRealWidget::OnUpdateStockRealKLine()
 	QDateTime dateVal = QDateTime::fromTime_t(realKLineInfo.realKLine.timeVal);
 	QString date = dateVal.toString("yyyy-MM-d");
 	m_pLabCode[STOCK_REAL_WIDGET_INDEX_DATE]->setText(date);
+}
+
+void CStockRealWidget::OnUpdateStockTraceInfo()
+{
+	CQtStockAgent* pStockAgent = (CQtStockAgent*)m_pStockAgent;
+	QTextCodec* pCodec = QTextCodec::codecForLocale();
+
+	for (int i = 0; i < STOCK_REAL_WIDGET_TRACE_INDEX_NUM; i++)
+	{
+		m_pTraceLabCode[i]->setText(pCodec->toUnicode(STOCK_REAL_WIDGET_TRACE_TEXT_DFT));
+	}
+
+	QT_STOCK_TRACE_INFO traceInfo;
+	if (!pStockAgent->GetStockTraceInfo(&traceInfo))
+	{
+		return;
+	}
+
+	m_pTraceLabCode[STOCK_REAL_WIDGET_TRACE_INDEX_CODE]->setText(pCodec->toUnicode(traceInfo.code));
+	m_pTraceLabCode[STOCK_REAL_WIDGET_TRACE_INDEX_NAME]->setText(pCodec->toUnicode(traceInfo.name));
+
+	if (traceInfo.traceStep == CALC_STOCK_TRADE_STEP_WAIT_BUY)
+	{
+		QDateTime dateVal = QDateTime::fromTime_t(traceInfo.highTime);
+		QString date = dateVal.toString("yyyy-MM-d");
+		m_pTraceLabCode[STOCK_REAL_WIDGET_TRACE_INDEX_HIGHTIME]->setText(date);
+		m_pTraceLabCode[STOCK_REAL_WIDGET_TRACE_INDEX_HIGHVAL]->setText(QString::number(traceInfo.fHighVal, 'g', 4));
+	}
+
+	if (traceInfo.traceStep == CALC_STOCK_TRADE_STEP_WAIT_SELL)
+	{
+		QDateTime dateVal = QDateTime::fromTime_t(traceInfo.sellTime);
+		QString date = dateVal.toString("yyyy-MM-d");
+		m_pTraceLabCode[STOCK_REAL_WIDGET_TRACE_INDEX_HIGHTIME]->setText(date);
+		m_pTraceLabCode[STOCK_REAL_WIDGET_TRACE_INDEX_HIGHVAL]->setText(QString::number(traceInfo.fSellVal, 'g', 4));
+	}
 }

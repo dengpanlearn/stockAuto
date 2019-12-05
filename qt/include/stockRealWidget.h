@@ -30,11 +30,13 @@ private:
 
 signals:
 	void QueryStockRealKLine(QString& code, QString& name);
+	void QueryStockTraceInfo(QString& code, QString& name);
 
 private slots:
 	void OnSelectStock(QString& code, QString& name);
 	void OnFreshTimeout();
 	void OnUpdateStockRealKLine();
+	void OnUpdateStockTraceInfo();
 
 private:
 	CQtObjectAgent*		m_pExitAgent;
