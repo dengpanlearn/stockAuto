@@ -167,7 +167,7 @@ void CStockTraceWidget::AddTraceLogItem(char const* pCode, char const* pName, UI
 			break;
 		}
 	}
-	else if (stat = QT_STOCK_TRACE_LOG_STAT_BUYED)
+	else if (stat == QT_STOCK_TRACE_LOG_STAT_BUYED)
 	{
 		pItem->setText(STOCK_TRACE_WIDGET_TREE_WAITSELL_INDEX_MA10, "--/--");
 		pItem->setText(STOCK_TRACE_WIDGET_TREE_WAITSELL_INDEX_EARNS, "--/--/--");

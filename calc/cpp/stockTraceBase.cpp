@@ -463,3 +463,25 @@ BOOL CStockTraceBase::IsReachHigh(STOCK_CALC_TRACE_KLINE const* pKLineEnd, int k
 
 	return TRUE;
 }
+
+BOOL CStockTraceBase::IsRaiseBalance(STOCK_CALC_TRACE_KLINE const* pStart, float fRaiseLimits, int weeksRanges, int rangesLimit)
+{
+	int calcBalance = 0;
+	while (weeksRanges-- > 0)
+	{
+		if (CALC_IN_DEADZONE(pStart->fPercent, fRaiseLimits))
+			calcBalance++;
+
+		pStart--;
+	}
+
+	return (calcBalance >= rangesLimit);
+}
+
+BOOL CStockTraceBase::IsEndOfCurTraceWeek()
+{
+	QDate curDate = QDate::currentDate();
+	QDateTime endDateTime = QDateTime(curDate, QTime(15, 30, 0, 0));
+
+	return ((curDate.dayOfWeek() == 5) && (QDateTime::currentDateTime() > endDateTime));
+}
