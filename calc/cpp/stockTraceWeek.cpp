@@ -220,6 +220,7 @@ BOOL CStockTraceWeek::DoTraceWeekWork(STOCK_CALC_TRACE_NODE* pTraceNode)
 			if (++pTraceLog->raiseBalanceCheckTimes < m_iRaiseBalances)
 				continue;
 #endif
+			_AGAIN:
 			if (IsRaiseBalance(pStartTraceKLine, m_fRaisePercent, 5, m_iRaiseBalances))
 			{
 				pTraceLog->traceStep = CALC_STOCK_TRADE_STEP_CHECK_HIGH;
@@ -245,7 +246,7 @@ BOOL CStockTraceWeek::DoTraceWeekWork(STOCK_CALC_TRACE_NODE* pTraceNode)
 				pTraceLog->raiseBalanceCheckTimes = 0;
 				pTraceLog->traceStep = CALC_STOCK_TRADE_STEP_CHECK_BALANCE_RAISE;
 				UpdateStockTraceStat(pTraceNode->stockIdx, pTraceLog->code, QT_STOCK_TRACE_LOG_STAT_DEL);
-				continue;
+				goto _AGAIN;
 			}
 
 		}
