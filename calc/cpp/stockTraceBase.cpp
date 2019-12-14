@@ -483,5 +483,6 @@ BOOL CStockTraceBase::IsEndOfCurTraceWeek()
 	QDate curDate = QDate::currentDate();
 	QDateTime endDateTime = QDateTime(curDate, QTime(15, 30, 0, 0));
 
-	return ((curDate.dayOfWeek() == 5) && (QDateTime::currentDateTime() > endDateTime));
+	int weekDay = curDate.dayOfWeek();
+	return (((weekDay == 5) && (QDateTime::currentDateTime() > endDateTime)) || (weekDay > 5));
 }
