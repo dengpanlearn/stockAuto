@@ -197,9 +197,9 @@ if __name__ == '__main__':
     if (not weekKLine.prepareUpdate('E:\\self\\stock\\data', 'stockList.db', 'kline.db')):
         """
         ret = weekKLine.getAndUpdateStockList(int(time.time()))
-      
+        """
         ret = weekKLine.getAndUpdateWeekKLine('SZ300599', int(time.time()), -1)
        
         ret = weekKLine.getCurWeekKLine('SZ300001')
-        """
+       
         ret = weekKLine.getCurWeekKLine('SH601369')

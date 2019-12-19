@@ -209,6 +209,11 @@ void CStockSettingDilaog::InitTraceTreeWidget(QTreeWidget* pTreeWidget, STOCKAUT
 	pItem->setText(0, pCodec->toUnicode(STOCK_SETTING_DIALOG_EDIT_TRACE_CUTLOSS_PERCENT_NAME));
 	pItem->setText(1, QString::number(pConfigTrace->fCutLossPercent, 'g', 4));
 	pTreeWidget->addTopLevelItem(pItem);
+
+	pItem = new QTreeWidgetItem();
+	pItem->setText(0, pCodec->toUnicode(STOCK_SETTING_DIALOG_EDIT_TRACE_CUTLOSS_AFTERTOP_NAME));
+	pItem->setText(1, QString::number(pConfigTrace->fCutLossAfterTop, 'g', 4));
+	pTreeWidget->addTopLevelItem(pItem);
 }
 
 void CStockSettingDilaog::GetPythonConfig(QTreeWidget* pTreeWidget, STOCKAUTO_CONFIG_PYTHON* pConfigPython)
@@ -289,6 +294,10 @@ void CStockSettingDilaog::GetTraceConfig(QTreeWidget* pTreeWidget, STOCKAUTO_CON
 	pItem = pTreeWidget->topLevelItem(STOCK_SETTING_DIALOG_EDIT_TRACE_IDX_CUTLOSS_PERCENT);
 	tmpVal = pItem->text(1);
 	pConfigTrace->fCutLossPercent = tmpVal.toFloat();
+
+	pItem = pTreeWidget->topLevelItem(STOCK_SETTING_DIALOG_EDIT_TRACE_IDX_CUTLOSS_AFTERTOP);
+	tmpVal = pItem->text(1);
+	pConfigTrace->fCutLossAfterTop = tmpVal.toFloat();
 }
 
 void CStockSettingDilaog::OnPythonDoubleClicked(QTreeWidgetItem* pItem, int column)

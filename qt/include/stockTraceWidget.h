@@ -12,6 +12,7 @@ class CQtObjectAgent;
 class QTreeWidget;
 class QWidget;
 class QSplitter;
+class QTimer;
 class QTreeWidgetItem;
 class CStockTraceWidget : public QWidget
 {
@@ -27,11 +28,13 @@ private:
 
 signals:
 	void SignalSelectStock(QString& code, QString& name);
+	void SignalUpdateStockSellStat(QString& code, QString& name);
 	void SignalShowTraceInfo(QString& code);
 
 private slots:
 	void OnNotifyStockTrace();
 	void OnSelectStock(QTreeWidgetItem * pItem, int column);
+	void OnUpdateSellStocks();
 
 private:
 	void AddTraceLogItem(char const* pCode, char const* pName, UINT stat);
@@ -49,6 +52,8 @@ private:
 	QWidget*			m_pWidgetWaitBuy;
 	QWidget*			m_pWidgetWaitSell;
 	QSplitter*			m_pSplitter;
+	QTimer*				m_pTimerSell;
+	int					m_indxOfSellStockForUpdate;
 };
 
 #endif // !__STOCK_TRACE_WIDGET_H__

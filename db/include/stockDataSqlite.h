@@ -27,7 +27,7 @@ public:
 	virtual int ClearTraceLogHisTime();
 	virtual int UpdateTraceLog(STOCK_MANAGER_TRACE_LOG* pTraceLogBuf);
 	virtual int GetHisKLine(char const* pStockCode, STOCK_CALC_TRACE_KLINE* pHisKLineBuf, int bufCounts);
-
+	virtual int GetTraceLog(char const* pStockCode, STOCK_MANAGER_TRACE_LOG* pTrace);
 private:
 	QSqlDatabase	m_listDb;
 	QSqlDatabase	m_klineDb;

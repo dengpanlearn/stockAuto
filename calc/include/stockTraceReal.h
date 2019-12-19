@@ -53,6 +53,7 @@ private:
 	float	m_fRsiSell;
 	int		m_iRsiSellWaits;
 	float	m_fCutLossPercent;
+	float	m_fCutLossAfterTop;
 	QDate	m_rsiCheckEndDateForBuy;
 };
 

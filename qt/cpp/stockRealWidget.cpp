@@ -170,6 +170,21 @@ void CStockRealWidget::OnInitTraceWidget(QWidget* pWidget)
 	pLytMain->addLayout(pLytLab);
 
 	pLytLab = new QHBoxLayout();
+	pLabTitle = new QLabel(pCodec->toUnicode(STOCK_REAL_WIDGET_TRACE_NAME_TOPTIME));
+
+	pLytLab->addWidget(pLabTitle);
+	pLytLab->addWidget(m_pTraceLabCode[STOCK_REAL_WIDGET_TRACE_INDEX_TOPTIME]);
+	pLytMain->addLayout(pLytLab);
+
+
+	pLytLab = new QHBoxLayout();
+	pLabTitle = new QLabel(pCodec->toUnicode(STOCK_REAL_WIDGET_TRACE_NAME_TOPVAL));
+
+	pLytLab->addWidget(pLabTitle);
+	pLytLab->addWidget(m_pTraceLabCode[STOCK_REAL_WIDGET_TRACE_INDEX_TOPVAL]);
+	pLytMain->addLayout(pLytLab);
+
+	pLytLab = new QHBoxLayout();
 	pLabTitle = new QLabel(pCodec->toUnicode(STOCK_REAL_WIDGET_TRACE_NAME_SELLTIME));
 
 	pLytLab->addWidget(pLabTitle);
@@ -284,9 +299,9 @@ void CStockRealWidget::OnUpdateStockTraceInfo()
 
 	if (traceInfo.traceStep == CALC_STOCK_TRADE_STEP_WAIT_SELL)
 	{
-		QDateTime dateVal = QDateTime::fromTime_t(traceInfo.sellTime);
+		QDateTime dateVal = QDateTime::fromTime_t(traceInfo.topTime);
 		QString date = dateVal.toString("yyyy-MM-d");
 		m_pTraceLabCode[STOCK_REAL_WIDGET_TRACE_INDEX_HIGHTIME]->setText(date);
-		m_pTraceLabCode[STOCK_REAL_WIDGET_TRACE_INDEX_HIGHVAL]->setText(QString::number(traceInfo.fSellVal, 'g', 4));
+		m_pTraceLabCode[STOCK_REAL_WIDGET_TRACE_INDEX_HIGHVAL]->setText(QString::number(traceInfo.fTopVal, 'g', 4));
 	}
 }

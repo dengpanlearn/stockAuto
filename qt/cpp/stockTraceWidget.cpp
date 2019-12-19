@@ -3,6 +3,7 @@
 #include <qsplitter.h>
 #include <qtextcodec.h>
 #include <qtreewidget.h>
+#include <qtimer.h>
 #include <qheaderview.h>
 #include <qlabel.h>
 #include <qlayout.h>
@@ -13,6 +14,7 @@
 #include "../include/qtResourceDef.h"
 #include "../include/stockTraceWidget.h"
 
+#define	 STOCK_TRACE_WIDGET_SELL_CYCLE		1000
 CStockTraceWidget::CStockTraceWidget(QWidget *parent, CQtObjectAgent* pExitAgent, CQtObjectAgent* pStockAgent)
 	: QWidget(parent)
 {
@@ -94,6 +96,10 @@ void CStockTraceWidget::OnInit()
 	m_pTreeWaitSell->header()->setDefaultAlignment(Qt::AlignCenter);
 	m_pTreeWaitSell->setHeaderLabels(waitSellHeaders);
 	m_pTreeWaitSell->setIndentation(0);
+
+	m_pTimerSell = new QTimer(this);
+	m_pTimerSell->setInterval(STOCK_TRACE_WIDGET_SELL_CYCLE);
+	m_indxOfSellStockForUpdate = 0;
 }
 
 void CStockTraceWidget::Retranslate()
@@ -101,6 +107,8 @@ void CStockTraceWidget::Retranslate()
 	CQtStockAgent* pStockAgent = (CQtStockAgent*)m_pStockAgent;
 	connect(pStockAgent, SIGNAL(NotifyUiStockTrace()), this, SLOT(OnNotifyStockTrace()));
 	connect(m_pTreeWaitBuy, SIGNAL(itemPressed(QTreeWidgetItem*, int)), this, SLOT(OnSelectStock(QTreeWidgetItem*, int)));
+	connect(m_pTimerSell, SIGNAL(timeout()), this, SLOT(OnUpdateSellStocks()));
+	m_pTimerSell->start();
 }
 
 void CStockTraceWidget::OnNotifyStockTrace()
@@ -134,7 +142,7 @@ void CStockTraceWidget::OnNotifyStockTrace()
 
 void CStockTraceWidget::OnSelectStock(QTreeWidgetItem * pItem, int column)
 {
-	QString codeName = pItem->text(STOCK_TRACE_WIDGET_TREE_WAITSELL_INDEX_CODE_NAME);
+	QString codeName = pItem->text(STOCK_TRACE_WIDGET_TREE_WAITBUY_INDEX_CODE_NAME);
 	QStringList list = codeName.split(' ');
 	if (list.size() < 2)
 		return;
@@ -280,4 +288,23 @@ QTreeWidgetItem* CStockTraceWidget::FindTraceLogItem(QTreeWidget* pTreeWidget, c
 	}
 
 	return NULL;
+}
+
+void CStockTraceWidget::OnUpdateSellStocks()
+{
+	int stockCnts = m_pTreeWaitSell->topLevelItemCount();
+	if (stockCnts == 0)
+		return;
+
+	if (m_indxOfSellStockForUpdate >= stockCnts)
+		m_indxOfSellStockForUpdate = 0;
+
+	QTreeWidgetItem* pItem = m_pTreeWaitSell->topLevelItem(m_indxOfSellStockForUpdate);
+
+	QString codeName = pItem->text(STOCK_TRACE_WIDGET_TREE_WAITSELL_INDEX_CODE_NAME);
+	QStringList list = codeName.split(' ');
+	if (list.size() >= 2)
+		emit SignalUpdateStockSellStat(list[0], list[1]);
+
+	m_indxOfSellStockForUpdate++;
 }

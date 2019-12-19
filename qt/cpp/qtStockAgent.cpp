@@ -23,6 +23,7 @@ CQtStockAgent::CQtStockAgent(QObject* parent): CQtTimeAgent(parent)
 	memset(&m_resetTraceJob, 0, sizeof(m_resetTraceJob));
 	memset(&m_realKLineQueryJob, 0, sizeof(m_realKLineQueryJob));
 	memset(&m_traceInfoQueryJob, 0, sizeof(m_traceInfoQueryJob));
+	memset(&m_sellStatQueryJob, 0, sizeof(m_sellStatQueryJob));
 	dllInit(&m_listTraceLog);
 }
 
@@ -239,6 +240,8 @@ void CQtStockAgent::OnTraceInfoQueryResponse(int result, QT_STOCK_TRACEINFO_QUER
 	m_traceInfoQueryJob.traceInfo.fHighVal = pTraceInfo->fHighVal;
 	m_traceInfoQueryJob.traceInfo.buyTime = pTraceInfo->buyTime;
 	m_traceInfoQueryJob.traceInfo.fBuyVal = pTraceInfo->fBuyVal;
+	m_traceInfoQueryJob.traceInfo.topTime = pTraceInfo->topTime;
+	m_traceInfoQueryJob.traceInfo.fTopVal = pTraceInfo->fTopVal;
 	m_traceInfoQueryJob.traceInfo.sellTime = pTraceInfo->sellTime;
 	m_traceInfoQueryJob.traceInfo.fSellVal = pTraceInfo->fSellVal;
 	m_updateCmd |= QT_STOCK_AGENT_QUERY_TRACEINFO_RESPONESE;
@@ -344,6 +347,39 @@ void CQtStockAgent::OnGetQueryTraceInfo(QString& code, QString& name)
 	pQueryParam->pStockAgent = this;
 	memcpy(pQueryParam->code, m_traceInfoQueryJob.traceInfo.code, sizeof(pQueryParam->code));
 	m_pManager->PostPktByEvent(pQueryParam);
+}
+
+void CQtStockAgent::OnGetQuerySellStat(QString& code, QString& name)
+{
+	CSingleLock lock(&m_cs, TRUE);
+	if (m_sellStatQueryJob.bInWorking)
+		return;
+	else
+		m_sellStatQueryJob.bInWorking = TRUE;
+	
+	m_sellStatQueryJob.jobResult = 0;
+	memset(&m_sellStatQueryJob.sellStatInfo, 0, sizeof(m_sellStatQueryJob.sellStatInfo));
+	QString2Char(code, m_sellStatQueryJob.sellStatInfo.code);
+	QString2Char(name, m_sellStatQueryJob.sellStatInfo.name);
+
+	if (m_pUpdateTask == NULL)
+		m_pUpdateTask = ((CStockAutoManager*)m_pManager)->GetTaskUpdate();
+
+	QT_STOCK_SELLSTAT_QUERY_PARAM* pQueryParam = (QT_STOCK_SELLSTAT_QUERY_PARAM*)m_pUpdateTask->AllocPktByEvent(STOCK_QT_EVENT_QUERY_STOCK_SELLSTAT, sizeof(QT_STOCK_SELLSTAT_QUERY_PARAM),
+		QtTaskEventComplete, NULL);
+
+	if (pQueryParam == NULL)
+	{
+		CSingleLock lock(&m_cs, TRUE);
+		m_sellStatQueryJob.jobResult = -1;
+		m_updateCmd |= QT_STOCK_AGENT_QUERY_SELLSTAT_RESPONESE;
+
+		return;
+	}
+
+	pQueryParam->pStockAgent = this;
+	memcpy(pQueryParam->code, m_sellStatQueryJob.sellStatInfo.code, sizeof(pQueryParam->code));
+	m_pUpdateTask->PostPktByEvent(pQueryParam);
 }
 
 void CQtStockAgent::OnRequestResetTrace()

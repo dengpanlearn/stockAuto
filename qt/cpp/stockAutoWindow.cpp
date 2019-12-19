@@ -181,6 +181,7 @@ BOOL CStockAutoWindow:: OnInitQtServerAndAgent()
 
 void CStockAutoWindow::closeEvent(QCloseEvent * event)
 {
+	GlobalExit();
 	if (m_pExitAgent != NULL)
 	{
 		if (m_pServerTask->isRunning())

@@ -94,6 +94,7 @@ void CStockConfig::OnInit()
 	pConfigTrace->fRsiSell = STOCKAUTO_CONFIG_TRACE_RSI_SELL_DFT;
 	pConfigTrace->rsiSellWaits = STOCKAUTO_CONFIG_TRACE_RSI_SELL_WAITS_DFT;
 	pConfigTrace->fCutLossPercent = STOCKAUTO_CONFIG_TRACE_CUTLOSS_PERCENT_DFT;
+	pConfigTrace->fCutLossAfterTop = STOCKAUTO_CONFIG_TRACE_CUTLOSS_AFTERTOP_DFT;
 
 }
 
@@ -242,6 +243,12 @@ void CStockConfig::LoadConfigTrace(QSettings* pConfigSettings, STOCKAUTO_CONFIG_
 		pConfigTrace->fCutLossPercent = pConfigSettings->value(tmpKey).toFloat();
 	}
 
+	tmpKey = pCodec->toUnicode(STOCKAUTO_CONFIG_TRACE_GROUP_CUTLOSS_AFTERTOP);
+	if (keys.contains(tmpKey))
+	{
+		pConfigTrace->fCutLossAfterTop = pConfigSettings->value(tmpKey).toFloat();
+	}
+
 	pConfigSettings->endGroup();
 }
 
@@ -281,5 +288,6 @@ void CStockConfig::SaveConfigTrace(QSettings* pConfigSettings, STOCKAUTO_CONFIG_
 	pConfigSettings->setValue(STOCKAUTO_CONFIG_TRACE_GROUP_RSI_SELL, QString::number(pConfigTrace->fRsiSell,'g', 4));
 	pConfigSettings->setValue(STOCKAUTO_CONFIG_TRACE_GROUP_RSI_SELLWAITS, QString::number(pConfigTrace->rsiSellWaits));
 	pConfigSettings->setValue(STOCKAUTO_CONFIG_TRACE_GROUP_CUTLOSS_PERCENT, QString::number(pConfigTrace->fCutLossPercent,'g', 4));
+	pConfigSettings->setValue(STOCKAUTO_CONFIG_TRACE_GROUP_CUTLOSS_AFTERTOP, QString::number(pConfigTrace->fCutLossAfterTop, 'g', 4));
 	pConfigSettings->endGroup();
 }

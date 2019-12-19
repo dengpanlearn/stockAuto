@@ -71,6 +71,8 @@ struct QT_STOCK_TRACE_INFO
 	float					fHighVal;
 	long					buyTime;
 	float					fBuyVal;
+	long					topTime;
+	float					fTopVal;
 	long					sellTime;
 	float					fSellVal;
 };
@@ -80,6 +82,24 @@ struct QT_STOCK_TRACEINFO_QUERY_JOB
 	int					jobResult;
 	BOOL				bInWorking;
 	QT_STOCK_TRACE_INFO traceInfo;
+};
+
+struct QT_STOCK_SELLSTAT_INFO
+{
+	char	name[STOCK_CODE_NAME_MAX];
+	char	code[STOCK_CODE_NAME_MAX];
+	float					fBuy;
+	float					fCur;
+	float					fMa10;
+	float					fRsi7;
+	float					fTop;
+};
+
+struct QT_STOCK_SELLSTAT_QUERY_JOB
+{
+	int					jobResult;
+	BOOL				bInWorking;
+	QT_STOCK_SELLSTAT_INFO sellStatInfo;
 };
 
 struct QT_STOCK_LOADING_MANAGER
@@ -122,9 +142,23 @@ struct QT_STOCK_TRACEINFO_QUERY_PARAM
 	float					fHighVal;
 	long					buyTime;
 	float					fBuyVal;
+	long				    topTime;
+	float					fTopVal;
 	long					sellTime;
 	float					fSellVal;
 };
 
+
+struct QT_STOCK_SELLSTAT_QUERY_PARAM
+{
+	TASK_EVENT_PARAM		eventParam;
+	char					code[STOCK_CODE_NAME_MAX];
+	CQtStockAgent*			pStockAgent;
+	float					fBuy;
+	float					fCur;
+	float					fMa10;
+	float					fRsi7;
+	float					fTop;
+};
 
 #endif // !__QT_STOCK_TRACE_DEF_H__

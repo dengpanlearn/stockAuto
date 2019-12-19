@@ -22,5 +22,6 @@ public:
 	virtual int ClearTraceLogHisTime() = 0;
 	virtual int UpdateTraceLog(STOCK_MANAGER_TRACE_LOG* pTraceLogBuf) = 0;
 	virtual int GetHisKLine(char const* pStockCode, STOCK_CALC_TRACE_KLINE* pHisKLineBuf, int bufCounts)=0;
+	virtual int GetTraceLog(char const* pStockCode, STOCK_MANAGER_TRACE_LOG* pTraceLogBuf)=0;
 };
 #endif // ! __STOCK_DATA_BASE_H__

@@ -86,7 +86,7 @@ int CStockDataSqlite::GetTraceLog(STOCK_MANAGER_TRACE_LOG* pTraceLogBuf, int buf
 		return -1;
 
 	QSqlQuery sqlQuery(m_traceLogDb);
-	QString selSql("select step, code, hightime, highval, buytime, buyval,  selltime, sellval, histime, updatetime, realtime, raisebalances from trace");
+	QString selSql("select step, code, hightime, highval, buytime, buyval,  selltime, sellval, histime, updatetime, realtime, raisebalances, toptime, topval from trace");
 	
 	if (!sqlQuery.exec(selSql))
 	{
@@ -114,7 +114,8 @@ int CStockDataSqlite::GetTraceLog(STOCK_MANAGER_TRACE_LOG* pTraceLogBuf, int buf
 		pTraceLogBuf->updateTime = sqlQuery.value(9).toInt();
 		pTraceLogBuf->realTime = sqlQuery.value(10).toInt();
 		pTraceLogBuf->raiseBalanceCheckTimes = sqlQuery.value(11).toInt();
-
+		pTraceLogBuf->topTime = sqlQuery.value(12).toInt();
+		pTraceLogBuf->fTopVal = sqlQuery.value(13).toFloat();
 		logCounts++;
 		pTraceLogBuf++;
 	}
@@ -150,7 +151,7 @@ int CStockDataSqlite::UpdateTraceLog(STOCK_MANAGER_TRACE_LOG* pTraceLogBuf)
 		if (m_traceLogDb.tables().contains("trace"))
 			return -1;
 
-		QString createTab = QString("create table trace (step int, code varchar(9), hightime int, highval decimal, buytime int, buyval decimal, selltime int, sellval decimal, histime int, updatetime int, realtime int, raisebalances int)");
+		QString createTab = QString("create table trace (step int, code varchar(9), hightime int, highval decimal, buytime int, buyval decimal, selltime int, sellval decimal, histime int, updatetime int, realtime int, raisebalances int, toptime int, topval decimal)");
 		if (!sqlQuery.exec(createTab))
 			return -1;
 	}
@@ -158,12 +159,12 @@ int CStockDataSqlite::UpdateTraceLog(STOCK_MANAGER_TRACE_LOG* pTraceLogBuf)
 
 	if (!sqlQuery.next())
 	{
-		QString insertSql = QString("insert into trace values(?, ?, ?, ?, ?, ?,?, ?, ?, ?, ?, ?)");
+		QString insertSql = QString("insert into trace values(?, ?, ?, ?, ?, ?,?, ?, ?, ?, ?, ?, ?, ?)");
 		sqlQuery.prepare(insertSql);
 	}
 	else
 	{
-		QString updateSql = QString("update trace set step=?, code=?, hightime=?, highval=?, buytime=?, buyval=?,  selltime=?, sellval=?, histime=?, updatetime=?, realtime=?, raisebalances=? where code=\'%1\'").arg(pTextCode->toUnicode(pTraceLogBuf->code));
+		QString updateSql = QString("update trace set step=?, code=?, hightime=?, highval=?, buytime=?, buyval=?,  selltime=?, sellval=?, histime=?, updatetime=?, realtime=?, raisebalances=?, toptime=?, topval=? where code=\'%1\'").arg(pTextCode->toUnicode(pTraceLogBuf->code));
 		sqlQuery.prepare(updateSql);
 	}
 
@@ -179,7 +180,8 @@ int CStockDataSqlite::UpdateTraceLog(STOCK_MANAGER_TRACE_LOG* pTraceLogBuf)
 	sqlQuery.bindValue(9, pTraceLogBuf->updateTime);
 	sqlQuery.bindValue(10, pTraceLogBuf->realTime);
 	sqlQuery.bindValue(11, pTraceLogBuf->raiseBalanceCheckTimes);
-	
+	sqlQuery.bindValue(11, pTraceLogBuf->topTime);
+	sqlQuery.bindValue(11, pTraceLogBuf->fTopVal);
 	return sqlQuery.exec() ? 0 : -1;
 }
 
@@ -217,4 +219,45 @@ int CStockDataSqlite::GetHisKLine(char const* pStockCode, STOCK_CALC_TRACE_KLINE
 	}
 
 	return hisCounts;
+}
+
+int CStockDataSqlite::GetTraceLog(char const* pStockCode, STOCK_MANAGER_TRACE_LOG* pTrace)
+{
+	if (!m_traceLogDb.isOpen())
+		return -1;
+
+	QTextCodec* pTextCode = QTextCodec::codecForLocale();
+	QSqlQuery sqlQuery(m_traceLogDb);
+	QString selSql = QString("select * from trace where code =\'%1\'").arg(pTextCode->toUnicode(pStockCode));
+
+	if (!sqlQuery.exec(selSql))
+	{
+		return -1;
+	}
+
+	if (sqlQuery.next())
+	{
+		pTrace->traceStep = sqlQuery.value(0).toInt();
+
+		QString code = sqlQuery.value(1).toString();
+		QString2Char(code, pTrace->code);
+
+		pTrace->highTime = sqlQuery.value(2).toInt();
+		pTrace->fHighVal = sqlQuery.value(3).toFloat();
+
+		pTrace->buyTime = sqlQuery.value(4).toInt();
+		pTrace->fBuyVal = sqlQuery.value(5).toFloat();
+
+		pTrace->sellTime = sqlQuery.value(6).toInt();
+		pTrace->fSellVal = sqlQuery.value(7).toFloat();
+
+		pTrace->hisTime = sqlQuery.value(8).toInt();
+		pTrace->updateTime = sqlQuery.value(9).toInt();
+		pTrace->realTime = sqlQuery.value(10).toInt();
+		pTrace->raiseBalanceCheckTimes = sqlQuery.value(11).toInt();
+		pTrace->topTime = sqlQuery.value(12).toInt();
+		pTrace->fTopVal = sqlQuery.value(13).toFloat();
+	}
+
+	return 0;
 }

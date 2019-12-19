@@ -1065,6 +1065,8 @@ int CStockAutoManager::OnQueryTraceInfo(QT_STOCK_TRACEINFO_QUERY_PARAM* pQueryTr
 			pQueryTraceInfo->fHighVal = pTraceLog->fHighVal;
 			pQueryTraceInfo->buyTime = pTraceLog->buyTime;
 			pQueryTraceInfo->fBuyVal = pTraceLog->fBuyVal;
+			pQueryTraceInfo->topTime = pTraceLog->topTime;
+			pQueryTraceInfo->fTopVal = pTraceLog->fTopVal;
 			pQueryTraceInfo->sellTime = pTraceLog->sellTime;
 			pQueryTraceInfo->fSellVal = pTraceLog->sellTime;
 			return EVENT_COMPLETE_OK;

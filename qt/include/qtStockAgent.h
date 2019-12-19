@@ -65,6 +65,7 @@ private slots:
 	void OnGetQueryHisKLine(QString& code);
 	void OnGetQueryRealKLine(QString& code, QString& name);
 	void OnGetQueryTraceInfo(QString& code, QString& name);
+	void OnGetQuerySellStat(QString& code, QString& name);
 	void OnRequestResetTrace();
 
 protected:
@@ -81,6 +82,7 @@ protected:
 		QT_STOCK_AGENT_QUERY_REALKLINE_RESPONESE = 0x00000008,
 		QT_STOCK_AGENT_REQUEST_RESET_TRACE_RESPONESE = 0x00000010,
 		QT_STOCK_AGENT_QUERY_TRACEINFO_RESPONESE = 0x00000020,
+		QT_STOCK_AGENT_QUERY_SELLSTAT_RESPONESE = 0x00000040
 	};
 
 private:
@@ -92,6 +94,7 @@ private:
 	QT_STOCK_TRACEINFO_QUERY_JOB	m_traceInfoQueryJob;
 	QT_STOCK_RESET_TRACE_JOB		m_resetTraceJob;
 	QT_STOCK_LOADING_MANAGER		m_loadingManager;
+	QT_STOCK_SELLSTAT_QUERY_JOB		m_sellStatQueryJob;
 	CMultiEventsTask*		m_pManager;
 	CMultiEventsTask*		m_pDataTask;
 	CMultiEventsTask*		m_pUpdateTask;

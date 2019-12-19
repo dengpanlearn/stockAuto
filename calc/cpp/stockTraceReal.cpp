@@ -26,6 +26,7 @@ BOOL CStockTraceReal::Init(int hisHighCounts, STOCKAUTO_CONFIG_TRACE const* pCon
 	m_iReachHighRanges = pConfigTrace->reachHighRanges;
 	m_fCutLossPercent = pConfigTrace->fCutLossPercent;
 	m_fRaisePercent = pConfigTrace->fRaisePercent;
+	m_fCutLossAfterTop = pConfigTrace->fCutLossAfterTop;
 	return CStockTraceBase::Init(hisHighCounts);
 }
 
@@ -43,6 +44,7 @@ void CStockTraceReal::UpdateConfigTrace(STOCKAUTO_CONFIG_TRACE const* pConfigTra
 	m_iReachHighRanges = pConfigTrace->reachHighRanges;
 	m_fCutLossPercent = pConfigTrace->fCutLossPercent;
 	m_fRaisePercent = pConfigTrace->fRaisePercent;
+	m_fCutLossAfterTop = pConfigTrace->fCutLossAfterTop;
 }
 
 BOOL CStockTraceReal::IsHisKLineRsiContinueLow(STOCK_CALC_TRACE_KLINE const* pHisKLineEnd, int times, float fRsiLimit)
@@ -239,6 +241,8 @@ BOOL CStockTraceReal::DoTraceRealWork(STOCK_CALC_TRACE_NODE* pTraceNode)
 			pTraceLog->traceStep = CALC_STOCK_TRADE_STEP_WAIT_SELL;
 			pTraceLog->buyTime = time(NULL);
 			pTraceLog->fBuyVal = pCurKLine->fClose;
+			pTraceLog->fTopVal = pCurKLine->fClose;
+			pTraceLog->topTime = pTraceLog->buyTime;
 			UpdateStockTraceStat(pTraceNode->stockIdx, pTraceLog->code, QT_STOCK_TRACE_LOG_STAT_RSI_REACHED | QT_STOCK_TRACE_LOG_STAT_MODIFY);
 			// 没有买入接口，
 			UpdateStockTraceStat(pTraceNode->stockIdx, pTraceLog->code, QT_STOCK_TRACE_LOG_STAT_BUYING | QT_STOCK_TRACE_LOG_STAT_MODIFY);
@@ -277,6 +281,19 @@ BOOL CStockTraceReal::DoTraceRealWork(STOCK_CALC_TRACE_NODE* pTraceNode)
 		if (IsHisKLineRsiContinueLow(pHisKLineEnd, m_iRsiSellWaits - 1, m_fRsiSell))
 		{
 			if (pCurKLine->fRsi7 < m_fRsiSell)
+				goto _TRACE_SELL;
+		}
+
+		
+		if (pCurKLine->fClose > pTraceLog->fTopVal)
+		{
+			pTraceLog->fTopVal = pCurKLine->fClose;
+			pTraceLog->topTime = time(NULL);
+		}
+		else
+		{
+			float fPercentTop = (pTraceLog->fTopVal - pCurKLine->fClose) * 100 / pTraceLog->fTopVal;
+			if (fPercentTop > m_fCutLossAfterTop)
 				goto _TRACE_SELL;
 		}
 	}
