@@ -35,6 +35,7 @@ private slots:
 	void OnNotifyStockTrace();
 	void OnSelectStock(QTreeWidgetItem * pItem, int column);
 	void OnUpdateSellStocks();
+	void OnNotifyUiSellStatResponse();
 
 private:
 	void AddTraceLogItem(char const* pCode, char const* pName, UINT stat);

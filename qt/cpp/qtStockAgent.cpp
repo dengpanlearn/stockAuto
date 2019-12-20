@@ -139,6 +139,24 @@ BOOL CQtStockAgent::GetStockTraceInfo(QT_STOCK_TRACE_INFO* pTraceInfo)
 	return TRUE;
 }
 
+BOOL CQtStockAgent::GetStockSellStat(QT_STOCK_SELLSTAT_INFO_EXE* pSellStat)
+{
+	CSingleLock lock(&m_cs, TRUE);
+	if (m_sellStatQueryJob.jobResult < 0)
+		return FALSE;
+
+	memcpy(pSellStat->code, m_sellStatQueryJob.sellStatInfo.traceInfo.code, STOCK_CODE_NAME_MAX);
+	memcpy(pSellStat->name, m_sellStatQueryJob.sellStatInfo.traceInfo.name, STOCK_CODE_NAME_MAX);
+	pSellStat->traceStep = m_sellStatQueryJob.sellStatInfo.traceInfo.traceStep;
+	pSellStat->fBuyVal = m_sellStatQueryJob.sellStatInfo.traceInfo.fBuyVal;
+	pSellStat->fTopVal = m_sellStatQueryJob.sellStatInfo.traceInfo.fTopVal;
+
+	pSellStat->fCurVal = m_sellStatQueryJob.sellStatInfo.realKline.fClose;
+	pSellStat->fMa = m_sellStatQueryJob.sellStatInfo.realKline.fMa10;
+	pSellStat->fRsi = m_sellStatQueryJob.sellStatInfo.realKline.fRsi7;
+	return TRUE;
+}
+
 void CQtStockAgent::GetConfigPython(STOCKAUTO_CONFIG_PYTHON* pConfigPython)
 {
 	g_configTask.GetConfigPython(pConfigPython);
@@ -205,12 +223,18 @@ BOOL CQtStockAgent::QtTaskEventComplete(UINT cmd, int result, void* param, int p
 		pQueryRealKLine->pStockAgent->OnRealKLineQueryResponse(result, pQueryRealKLine);
 		break;
 
-
 	case STOCK_QT_EVENT_QUERY_STOCK_TRACEINFO:
 		pQueryTraceInfo->pStockAgent->OnTraceInfoQueryResponse(result, pQueryTraceInfo);
 		break;
-	}
 
+	case STOCK_QT_EVENT_QUERY_STOCK_SELLSTAT_REALKLINE:
+		pQueryRealKLine->pStockAgent->OnSellStatQueryRealKLineResponse(result, pQueryRealKLine);
+		break;
+
+	case STOCK_QT_EVENT_QUERY_STOCK_SELLSTAT_TRACEINFO:
+		pQueryRealKLine->pStockAgent->OnSellStatQueryTraceInfoResponse(result, pQueryTraceInfo);
+		break;
+	}
 
 	return TRUE;
 }
@@ -245,6 +269,46 @@ void CQtStockAgent::OnTraceInfoQueryResponse(int result, QT_STOCK_TRACEINFO_QUER
 	m_traceInfoQueryJob.traceInfo.sellTime = pTraceInfo->sellTime;
 	m_traceInfoQueryJob.traceInfo.fSellVal = pTraceInfo->fSellVal;
 	m_updateCmd |= QT_STOCK_AGENT_QUERY_TRACEINFO_RESPONESE;
+}
+
+void CQtStockAgent::OnSellStatQueryRealKLineResponse(int result, QT_STOCK_REALKLINE_QUERY_PARAM* pRealKLine)
+{
+	if (result < 0)
+	{
+	_JOB_ERROR:
+		CSingleLock lock(&m_cs, TRUE);
+		m_sellStatQueryJob.jobResult = result;
+		m_updateCmd |= QT_STOCK_AGENT_QUERY_SELLSTAT_RESPONESE;
+		return;
+	}
+
+	QT_STOCK_TRACEINFO_QUERY_PARAM* pQueryParam = (QT_STOCK_TRACEINFO_QUERY_PARAM*)m_pManager->AllocPktByEvent(STOCK_QT_EVENT_QUERY_STOCK_SELLSTAT_TRACEINFO, sizeof(QT_STOCK_TRACEINFO_QUERY_PARAM),
+		QtTaskEventComplete, NULL);
+
+	if (pQueryParam == NULL)
+	{
+		result = -1;
+		goto _JOB_ERROR;
+	}
+	pQueryParam->pStockAgent = this;
+	memcpy(pQueryParam->code, m_sellStatQueryJob.sellStatInfo.traceInfo.code, sizeof(pQueryParam->code));
+	m_pManager->PostPktByEvent(pQueryParam);
+}
+
+void CQtStockAgent::OnSellStatQueryTraceInfoResponse(int result, QT_STOCK_TRACEINFO_QUERY_PARAM* pTraceInfo)
+{
+	CSingleLock lock(&m_cs, TRUE);
+	m_sellStatQueryJob.jobResult = result;
+	m_sellStatQueryJob.sellStatInfo.traceInfo.traceStep = pTraceInfo->traceStep;
+	m_sellStatQueryJob.sellStatInfo.traceInfo.highTime = pTraceInfo->highTime;
+	m_sellStatQueryJob.sellStatInfo.traceInfo.fHighVal = pTraceInfo->fHighVal;
+	m_sellStatQueryJob.sellStatInfo.traceInfo.buyTime = pTraceInfo->buyTime;
+	m_sellStatQueryJob.sellStatInfo.traceInfo.fBuyVal = pTraceInfo->fBuyVal;
+	m_sellStatQueryJob.sellStatInfo.traceInfo.topTime = pTraceInfo->topTime;
+	m_sellStatQueryJob.sellStatInfo.traceInfo.fTopVal = pTraceInfo->fTopVal;
+	m_sellStatQueryJob.sellStatInfo.traceInfo.sellTime = pTraceInfo->sellTime;
+	m_sellStatQueryJob.sellStatInfo.traceInfo.fSellVal = pTraceInfo->fSellVal;
+	m_updateCmd |= QT_STOCK_AGENT_QUERY_SELLSTAT_RESPONESE;
 }
 
 void CQtStockAgent::OnGetQueryHisKLine(QString& code)
@@ -359,18 +423,17 @@ void CQtStockAgent::OnGetQuerySellStat(QString& code, QString& name)
 	
 	m_sellStatQueryJob.jobResult = 0;
 	memset(&m_sellStatQueryJob.sellStatInfo, 0, sizeof(m_sellStatQueryJob.sellStatInfo));
-	QString2Char(code, m_sellStatQueryJob.sellStatInfo.code);
-	QString2Char(name, m_sellStatQueryJob.sellStatInfo.name);
+	QString2Char(code, m_sellStatQueryJob.sellStatInfo.traceInfo.code);
+	QString2Char(name, m_sellStatQueryJob.sellStatInfo.traceInfo.name);
 
 	if (m_pUpdateTask == NULL)
 		m_pUpdateTask = ((CStockAutoManager*)m_pManager)->GetTaskUpdate();
 
-	QT_STOCK_SELLSTAT_QUERY_PARAM* pQueryParam = (QT_STOCK_SELLSTAT_QUERY_PARAM*)m_pUpdateTask->AllocPktByEvent(STOCK_QT_EVENT_QUERY_STOCK_SELLSTAT, sizeof(QT_STOCK_SELLSTAT_QUERY_PARAM),
+	QT_STOCK_REALKLINE_QUERY_PARAM* pQueryParam = (QT_STOCK_REALKLINE_QUERY_PARAM*)m_pUpdateTask->AllocPktByEvent(STOCK_QT_EVENT_QUERY_STOCK_SELLSTAT_REALKLINE, sizeof(QT_STOCK_REALKLINE_QUERY_PARAM),
 		QtTaskEventComplete, NULL);
 
 	if (pQueryParam == NULL)
 	{
-		CSingleLock lock(&m_cs, TRUE);
 		m_sellStatQueryJob.jobResult = -1;
 		m_updateCmd |= QT_STOCK_AGENT_QUERY_SELLSTAT_RESPONESE;
 
@@ -378,7 +441,8 @@ void CQtStockAgent::OnGetQuerySellStat(QString& code, QString& name)
 	}
 
 	pQueryParam->pStockAgent = this;
-	memcpy(pQueryParam->code, m_sellStatQueryJob.sellStatInfo.code, sizeof(pQueryParam->code));
+	pQueryParam->pRealKLineBuf = &m_sellStatQueryJob.sellStatInfo.realKline;
+	memcpy(pQueryParam->code, m_sellStatQueryJob.sellStatInfo.traceInfo.code, sizeof(pQueryParam->code));
 	m_pUpdateTask->PostPktByEvent(pQueryParam);
 }
 
@@ -444,6 +508,13 @@ void CQtStockAgent::OnTimeout()
 		m_updateCmd &= ~QT_STOCK_AGENT_QUERY_TRACEINFO_RESPONESE;
 		m_traceInfoQueryJob.bInWorking = FALSE;
 		emit NotifyUiTraceInfoResponse();
+	}
+
+	if (m_updateCmd & QT_STOCK_AGENT_QUERY_SELLSTAT_RESPONESE)
+	{
+		m_updateCmd &= ~QT_STOCK_AGENT_QUERY_SELLSTAT_RESPONESE;
+		m_sellStatQueryJob.bInWorking = FALSE;
+		emit NotifyUiSellStatResponse();
 	}
 
 	if (!DLL_IS_EMPTY(&m_listTraceLog))

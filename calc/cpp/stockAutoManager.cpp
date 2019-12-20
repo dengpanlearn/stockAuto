@@ -355,6 +355,7 @@ int CStockAutoManager::OnEventActive(UINT cmd, void* param, int paramLen)
 		break;
 
 	case STOCK_QT_EVENT_QUERY_STOCK_TRACEINFO:
+	case STOCK_QT_EVENT_QUERY_STOCK_SELLSTAT_TRACEINFO:
 		result = OnQueryTraceInfo(pQueryTraceInfo);
 		break;
 	}

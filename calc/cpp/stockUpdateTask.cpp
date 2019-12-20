@@ -92,6 +92,7 @@ int CStockUpdateTask::OnEventActive(UINT cmd, void* param, int paramLen)
 		break;
 
 	case STOCK_QT_EVENT_QUERY_STOCK_REALKLINE:
+	case STOCK_QT_EVENT_QUERY_STOCK_SELLSTAT_REALKLINE:
 		result = m_pStockUpdate->GetLatestKLine(pQueryRealKLine->code, pQueryRealKLine->pRealKLineBuf);
 		break;
 

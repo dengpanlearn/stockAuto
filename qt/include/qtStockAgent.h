@@ -34,6 +34,7 @@ public:
 	int	GetStockHisKLine(int count, int offset, STOCK_CALC_TRACE_KLINE* pKLine);
 	BOOL GetStockRealKLine(QT_STOCK_REALKLINE_INFO* pKLineInfo);
 	BOOL GetStockTraceInfo(QT_STOCK_TRACE_INFO* pTraceInfo);
+	BOOL GetStockSellStat(QT_STOCK_SELLSTAT_INFO_EXE* pSellStat);
 
 	void GetConfigPython(STOCKAUTO_CONFIG_PYTHON* pConfigPython);
 	void GetConfigData(STOCKAUTO_CONFIG_DATA* pConfigData);
@@ -53,6 +54,9 @@ private:
 	void OnHisKLineQueryResponse(int result, QT_STOCK_HISKLINE_QUERY_PARAM* pHisKLine);
 	void OnRealKLineQueryResponse(int result, QT_STOCK_REALKLINE_QUERY_PARAM* pRealKLine);
 	void OnTraceInfoQueryResponse(int result, QT_STOCK_TRACEINFO_QUERY_PARAM* pTraceInfo);
+	void OnSellStatQueryRealKLineResponse(int result, QT_STOCK_REALKLINE_QUERY_PARAM* pRealKLine);
+	void OnSellStatQueryTraceInfoResponse(int result, QT_STOCK_TRACEINFO_QUERY_PARAM* pTraceInfo);
+
 signals:
 	void NotifyUiManagerLoadingProgress();
 	void NotifyUiStockTrace();
@@ -60,6 +64,7 @@ signals:
 	void NotifyUiRealKLineResponese();
 	void NotifyResetTraceResponese();
 	void NotifyUiTraceInfoResponse();
+	void NotifyUiSellStatResponse();
 	
 private slots:
 	void OnGetQueryHisKLine(QString& code);

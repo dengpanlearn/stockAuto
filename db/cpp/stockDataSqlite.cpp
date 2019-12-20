@@ -228,7 +228,7 @@ int CStockDataSqlite::GetTraceLog(char const* pStockCode, STOCK_MANAGER_TRACE_LO
 
 	QTextCodec* pTextCode = QTextCodec::codecForLocale();
 	QSqlQuery sqlQuery(m_traceLogDb);
-	QString selSql = QString("select * from trace where code =\'%1\'").arg(pTextCode->toUnicode(pStockCode));
+	QString selSql = QString("select  step, code, hightime, highval, buytime, buyval,  selltime, sellval, histime, updatetime, realtime, raisebalances, toptime, topval from trace where code =\'%1\'").arg(pTextCode->toUnicode(pStockCode));
 
 	if (!sqlQuery.exec(selSql))
 	{

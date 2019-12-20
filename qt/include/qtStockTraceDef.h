@@ -86,13 +86,20 @@ struct QT_STOCK_TRACEINFO_QUERY_JOB
 
 struct QT_STOCK_SELLSTAT_INFO
 {
+	QT_STOCK_TRACE_INFO     traceInfo;
+	STOCK_CALC_TRACE_KLINE	realKline;
+};
+
+struct QT_STOCK_SELLSTAT_INFO_EXE
+{
 	char	name[STOCK_CODE_NAME_MAX];
 	char	code[STOCK_CODE_NAME_MAX];
-	float					fBuy;
-	float					fCur;
-	float					fMa10;
-	float					fRsi7;
-	float					fTop;
+	UINT					traceStep;
+	float					fBuyVal;
+	float					fTopVal;
+	float					fCurVal;
+	float					fRsi;
+	float					fMa;
 };
 
 struct QT_STOCK_SELLSTAT_QUERY_JOB
@@ -148,17 +155,5 @@ struct QT_STOCK_TRACEINFO_QUERY_PARAM
 	float					fSellVal;
 };
 
-
-struct QT_STOCK_SELLSTAT_QUERY_PARAM
-{
-	TASK_EVENT_PARAM		eventParam;
-	char					code[STOCK_CODE_NAME_MAX];
-	CQtStockAgent*			pStockAgent;
-	float					fBuy;
-	float					fCur;
-	float					fMa10;
-	float					fRsi7;
-	float					fTop;
-};
 
 #endif // !__QT_STOCK_TRACE_DEF_H__

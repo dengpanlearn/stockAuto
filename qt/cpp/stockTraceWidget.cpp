@@ -106,7 +106,10 @@ void CStockTraceWidget::Retranslate()
 {
 	CQtStockAgent* pStockAgent = (CQtStockAgent*)m_pStockAgent;
 	connect(pStockAgent, SIGNAL(NotifyUiStockTrace()), this, SLOT(OnNotifyStockTrace()));
+	connect(pStockAgent, SIGNAL(NotifyUiSellStatResponse()), this, SLOT(OnNotifyUiSellStatResponse()));
+	connect(this, SIGNAL(SignalUpdateStockSellStat(QString& , QString& )), pStockAgent, SLOT(OnGetQuerySellStat(QString& , QString& )));
 	connect(m_pTreeWaitBuy, SIGNAL(itemPressed(QTreeWidgetItem*, int)), this, SLOT(OnSelectStock(QTreeWidgetItem*, int)));
+	connect(m_pTreeWaitSell, SIGNAL(itemPressed(QTreeWidgetItem*, int)), this, SLOT(OnSelectStock(QTreeWidgetItem*, int)));
 	connect(m_pTimerSell, SIGNAL(timeout()), this, SLOT(OnUpdateSellStocks()));
 	m_pTimerSell->start();
 }
@@ -153,7 +156,7 @@ void CStockTraceWidget::AddTraceLogItem(char const* pCode, char const* pName, UI
 {
 	QTreeWidgetItem* pItem = new QTreeWidgetItem();
 	QTextCodec* pCodec = QTextCodec::codecForLocale();
-	QString codeName = QString::fromUtf8(pCode)+" "+ pCodec->toUnicode(pName);
+	QString codeName = pCodec->toUnicode(pCode)+" "+ pCodec->toUnicode(pName);
 	pItem->setText(STOCK_TRACE_WIDGET_TREE_WAITBUY_INDEX_CODE_NAME, codeName);
 	if (stat < QT_STOCK_TRACE_LOG_STAT_BUYED)
 	{
@@ -180,7 +183,7 @@ void CStockTraceWidget::AddTraceLogItem(char const* pCode, char const* pName, UI
 		pItem->setText(STOCK_TRACE_WIDGET_TREE_WAITSELL_INDEX_MA10, "--/--");
 		pItem->setText(STOCK_TRACE_WIDGET_TREE_WAITSELL_INDEX_EARNS, "--/--/--");
 		pItem->setText(STOCK_TRACE_WIDGET_TREE_WAITSELL_INDEX_RSI, "--");
-		pItem->setText(STOCK_TRACE_WIDGET_TREE_WAITSELL_INDEX_CUT_BACK, "--");
+		pItem->setText(STOCK_TRACE_WIDGET_TREE_WAITSELL_INDEX_CUT_BACK, "--/--/--");
 		m_pTreeWaitSell->addTopLevelItem(pItem);
 	}
 	else
@@ -280,7 +283,7 @@ QTreeWidgetItem* CStockTraceWidget::FindTraceLogItem(QTreeWidget* pTreeWidget, c
 		QString codeName = pItem->text(STOCK_TRACE_WIDGET_TREE_WAITBUY_INDEX_CODE_NAME);
 
 		QTextCodec* pCodec = QTextCodec::codecForLocale();
-		QString findCodeName = QString::fromUtf8(pCode) + " " + pCodec->toUnicode(pName);
+		QString findCodeName = pCodec->toUnicode(pCode) + " " + pCodec->toUnicode(pName);
 		if (findCodeName == codeName)
 		{
 			return pItem;
@@ -307,4 +310,46 @@ void CStockTraceWidget::OnUpdateSellStocks()
 		emit SignalUpdateStockSellStat(list[0], list[1]);
 
 	m_indxOfSellStockForUpdate++;
+}
+
+void CStockTraceWidget::OnNotifyUiSellStatResponse()
+{
+	QT_STOCK_SELLSTAT_INFO_EXE stockSellStat;
+	CQtStockAgent* pStockAgent = (CQtStockAgent*)m_pStockAgent;
+	if (!pStockAgent->GetStockSellStat(&stockSellStat))
+		return;
+
+	if (stockSellStat.traceStep != CALC_STOCK_TRADE_STEP_WAIT_SELL)
+		return;
+
+	QTextCodec* pCodec = QTextCodec::codecForLocale();
+	QString stockCodeName = pCodec->toUnicode(stockSellStat.code) + " " + pCodec->toUnicode(stockSellStat.name);
+	int stockCnts = m_pTreeWaitSell->topLevelItemCount();
+
+	for (int i = 0; i < stockCnts; i++)
+	{
+		QTreeWidgetItem* pItem = m_pTreeWaitSell->topLevelItem(i);
+		QString codeName = pItem->text(STOCK_TRACE_WIDGET_TREE_WAITSELL_INDEX_CODE_NAME);
+
+		if (codeName == stockCodeName)
+		{
+			QString ma10 = QString("%1/%2").arg(stockSellStat.fMa).arg(stockSellStat.fCurVal);
+
+			pItem->setText(STOCK_TRACE_WIDGET_TREE_WAITSELL_INDEX_MA10, ma10);
+
+			float fCutLoss = stockSellStat.fCurVal - stockSellStat.fBuyVal;
+			float percent = fCutLoss * 100 / stockSellStat.fBuyVal;
+			QString cur = QString("%1/%2/%3").arg(stockSellStat.fBuyVal).arg(stockSellStat.fCurVal).arg(percent);
+			pItem->setText(STOCK_TRACE_WIDGET_TREE_WAITSELL_INDEX_EARNS, cur);
+
+		
+			pItem->setText(STOCK_TRACE_WIDGET_TREE_WAITSELL_INDEX_RSI, QString::number(stockSellStat.fRsi, 'g', 4));
+
+			fCutLoss = stockSellStat.fTopVal - stockSellStat.fCurVal;
+			percent = fCutLoss * 100 / stockSellStat.fTopVal;
+			QString cut = QString("%1/%2/%3").arg(stockSellStat.fTopVal).arg(stockSellStat.fCurVal).arg(percent);
+			pItem->setText(STOCK_TRACE_WIDGET_TREE_WAITSELL_INDEX_CUT_BACK, cut);
+			break;
+		}
+	}
 }
