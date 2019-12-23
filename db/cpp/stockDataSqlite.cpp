@@ -180,8 +180,8 @@ int CStockDataSqlite::UpdateTraceLog(STOCK_MANAGER_TRACE_LOG* pTraceLogBuf)
 	sqlQuery.bindValue(9, pTraceLogBuf->updateTime);
 	sqlQuery.bindValue(10, pTraceLogBuf->realTime);
 	sqlQuery.bindValue(11, pTraceLogBuf->raiseBalanceCheckTimes);
-	sqlQuery.bindValue(11, pTraceLogBuf->topTime);
-	sqlQuery.bindValue(11, pTraceLogBuf->fTopVal);
+	sqlQuery.bindValue(12, pTraceLogBuf->topTime);
+	sqlQuery.bindValue(13, pTraceLogBuf->fTopVal);
 	return sqlQuery.exec() ? 0 : -1;
 }
 

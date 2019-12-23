@@ -57,14 +57,14 @@ void CStockTraceBase::Close()
 
 void CStockTraceBase::ResetTrace()
 {
-	m_pCurNode = DLL_FIRST(m_pTraceList);
+	
 	union
 	{
 		STOCK_CALC_TRACE_NODE* pTraceNode;
 		DL_NODE*			pNode;
 	};
 	DL_NODE* pNextNode;
-	pNode = m_pCurNode;
+	pNode = DLL_FIRST(m_pTraceList);
 	m_workStep = STOCK_TRACE_STEP_PRPARING;
 	while (pNode)
 	{ 
@@ -77,6 +77,8 @@ void CStockTraceBase::ResetTrace()
 	m_jobGetHisKine.jobStep = TASK_EVENT_JOB_STEP_NONE;
 	m_jobUpdateTraceLog.jobStep = TASK_EVENT_JOB_STEP_NONE;
 	m_jobGetCurHisKLine.jobStep = TASK_EVENT_JOB_STEP_NONE;
+
+	m_pCurNode = DLL_FIRST(m_pTraceList);
 }
 
 void CStockTraceBase::Trace()
