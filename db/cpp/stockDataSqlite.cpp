@@ -191,7 +191,7 @@ int CStockDataSqlite::GetHisKLine(char const* pStockCode, STOCK_CALC_TRACE_KLINE
 		return -1;
 
 	QSqlQuery sqlQuery(m_klineDb);
-	QString selSql("select * from (select open, close, high, low, rsi, ma10, percent, timestamp from %1 order by timestamp desc limit %2) aa order by timestamp");
+	QString selSql("select * from (select open, close, high, low, rsi, ma10, percent, timestamp ,volume from %1 order by timestamp desc limit %2) aa order by timestamp");
 	QTextCodec* pTextCode = QTextCodec::codecForLocale();
 	QString tab = pTextCode->toUnicode(pStockCode);
 
@@ -212,8 +212,7 @@ int CStockDataSqlite::GetHisKLine(char const* pStockCode, STOCK_CALC_TRACE_KLINE
 		pHisKLineBuf->fMa10 = sqlQuery.value(5).toFloat();
 		pHisKLineBuf->fPercent = sqlQuery.value(6).toFloat();
 		pHisKLineBuf->timeVal = sqlQuery.value(7).toInt();
-		
-
+		pHisKLineBuf->volume = sqlQuery.value(8).toInt();
 		hisCounts++;
 		pHisKLineBuf++;
 	}

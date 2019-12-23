@@ -64,6 +64,7 @@ void CStockRealWidget::OnInitRealWidget(QWidget* pWidget)
 	QLabel* pLabLow = new QLabel(pCodec->toUnicode(STOCK_REAL_WIDGET_LAB_LOW));
 	QLabel* pLabMA10 = new QLabel(pCodec->toUnicode(STOCK_REAL_WIDGET_LAB_MA10));
 	QLabel* pLabRSI7 = new QLabel(pCodec->toUnicode(STOCK_REAL_WIDGET_LAB_RSI7));
+	QLabel* pLabVol = new QLabel(pCodec->toUnicode(STOCK_REAL_WIDGET_LAB_VOLUME));
 	QLabel* pLabData = new QLabel(pCodec->toUnicode(STOCK_REAL_WIDGET_LAB_DATE));
 	QHBoxLayout* pLytCode = new QHBoxLayout();
 	pLytCode->setAlignment(Qt::AlignHCenter);
@@ -96,6 +97,10 @@ void CStockRealWidget::OnInitRealWidget(QWidget* pWidget)
 	pLytRSI7->addWidget(pLabRSI7);
 	pLytRSI7->addWidget(m_pLabCode[STOCK_REAL_WIDGET_INDEX_RSI7]);
 
+	QHBoxLayout* pLytVol = new QHBoxLayout();
+	pLytVol->addWidget(pLabVol);
+	pLytVol->addWidget(m_pLabCode[STOCK_REAL_WIDGET_INDEX_VOLUME]);
+
 	QHBoxLayout* pLytData = new QHBoxLayout();
 	pLytData->addWidget(pLabData);
 	pLytData->addWidget(m_pLabCode[STOCK_REAL_WIDGET_INDEX_DATE]);
@@ -112,6 +117,7 @@ void CStockRealWidget::OnInitRealWidget(QWidget* pWidget)
 	pLytMain->addLayout(pLytLow);
 	pLytMain->addLayout(pLytMA10);
 	pLytMain->addLayout(pLytRSI7);
+	pLytMain->addLayout(pLytVol);
 	pLytMain->addLayout(pLytData);
 	pLytMain->setMargin(0);
 	pWidget->setLayout(pLytMain);
@@ -264,6 +270,9 @@ void CStockRealWidget::OnUpdateStockRealKLine()
 
 	QString rsi7 = QString::number(realKLineInfo.realKLine.fRsi7, 'g', 4);
 	m_pLabCode[STOCK_REAL_WIDGET_INDEX_RSI7]->setText(rsi7);
+
+	QString volume = QString::number(((double)(realKLineInfo.realKLine.volume))/100, 'f', 2);
+	m_pLabCode[STOCK_REAL_WIDGET_INDEX_VOLUME]->setText(volume);
 
 	QDateTime dateVal = QDateTime::fromTime_t(realKLineInfo.realKLine.timeVal);
 	QString date = dateVal.toString("yyyy-MM-d");

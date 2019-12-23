@@ -97,10 +97,10 @@ class WeekKLineUpdate:
         curSmaGain = 0
         rsiCycle = 7
         lastClose = 0.1
-        itemList =  data.get('item')
-        columns = data.get('column')
 
         try:
+            itemList =  data.get('item')
+            columns = data.get('column')
             openIndex = columns.index('open')
             closeIndex = columns.index('close')
             highIndex = columns.index('high')
@@ -108,7 +108,8 @@ class WeekKLineUpdate:
             percentIndex = columns.index('percent')
             ma10Index = columns.index('ma10')
             timestampIndex = columns.index('timestamp')
-            
+            volumeIndex = columns.index('volume')
+         
             for kline in itemList :
                 difClose = kline[closeIndex]-lastClose
                 kline[percentIndex]=(difClose*100)/lastClose
@@ -122,7 +123,7 @@ class WeekKLineUpdate:
                 
            
             return [itemList[-1][openIndex], itemList[-1][closeIndex], itemList[-1][highIndex], itemList[-1][lowIndex],itemList[-1][percentIndex],itemList[-1][ma10Index], itemList[-1][timestampIndex]//1000,
-                    itemList[-1][-1]]
+                    itemList[-1][volumeIndex], itemList[-1][-1]]
         except ValueError:
             return None
 
@@ -145,7 +146,7 @@ class WeekKLineUpdate:
         orgUrl = 'https://stock.xueqiu.com/v5/stock/chart/kline.json?symbol={stockNo}&begin={beginTime}&period=week&type=before&count={counts}&indicator=kline,ma'
         url = orgUrl.format(stockNo=stockNo, beginTime = beginTime, counts=counts)
         self.headers["Host"] = "stock.xueqiu.com"
-  
+        
         try:
             response = self.session.get(url, verify=False, headers = self.headers)
         except (ReadTimeout, ConnectTimeout, ConnectionError, TooManyRedirects):
@@ -195,11 +196,11 @@ class WeekKLineUpdate:
 if __name__ == '__main__':
     weekKLine =   WeekKLineUpdate()
     if (not weekKLine.prepareUpdate('E:\\self\\stock\\data', 'stockList.db', 'kline.db')):
-        """
+        
         ret = weekKLine.getAndUpdateStockList(int(time.time()))
-        """
+        
         ret = weekKLine.getAndUpdateWeekKLine('SZ300599', int(time.time()), -1)
        
         ret = weekKLine.getCurWeekKLine('SZ300001')
        
-        ret = weekKLine.getCurWeekKLine('SH601369')
+        ret = weekKLine.getCurWeekKLine('SZ002271')
