@@ -49,6 +49,8 @@ private:
 	float	m_fRaisePercent;
 	int		m_iReachHighRanges;
 	float	m_fRsiBuy;
+	float	m_fVolumePercentBuy;
+	float	m_fHighLossPercent;
 	int		m_iRsiBuyWaits;
 	float	m_fRsiSell;
 	int		m_iRsiSellWaits;

@@ -30,7 +30,7 @@ public:
 	BOOL UpdateStockTrace(char const* pStockName, char const* pStockCode, UINT updateStat);
 
 	void GetAutoManagerLoading(QT_STOCK_LOADING_MANAGER* pLoadingInfo);
-	BOOL GetAckStockTrace(QT_STOCK_TRACE_LOG* pTraceLog);
+	int GetAckStockTrace(QT_STOCK_TRACE_LOG* pTraceLog, int counts);
 	int	GetStockHisKLine(int count, int offset, STOCK_CALC_TRACE_KLINE* pKLine);
 	BOOL GetStockRealKLine(QT_STOCK_REALKLINE_INFO* pKLineInfo);
 	BOOL GetStockTraceInfo(QT_STOCK_TRACE_INFO* pTraceInfo);

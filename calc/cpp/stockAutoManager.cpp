@@ -457,7 +457,7 @@ void CStockAutoManager::InitStockTraceCalc(STOCK_MANAGER_TRACE_LOG* pTraceLog, i
 		pTraceNode->stockIdx = j;
 		pTraceNode->pTraceLog = pTraceLog;
 
-		if (pTraceLog->traceStep < CALC_STOCK_TRADE_STEP_CHECK_HIGH)
+		if (pTraceLog->traceStep < CALC_STOCK_TRADE_STEP_WAIT_BUY)
 			dllAdd(&m_listTraceWeek, pNode);
 		else
 		{

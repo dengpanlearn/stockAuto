@@ -14,18 +14,25 @@
 #include "../include/qtResourceDef.h"
 #include "../include/stockTraceWidget.h"
 
-#define	 STOCK_TRACE_WIDGET_SELL_CYCLE		1000
+#define	 STOCK_TRACE_WIDGET_SELL_CYCLE			1000
+#define	 STOCK_TRACE_WIDGET_TRACE_BUF_COUNTS	20
 CStockTraceWidget::CStockTraceWidget(QWidget *parent, CQtObjectAgent* pExitAgent, CQtObjectAgent* pStockAgent)
 	: QWidget(parent)
 {
 	m_pExitAgent = pExitAgent;
 	m_pStockAgent = pStockAgent;
+	m_pTraceLogBuf = NULL;
 	OnInit();
 	Retranslate();
 }
 
 CStockTraceWidget::~CStockTraceWidget()
 {
+	if (m_pTraceLogBuf != NULL)
+	{
+		free(m_pTraceLogBuf);
+		m_pTraceLogBuf = NULL;
+	}
 }
 
 
@@ -67,8 +74,8 @@ void CStockTraceWidget::OnInit()
 	pLyt->addWidget(m_pSplitter);
 	this->setLayout(pLyt);
 	QStringList waitBuyHeaders;
-	char const* pWaitBuyHeaders[] = { STOCK_TRACE_WIDGET_TREE_WAITBUY_NAME_CODE_NAME ,STOCK_TRACE_WIDGET_TREE_WAITBUY_NAME_RAISE_BALANCE,
-		STOCK_TRACE_WIDGET_TREE_WAITBUY_NAME_REACH_HIGH , STOCK_TRACE_WIDGET_TREE_WAITBUY_NAME_WAIT_RSI , STOCK_TRACE_WIDGET_TREE_WAITBUY_NAME_WAIT_BUY };
+	char const* pWaitBuyHeaders[] = { STOCK_TRACE_WIDGET_TREE_WAITBUY_NAME_CODE_NAME, STOCK_TRACE_WIDGET_TREE_WAITBUY_NAME_REACH_HIGH ,
+		 STOCK_TRACE_WIDGET_TREE_WAITBUY_NAME_RAISE_BALANCE, STOCK_TRACE_WIDGET_TREE_WAITBUY_NAME_WAIT_VOLUME, STOCK_TRACE_WIDGET_TREE_WAITBUY_NAME_WAIT_BUY };
 
 	for (int i = 0; i < STOCK_TRACE_WIDGET_TREE_WAITBUY_INDEX_NUM; i++)
 	{
@@ -100,6 +107,7 @@ void CStockTraceWidget::OnInit()
 	m_pTimerSell = new QTimer(this);
 	m_pTimerSell->setInterval(STOCK_TRACE_WIDGET_SELL_CYCLE);
 	m_indxOfSellStockForUpdate = 0;
+	m_pTraceLogBuf = (QT_STOCK_TRACE_LOG*)calloc(STOCK_TRACE_WIDGET_TRACE_BUF_COUNTS, sizeof(QT_STOCK_TRACE_LOG));
 }
 
 void CStockTraceWidget::Retranslate()
@@ -117,29 +125,32 @@ void CStockTraceWidget::Retranslate()
 void CStockTraceWidget::OnNotifyStockTrace()
 {
 	CQtStockAgent* pStockAgent = (CQtStockAgent*)m_pStockAgent;
+	QT_STOCK_TRACE_LOG* pBuf = m_pTraceLogBuf;
+	if (pBuf == NULL)
+		return;
 
-	while (1)
+	int bufCounts = pStockAgent->GetAckStockTrace(pBuf, STOCK_TRACE_WIDGET_TRACE_BUF_COUNTS);
+	QT_STOCK_TRACE_LOG* pTraceLog = pBuf;
+	while (bufCounts-- > 0)
 	{
-		QT_STOCK_TRACE_LOG traceLog;
-		if (!pStockAgent->GetAckStockTrace(&traceLog))
-			break;
-
-		if (traceLog.stat& QT_STOCK_TRACE_LOG_STAT_ADD)
+		if (pTraceLog->stat& QT_STOCK_TRACE_LOG_STAT_ADD)
 		{
-			AddTraceLogItem(traceLog.code, traceLog.stockName, traceLog.stat&0xff);
+			AddTraceLogItem(pTraceLog->code, pTraceLog->stockName, pTraceLog->stat&0xff);
 		}
-		else if (traceLog.stat& QT_STOCK_TRACE_LOG_STAT_MODIFY)
+		else if (pTraceLog->stat& QT_STOCK_TRACE_LOG_STAT_MODIFY)
 		{
-			ModifyTraceLogItem(traceLog.code, traceLog.stockName, traceLog.stat & 0xff);
+			ModifyTraceLogItem(pTraceLog->code, pTraceLog->stockName, pTraceLog->stat & 0xff);
 		}
-		else if(traceLog.stat& QT_STOCK_TRACE_LOG_STAT_DEL)
+		else if(pTraceLog->stat& QT_STOCK_TRACE_LOG_STAT_DEL)
 		{
-			DeleteTraceLogItem(traceLog.code, traceLog.stockName);
+			DeleteTraceLogItem(pTraceLog->code, pTraceLog->stockName);
 		}
 		else
 		{
 
 		}
+
+		pTraceLog++;
 	}
 }
 
@@ -164,18 +175,18 @@ void CStockTraceWidget::AddTraceLogItem(char const* pCode, char const* pName, UI
 		m_pTreeWaitBuy->addTopLevelItem(pItem);
 		switch (stat)
 		{
-		case QT_STOCK_TRACE_LOG_STAT_RSI_REACHED:
+		case QT_STOCK_TRACE_LOG_STAT_VOLUME_REACHED:
 			pLabBack = new QLabel();
-			m_pTreeWaitBuy->setItemWidget(pItem, STOCK_TRACE_WIDGET_TREE_WAITBUY_INDEX_WAIT_RSI, pLabBack);
-			
-		case QT_STOCK_TRACE_LOG_STAT_HIGH_REACHED:
-			pLabBack = new QLabel();
-			m_pTreeWaitBuy->setItemWidget(pItem, STOCK_TRACE_WIDGET_TREE_WAITBUY_INDEX_REACH_HIGH, pLabBack);
+			m_pTreeWaitBuy->setItemWidget(pItem, STOCK_TRACE_WIDGET_TREE_WAITBUY_INDEX_WAIT_VOLUME, pLabBack);
 
 		case QT_STOCK_TRACE_LOG_STAT_RAISE_BALANCED:
 			pLabBack = new QLabel();
 			m_pTreeWaitBuy->setItemWidget(pItem, STOCK_TRACE_WIDGET_TREE_WAITBUY_INDEX_RAISE_BALANCE, pLabBack);
-			break;
+	
+		case QT_STOCK_TRACE_LOG_STAT_HIGH_REACHED:
+			pLabBack = new QLabel();
+			m_pTreeWaitBuy->setItemWidget(pItem, STOCK_TRACE_WIDGET_TREE_WAITBUY_INDEX_REACH_HIGH, pLabBack);
+
 		}
 	}
 	else if (stat == QT_STOCK_TRACE_LOG_STAT_BUYED)
@@ -208,19 +219,19 @@ void CStockTraceWidget::ModifyTraceLogItem(char const* pCode, char const* pName,
 			m_pTreeWaitBuy->setItemWidget(pItem, STOCK_TRACE_WIDGET_TREE_WAITBUY_INDEX_WAIT_BUY, pLabBack);
 			break;
 
-		case QT_STOCK_TRACE_LOG_STAT_RSI_REACHED:
+		case QT_STOCK_TRACE_LOG_STAT_VOLUME_REACHED:
 			pLabBack = new QLabel();
-			m_pTreeWaitBuy->setItemWidget(pItem, STOCK_TRACE_WIDGET_TREE_WAITBUY_INDEX_WAIT_RSI, pLabBack);
-			break;
-
-		case QT_STOCK_TRACE_LOG_STAT_HIGH_REACHED:
-			pLabBack = new QLabel();
-			m_pTreeWaitBuy->setItemWidget(pItem, STOCK_TRACE_WIDGET_TREE_WAITBUY_INDEX_REACH_HIGH, pLabBack);
+			m_pTreeWaitBuy->setItemWidget(pItem, STOCK_TRACE_WIDGET_TREE_WAITBUY_INDEX_WAIT_VOLUME, pLabBack);
 			break;
 
 		case QT_STOCK_TRACE_LOG_STAT_RAISE_BALANCED:
 			pLabBack = new QLabel();
 			m_pTreeWaitBuy->setItemWidget(pItem, STOCK_TRACE_WIDGET_TREE_WAITBUY_INDEX_RAISE_BALANCE, pLabBack);
+			break;
+
+		case QT_STOCK_TRACE_LOG_STAT_HIGH_REACHED:
+			pLabBack = new QLabel();
+			m_pTreeWaitBuy->setItemWidget(pItem, STOCK_TRACE_WIDGET_TREE_WAITBUY_INDEX_REACH_HIGH, pLabBack);
 			break;
 		}
 	}

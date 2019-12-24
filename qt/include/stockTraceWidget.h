@@ -14,6 +14,7 @@ class QWidget;
 class QSplitter;
 class QTimer;
 class QTreeWidgetItem;
+struct QT_STOCK_TRACE_LOG;
 class CStockTraceWidget : public QWidget
 {
 	Q_OBJECT
@@ -55,6 +56,7 @@ private:
 	QSplitter*			m_pSplitter;
 	QTimer*				m_pTimerSell;
 	int					m_indxOfSellStockForUpdate;
+	QT_STOCK_TRACE_LOG*	m_pTraceLogBuf;
 };
 
 #endif // !__STOCK_TRACE_WIDGET_H__

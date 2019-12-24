@@ -298,7 +298,7 @@ void CStockRealWidget::OnUpdateStockTraceInfo()
 	m_pTraceLabCode[STOCK_REAL_WIDGET_TRACE_INDEX_CODE]->setText(pCodec->toUnicode(traceInfo.code));
 	m_pTraceLabCode[STOCK_REAL_WIDGET_TRACE_INDEX_NAME]->setText(pCodec->toUnicode(traceInfo.name));
 
-	if (traceInfo.traceStep == CALC_STOCK_TRADE_STEP_WAIT_BUY)
+	if (traceInfo.traceStep >= CALC_STOCK_TRADE_STEP_CHECK_BALANCE_RAISE)
 	{
 		QDateTime dateVal = QDateTime::fromTime_t(traceInfo.highTime);
 		QString date = dateVal.toString("yyyy-MM-d");
@@ -310,7 +310,12 @@ void CStockRealWidget::OnUpdateStockTraceInfo()
 	{
 		QDateTime dateVal = QDateTime::fromTime_t(traceInfo.topTime);
 		QString date = dateVal.toString("yyyy-MM-d");
-		m_pTraceLabCode[STOCK_REAL_WIDGET_TRACE_INDEX_HIGHTIME]->setText(date);
-		m_pTraceLabCode[STOCK_REAL_WIDGET_TRACE_INDEX_HIGHVAL]->setText(QString::number(traceInfo.fTopVal, 'g', 4));
+		m_pTraceLabCode[STOCK_REAL_WIDGET_TRACE_INDEX_TOPTIME]->setText(date);
+		m_pTraceLabCode[STOCK_REAL_WIDGET_TRACE_INDEX_TOPVAL]->setText(QString::number(traceInfo.fTopVal, 'g', 4));
+
+		dateVal = QDateTime::fromTime_t(traceInfo.buyTime);
+		date = dateVal.toString("yyyy-MM-d");
+		m_pTraceLabCode[STOCK_REAL_WIDGET_TRACE_INDEX_BUYTIME]->setText(date);
+		m_pTraceLabCode[STOCK_REAL_WIDGET_TRACE_INDEX_BUYVAL]->setText(QString::number(traceInfo.fBuyVal, 'g', 4));
 	}
 }

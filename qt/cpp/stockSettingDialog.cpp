@@ -181,8 +181,23 @@ void CStockSettingDilaog::InitTraceTreeWidget(QTreeWidget* pTreeWidget, STOCKAUT
 	pTreeWidget->addTopLevelItem(pItem);
 
 	pItem = new QTreeWidgetItem();
-	pItem->setText(0, pCodec->toUnicode(STOCK_SETTING_DIALOG_EDIT_TRACEREACHHIGH_RANGES_NAME));
+	pItem->setText(0, pCodec->toUnicode(STOCK_SETTING_DIALOG_EDIT_TRACE_REACHHIGH_RANGES_NAME));
 	pItem->setText(1, QString::number(pConfigTrace->reachHighRanges));
+	pTreeWidget->addTopLevelItem(pItem);
+
+	pItem = new QTreeWidgetItem();
+	pItem->setText(0, pCodec->toUnicode(STOCK_SETTING_DIALOG_EDIT_TRACE_HIGHLOSS_PERCENT_NAME));
+	pItem->setText(1, QString::number(pConfigTrace->fHighLostPercent, 'g', 4));
+	pTreeWidget->addTopLevelItem(pItem);
+
+	pItem = new QTreeWidgetItem();
+	pItem->setText(0, pCodec->toUnicode(STOCK_SETTING_DIALOG_EDIT_TRACE_RAISEBALANCE_WAITS_NAME));
+	pItem->setText(1, QString::number(pConfigTrace->raiseBalanceWaits));
+	pTreeWidget->addTopLevelItem(pItem);
+
+	pItem = new QTreeWidgetItem();
+	pItem->setText(0, pCodec->toUnicode(STOCK_SETTING_DIALOG_EDIT_TRACE_VOLUME_PERCENT_BUY_NAME));
+	pItem->setText(1, QString::number(pConfigTrace->fVolumePercentBuy, 'g', 4));
 	pTreeWidget->addTopLevelItem(pItem);
 
 	pItem = new QTreeWidgetItem();
@@ -274,6 +289,18 @@ void CStockSettingDilaog::GetTraceConfig(QTreeWidget* pTreeWidget, STOCKAUTO_CON
 	pItem = pTreeWidget->topLevelItem(STOCK_SETTING_DIALOG_EDIT_TRACE_IDX_REACHHIGH_RANGES);
 	tmpVal = pItem->text(1);
 	pConfigTrace->reachHighRanges = tmpVal.toInt();
+
+	pItem = pTreeWidget->topLevelItem(STOCK_SETTING_DIALOG_EDIT_TRACE_IDX_HIGHLOSS_PERCENT);
+	tmpVal = pItem->text(1);
+	pConfigTrace->fHighLostPercent = tmpVal.toFloat();
+
+	pItem = pTreeWidget->topLevelItem(STOCK_SETTING_DIALOG_EDIT_TRACE_IDX_RAISEBALANCE_WAITS);
+	tmpVal = pItem->text(1);
+	pConfigTrace->raiseBalanceWaits = tmpVal.toInt();
+
+	pItem = pTreeWidget->topLevelItem(STOCK_SETTING_DIALOG_EDIT_TRACE_IDX_VOLUMEPERCENT_BUY);
+	tmpVal = pItem->text(1);
+	pConfigTrace->fVolumePercentBuy = tmpVal.toFloat();
 
 	pItem = pTreeWidget->topLevelItem(STOCK_SETTING_DIALOG_EDIT_TRACE_IDX_RSIBUY_WAITS);
 	tmpVal = pItem->text(1);

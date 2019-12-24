@@ -135,13 +135,13 @@ void CStockTraceBase::UpdateStockTraceStat(int stockIdx, char const* pCode, UINT
 void CStockTraceBase::InitStockTrace(STOCK_CALC_TRACE_NODE* pTraceNode)
 {
 	STOCK_MANAGER_TRACE_LOG* pTraceLog = pTraceNode->pTraceLog;
-	if (pTraceLog->traceStep == CALC_STOCK_TRADE_STEP_CHECK_HIGH)
+	if (pTraceLog->traceStep == CALC_STOCK_TRADE_STEP_CHECK_BALANCE_RAISE)
 	{
-		UpdateStockTraceStat(pTraceNode->stockIdx, pTraceLog->code, QT_STOCK_TRACE_LOG_STAT_RAISE_BALANCED | QT_STOCK_TRACE_LOG_STAT_ADD);
+		UpdateStockTraceStat(pTraceNode->stockIdx, pTraceLog->code, QT_STOCK_TRACE_LOG_STAT_HIGH_REACHED | QT_STOCK_TRACE_LOG_STAT_ADD);
 	}
 	else if (pTraceLog->traceStep == CALC_STOCK_TRADE_STEP_WAIT_BUY)
 	{
-		UpdateStockTraceStat(pTraceNode->stockIdx, pTraceLog->code, QT_STOCK_TRACE_LOG_STAT_HIGH_REACHED | QT_STOCK_TRACE_LOG_STAT_ADD);
+		UpdateStockTraceStat(pTraceNode->stockIdx, pTraceLog->code, QT_STOCK_TRACE_LOG_STAT_RAISE_BALANCED | QT_STOCK_TRACE_LOG_STAT_ADD);
 	}
 	else if (pTraceLog->traceStep == CALC_STOCK_TRADE_STEP_WAIT_SELL)
 	{
@@ -152,23 +152,23 @@ void CStockTraceBase::InitStockTrace(STOCK_CALC_TRACE_NODE* pTraceNode)
 void CStockTraceBase::ResetStockTrace(STOCK_CALC_TRACE_NODE* pTraceNode)
 {
 	STOCK_MANAGER_TRACE_LOG* pTraceLog = pTraceNode->pTraceLog;
-	if ((pTraceLog->traceStep == CALC_STOCK_TRADE_STEP_CHECK_BALANCE_RAISE) || (pTraceLog->traceStep == 0))
+	if ((pTraceLog->traceStep == CALC_STOCK_TRADE_STEP_CHECK_HIGH) || (pTraceLog->traceStep == 0))
 	{
-		pTraceLog->traceStep = CALC_STOCK_TRADE_STEP_CHECK_BALANCE_RAISE;
+		pTraceLog->traceStep = CALC_STOCK_TRADE_STEP_CHECK_HIGH;
 		pTraceLog->hisTime = 0;
 		pTraceLog->realTime = 0;
 	}
-	else if (pTraceLog->traceStep == CALC_STOCK_TRADE_STEP_CHECK_HIGH)
+	else if (pTraceLog->traceStep == CALC_STOCK_TRADE_STEP_CHECK_BALANCE_RAISE)
 	{
-		UpdateStockTraceStat(pTraceNode->stockIdx, pTraceLog->code, QT_STOCK_TRACE_LOG_STAT_RAISE_BALANCED | QT_STOCK_TRACE_LOG_STAT_DEL);
-		pTraceLog->traceStep = CALC_STOCK_TRADE_STEP_CHECK_BALANCE_RAISE;
+		UpdateStockTraceStat(pTraceNode->stockIdx, pTraceLog->code, QT_STOCK_TRACE_LOG_STAT_HIGH_REACHED  | QT_STOCK_TRACE_LOG_STAT_DEL);
+		pTraceLog->traceStep = CALC_STOCK_TRADE_STEP_CHECK_HIGH;
 		pTraceLog->hisTime = 0;
 		pTraceLog->realTime = 0;
 	}
 	else if (pTraceLog->traceStep == CALC_STOCK_TRADE_STEP_WAIT_BUY)
 	{
-		UpdateStockTraceStat(pTraceNode->stockIdx, pTraceLog->code, QT_STOCK_TRACE_LOG_STAT_HIGH_REACHED | QT_STOCK_TRACE_LOG_STAT_DEL);
-		pTraceLog->traceStep = CALC_STOCK_TRADE_STEP_CHECK_BALANCE_RAISE;
+		UpdateStockTraceStat(pTraceNode->stockIdx, pTraceLog->code, QT_STOCK_TRACE_LOG_STAT_RAISE_BALANCED | QT_STOCK_TRACE_LOG_STAT_DEL);
+		pTraceLog->traceStep = CALC_STOCK_TRADE_STEP_CHECK_HIGH;
 		pTraceLog->hisTime = 0;
 		pTraceLog->realTime = 0;
 	}
@@ -466,18 +466,21 @@ BOOL CStockTraceBase::IsReachHigh(STOCK_CALC_TRACE_KLINE const* pKLineEnd, int k
 	return TRUE;
 }
 
-BOOL CStockTraceBase::IsRaiseBalance(STOCK_CALC_TRACE_KLINE const* pStart, float fRaiseLimits, int weeksRanges, int rangesLimit)
+BOOL CStockTraceBase::IsRaiseBalance(STOCK_CALC_TRACE_KLINE const* pStart, STOCK_CALC_TRACE_KLINE const* pHighPtr, float fRaiseLimits, int rangesLimit)
 {
 	int calcBalance = 0;
-	while (weeksRanges-- > 0)
+	STOCK_CALC_TRACE_KLINE const* pCur = pStart;
+	while (pCur  > pHighPtr)
 	{
-		if (CALC_IN_DEADZONE(pStart->fPercent, fRaiseLimits))
-			calcBalance++;
+		if (!CALC_IN_DEADZONE(pCur->fPercent, fRaiseLimits))
+			break;
 
-		pStart--;
+		if (++calcBalance >= rangesLimit)
+			return TRUE;
+		pCur--;
 	}
 
-	return (calcBalance >= rangesLimit);
+	return FALSE;
 }
 
 BOOL CStockTraceBase::IsEndOfCurTraceWeek()
@@ -487,4 +490,17 @@ BOOL CStockTraceBase::IsEndOfCurTraceWeek()
 
 	int weekDay = curDate.dayOfWeek();
 	return (((weekDay == 5) && (QDateTime::currentDateTime() > endDateTime)) || (weekDay > 5));
+}
+
+STOCK_CALC_TRACE_KLINE const* CStockTraceBase::GetHighHisKLinePtr(STOCK_CALC_TRACE_KLINE const* pHisKLineEnd, int findLimits, long time)
+{
+	while (findLimits-- > 0)
+	{
+		if (pHisKLineEnd->timeVal == time)
+			return pHisKLineEnd;
+
+		pHisKLineEnd--;
+	}
+
+	return NULL;
 }

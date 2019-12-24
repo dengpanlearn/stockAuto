@@ -83,22 +83,27 @@ void CQtStockAgent::GetAutoManagerLoading(QT_STOCK_LOADING_MANAGER* pLoadingInfo
 	memcpy(pLoadingInfo, &m_loadingManager, sizeof(QT_STOCK_LOADING_MANAGER));
 }
 
-BOOL CQtStockAgent::GetAckStockTrace(QT_STOCK_TRACE_LOG* pTraceLog)
+int CQtStockAgent::GetAckStockTrace(QT_STOCK_TRACE_LOG* pTraceLog, int counts)
 {
 	union
 	{
 		QT_STOCK_TRACE_LOG_NODE* pTraceLogNode;
 		DL_NODE*		pNode;
 	};
-	
-	CSingleLock lock(&m_cs, TRUE);
-	pNode = dllGet(&m_listTraceLog);
-	if (pNode == NULL)
-		return FALSE;
 
-	memcpy(pTraceLog, &pTraceLogNode->traceLogVal, sizeof(QT_STOCK_TRACE_LOG));
-	free(pTraceLogNode);
-	return TRUE;
+	int leftCounts = counts;
+	CSingleLock lock(&m_cs, TRUE);
+	while (leftCounts > 0)
+	{
+		pNode = dllGet(&m_listTraceLog);
+		if (pNode == NULL)
+			break;
+
+		leftCounts--;
+		memcpy(pTraceLog++, &pTraceLogNode->traceLogVal, sizeof(QT_STOCK_TRACE_LOG));
+		free(pTraceLogNode);
+	}
+	return (counts - leftCounts);
 }
 
 int	CQtStockAgent:: GetStockHisKLine(int count, int offset, STOCK_CALC_TRACE_KLINE* pKLine)
