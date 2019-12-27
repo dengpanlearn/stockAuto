@@ -171,31 +171,40 @@ BOOL CStockPython::GetLatestKLine(char const* pStockCode, STOCK_CALC_TRACE_KLINE
 		goto _ITEM_ERROR;
 
 	pItemVal = PyList_GetItem(pItem, STOCK_CALC_TRACE_KLINE_INDEX_OPEN);
-	PyArg_Parse(pItemVal, "f", &pCurKLine->fOpen);
+	if (pItemVal != NULL)
+		PyArg_Parse(pItemVal, "f", &pCurKLine->fOpen);
 	
 	pItemVal = PyList_GetItem(pItem, STOCK_CALC_TRACE_KLINE_INDEX_CLOSE);
-	PyArg_Parse(pItemVal, "f", &pCurKLine->fClose);
+	if (pItemVal != NULL)
+		PyArg_Parse(pItemVal, "f", &pCurKLine->fClose);
 	
 	pItemVal = PyList_GetItem(pItem, STOCK_CALC_TRACE_KLINE_INDEX_HIGH);
-	PyArg_Parse(pItemVal, "f", &pCurKLine->fHigh);
+	if (pItemVal != NULL)
+		PyArg_Parse(pItemVal, "f", &pCurKLine->fHigh);
 	
 	pItemVal = PyList_GetItem(pItem, STOCK_CALC_TRACE_KLINE_INDEX_LOW);
-	PyArg_Parse(pItemVal, "f", &pCurKLine->fLow);
+	if (pItemVal != NULL)
+		PyArg_Parse(pItemVal, "f", &pCurKLine->fLow);
 	
 	pItemVal = PyList_GetItem(pItem, STOCK_CALC_TRACE_KLINE_INDEX_PERCENT);
-	PyArg_Parse(pItemVal, "f", &pCurKLine->fPercent);
+	if (pItemVal != NULL)
+		PyArg_Parse(pItemVal, "f", &pCurKLine->fPercent);
 	
 	pItemVal = PyList_GetItem(pItem, STOCK_CALC_TRACE_KLINE_INDEX_MA10);
-	PyArg_Parse(pItemVal, "f", &pCurKLine->fMa10);
+	if (pItemVal != NULL)
+		PyArg_Parse(pItemVal, "f", &pCurKLine->fMa10);
 	
 	pItemVal = PyList_GetItem(pItem, STOCK_CALC_TRACE_KLINE_INDEX_TIMEVAL);
-	PyArg_Parse(pItemVal, "i", &pCurKLine->timeVal);
+	if (pItemVal != NULL)
+		PyArg_Parse(pItemVal, "i", &pCurKLine->timeVal);
 	
 	pItemVal = PyList_GetItem(pItem, STOCK_CALC_TRACE_KLINE_INDEX_VOLUME);
-	PyArg_Parse(pItemVal, "i", &pCurKLine->volume);
+	if (pItemVal != NULL)
+		PyArg_Parse(pItemVal, "i", &pCurKLine->volume);
 	
 	pItemVal = PyList_GetItem(pItem, STOCK_CALC_TRACE_KLINE_INDEX_RSI7);
-	PyArg_Parse(pItemVal, "f", &pCurKLine->fRsi7);
+	if (pItemVal != NULL)
+		PyArg_Parse(pItemVal, "f", &pCurKLine->fRsi7);
 	
 	bResult = TRUE;
 _ITEM_ERROR:

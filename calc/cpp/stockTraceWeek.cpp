@@ -160,6 +160,7 @@ STOCK_CALC_TRACE_KLINE const* CStockTraceWeek::GetStartHisKLinePtr(STOCK_CALC_TR
 
 BOOL CStockTraceWeek::DoTraceWeekWork(STOCK_CALC_TRACE_NODE* pTraceNode)
 {
+	
 	int hisKLineCounts = 0;
 	STOCK_CALC_TRACE_KLINE const* pHighKLinePtr = NULL;
 	STOCK_CALC_TRACE_KLINE const* pTraceKLine = GetHisKLinePtr(hisKLineCounts);
@@ -194,6 +195,8 @@ BOOL CStockTraceWeek::DoTraceWeekWork(STOCK_CALC_TRACE_NODE* pTraceNode)
 	if (pTraceLog->traceStep <= CALC_STOCK_TRADE_STEP_CHECK_BALANCE_RAISE)
 		pStartTraceKLine++;
 
+	//if (strcmp(pTraceNode->pTraceLog->code, "SZ002216") == 0)
+		//printf("debug\n");
 	do
 	{
 	_AGAIN:
@@ -219,7 +222,7 @@ BOOL CStockTraceWeek::DoTraceWeekWork(STOCK_CALC_TRACE_NODE* pTraceNode)
 				pHighKLinePtr = GetHighHisKLinePtr(pStartTraceKLine - 1, STOCK_CALC_WEEKS_LOST_MAX, pTraceLog->highTime);
 			}
 			// 简单的处理
-			if ((fHighLossPercent > m_fHighLossPercent) ||  (pHighKLinePtr == NULL) || (pStartTraceKLine >= (pHighKLinePtr+m_iRaiseBalanceWaits))
+			if ((fHighLossPercent > m_fHighLossPercent) ||  (pHighKLinePtr == NULL) || (pStartTraceKLine > (pHighKLinePtr+m_iRaiseBalanceWaits))
 				|| (pStartTraceKLine->fClose < pStartTraceKLine->fMa10))
 			{
 			__TRACE_INIT:
