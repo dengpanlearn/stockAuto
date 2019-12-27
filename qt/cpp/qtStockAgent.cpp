@@ -237,7 +237,7 @@ BOOL CQtStockAgent::QtTaskEventComplete(UINT cmd, int result, void* param, int p
 		break;
 
 	case STOCK_QT_EVENT_QUERY_STOCK_SELLSTAT_TRACEINFO:
-		pQueryRealKLine->pStockAgent->OnSellStatQueryTraceInfoResponse(result, pQueryTraceInfo);
+		pQueryTraceInfo->pStockAgent->OnSellStatQueryTraceInfoResponse(result, pQueryTraceInfo);
 		break;
 	}
 
