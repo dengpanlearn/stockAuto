@@ -12,7 +12,7 @@
 #include "../include/stockDataSqlite.h"
 
 
-BOOL CStockDataSqlite::Init(const char* dbDir, const char* pListName, const char* pKLineName, const char* pTraceName)
+BOOL CStockDataSqlite::Init(const char* dbDir, const char* pListName, const char* pKLineName, const char* pTraceName, const char* pRecordName)
 {
 	QTextCodec* pTextCode = QTextCodec::codecForLocale();
 	QString dirPath = pTextCode->toUnicode(dbDir);
@@ -21,6 +21,7 @@ BOOL CStockDataSqlite::Init(const char* dbDir, const char* pListName, const char
 	QString listFile = dir.absoluteFilePath(pTextCode->toUnicode(pListName));
 	QString klineFile = dir.absoluteFilePath(pTextCode->toUnicode(pKLineName));
 	QString traceFile = dir.absoluteFilePath(pTextCode->toUnicode(pTraceName));
+	QString traceRecordFile = dir.absoluteFilePath(pTextCode->toUnicode(pRecordName));
 	m_listDb = QSqlDatabase::addDatabase("QSQLITE", "stocklist");
 	m_listDb.setDatabaseName(listFile);
 
@@ -31,9 +32,13 @@ BOOL CStockDataSqlite::Init(const char* dbDir, const char* pListName, const char
 	m_traceLogDb = QSqlDatabase::addDatabase("QSQLITE", "tracelog");
 	m_traceLogDb.setDatabaseName(traceFile);
 
+	m_traceRecordDb = QSqlDatabase::addDatabase("QSQLITE", "traceRecord");
+	m_traceRecordDb.setDatabaseName(traceRecordFile);
+
 	m_listDb.open();
 	m_klineDb.open();
 	m_traceLogDb.open();
+	m_traceRecordDb.open();
 	return TRUE;
 }
 
@@ -41,6 +46,8 @@ void CStockDataSqlite::Close()
 {
 	m_listDb.close();
 	m_klineDb.close();
+	m_traceLogDb.close();
+	m_traceRecordDb.close();
 }
 
 BOOL CStockDataSqlite::StockListIsOn()
@@ -77,7 +84,28 @@ int CStockDataSqlite::GetStockList(STOCK_CODE_NAME* pListBuf, int bufCounts)
 
 BOOL CStockDataSqlite::TraceLogIsOn()
 {
-	return m_traceLogDb.isOpen();
+	if (!m_traceLogDb.isOpen())
+		return FALSE;
+
+	if (m_traceLogDb.tables().contains("trace"))
+		return TRUE;
+
+	QSqlQuery sqlQuery(m_traceLogDb);
+	QString createTab = QString("create table trace (step int, code varchar(9), hightime int, highval decimal, buytime int, buyval decimal, selltime int, sellval decimal, histime int, updatetime int, realtime int, raisebalances int, toptime int, topval decimal)");
+	return sqlQuery.exec(createTab);
+}
+
+BOOL CStockDataSqlite::TraceRecordIsOn()
+{
+	if (!m_traceRecordDb.isOpen())
+		return FALSE;
+
+	if (m_traceRecordDb.tables().contains("traceRecord"))
+		return TRUE;
+
+	QSqlQuery sqlQuery(m_traceRecordDb);
+	QString createTab = QString("create table traceRecord (code varchar(9), hightime int, highval decimal, buytime int, buyval decimal, selltime int, sellval decimal)");
+	return sqlQuery.exec(createTab);
 }
 
 int CStockDataSqlite::GetTraceLog(STOCK_MANAGER_TRACE_LOG* pTraceLogBuf, int bufCounts)
@@ -259,4 +287,23 @@ int CStockDataSqlite::GetTraceLog(char const* pStockCode, STOCK_MANAGER_TRACE_LO
 	}
 
 	return 0;
+}
+
+int CStockDataSqlite::InsertTraceRecord(STOCK_MANAGER_TRACE_LOG* pTraceLogBuf)
+{
+	QTextCodec* pTextCode = QTextCodec::codecForLocale();
+	QSqlQuery sqlQuery(m_traceRecordDb);
+
+	QString insertSql = QString("insert into traceRecord values(?, ?, ?, ?, ?, ?,?)");
+	sqlQuery.prepare(insertSql);
+
+	sqlQuery.bindValue(0, pTextCode->toUnicode(pTraceLogBuf->code));
+	sqlQuery.bindValue(1, pTraceLogBuf->highTime);
+	sqlQuery.bindValue(2, pTraceLogBuf->fHighVal);
+	sqlQuery.bindValue(3, pTraceLogBuf->buyTime);
+	sqlQuery.bindValue(4, pTraceLogBuf->fBuyVal);
+	sqlQuery.bindValue(5, pTraceLogBuf->sellTime);
+	sqlQuery.bindValue(6, pTraceLogBuf->fSellVal);
+
+	return sqlQuery.exec() ? 0 : -1;
 }

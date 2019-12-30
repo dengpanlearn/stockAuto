@@ -73,6 +73,12 @@ public:
 	STOCK_CALC_UPDATE_TRACELOG_RESP* AllocUpdateTraceLogRespPkt(CStockTraceBase* pTraceBase);
 	void PostUpdateTraceLogRespPkt(STOCK_CALC_UPDATE_TRACELOG_RESP* pUpdateTraceLogResp);
 
+	STOCK_CALC_INSERT_TRACERECORD* AllocInsertTraceRecordPkt(CStockTraceBase* pTraceBase);
+	void PostInsertTraceRecordPkt(STOCK_CALC_INSERT_TRACERECORD* pInsertTraceRecord);
+
+	STOCK_CALC_INSERT_TRACERECORD_RESP* AllocInsertTraceRecordRespPkt(CStockTraceBase* pTraceBase);
+	void PostInsertTraceLRecordRespPkt(STOCK_CALC_INSERT_TRACERECORD_RESP* pInsertTraceRecordResp);
+
 	void AddTraceList(CStockTraceBase* pTraceBase, STOCK_CALC_TRACE_NODE* pTraceNode);
 
 private:
@@ -100,6 +106,9 @@ private:
 
 	void OnCurHisKLineGetResp(STOCK_CALC_GET_CUR_HISKLINE_RESP* pGetCurHisKLineResp);
 	BOOL OnCurHisKLineGetComplete(int result, void* param, int paramLen);
+
+	void OnInsertTraceRecordResp(STOCK_CALC_INSERT_TRACERECORD_RESP* pUpdateTraceLogResp);
+	BOOL OnInsertTraceRecordComplete(int result, void* param, int paramLen);
 
 	void OnUpdateConfigTrace(STOCK_CALC_UPDATE_CONFIG_TRACE* pUpdateConfigTrace);
 

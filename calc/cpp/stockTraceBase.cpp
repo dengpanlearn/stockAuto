@@ -14,6 +14,7 @@ CStockTraceBase::CStockTraceBase(CStockAutoManager* pAutoManager, DL_LIST* pTrac
 	memset(&m_jobGetHisKine, 0, sizeof(m_jobGetHisKine));
 	memset(&m_jobUpdateTraceLog, 0, sizeof(m_jobUpdateTraceLog));
 	memset(&m_jobGetCurHisKLine, 0, sizeof(m_jobGetCurHisKLine));
+	memset(&m_jobInsertTraceRecord, 0, sizeof(m_jobInsertTraceRecord));
 }
 
 CStockTraceBase::~CStockTraceBase()
@@ -174,7 +175,7 @@ void CStockTraceBase::ResetStockTrace(STOCK_CALC_TRACE_NODE* pTraceNode)
 	}
 	else if (pTraceLog->traceStep == CALC_STOCK_TRADE_STEP_WAIT_SELL)
 	{
-		//UpdateStockTraceStat(pTraceNode->stockIdx, pTraceLog->code, QT_STOCK_TRACE_LOG_STAT_BUYED | QT_STOCK_TRACE_LOG_STAT_DEL);
+		UpdateStockTraceStat(pTraceNode->stockIdx, pTraceLog->code, QT_STOCK_TRACE_LOG_STAT_BUYED | QT_STOCK_TRACE_LOG_STAT_DEL);
 	}
 }
 
@@ -273,6 +274,35 @@ BOOL CStockTraceBase::OnGetCurKLineComplete(int result, void* param, int paramLe
 	return TRUE;
 }
 
+void CStockTraceBase::OnInsertTraceRecordResp(STOCK_CALC_INSERT_TRACERECORD_RESP* pInsertTraceReocrdResp)
+{
+	if (m_jobInsertTraceRecord.jobStep != TASK_EVENT_JOB_STEP_WAITING_RESP)
+		return;
+
+	if (pInsertTraceReocrdResp->respResult < 0)
+	{
+		m_jobInsertTraceRecord.jobStep = TASK_EVENT_JOB_STEP_COMPLETED_FAIL;
+	}
+	else
+	{
+		m_jobInsertTraceRecord.jobStep = TASK_EVENT_JOB_STEP_COMPLETED_OK;
+	}
+}
+
+BOOL CStockTraceBase::OnInsertTraceRecordComplete(int result, void* param, int paramLen)
+{
+	STOCK_CALC_INSERT_TRACERECORD* pInsertTrace = (STOCK_CALC_INSERT_TRACERECORD*)param;
+	STOCK_CALC_INSERT_TRACERECORD_RESP* pInsertTraceResp = m_pAutoManager->AllocInsertTraceRecordRespPkt(pInsertTrace->pTraceBase);
+
+	if (pInsertTraceResp == NULL)
+		return FALSE;
+
+	pInsertTraceResp->respResult = result;
+	m_pAutoManager->PostInsertTraceLRecordRespPkt(pInsertTraceResp);
+	return TRUE;
+}
+
+
 UINT CStockTraceBase::GetHisKLine(STOCK_CALC_TRACE_NODE* pTraceNode, int counts)
 {
 	if (m_jobGetHisKine.jobStep == TASK_EVENT_JOB_STEP_WAITING_RESP)
@@ -359,6 +389,35 @@ UINT CStockTraceBase::GetCurHisKLine(STOCK_CALC_TRACE_NODE* pTraceNode)
 	else
 	{
 		m_jobGetCurHisKLine.jobStep = TASK_EVENT_JOB_STEP_NONE;
+		return STOCK_TRACE_WORK_FAIL;
+	}
+}
+
+UINT CStockTraceBase::InsertTraceRecord(STOCK_CALC_TRACE_NODE* pTraceNode)
+{
+	if (m_jobInsertTraceRecord.jobStep == TASK_EVENT_JOB_STEP_WAITING_RESP)
+		return STOCK_TRACE_WORK_WAIT_RESP;
+
+	if (m_jobInsertTraceRecord.jobStep == TASK_EVENT_JOB_STEP_NONE)
+	{
+		STOCK_CALC_INSERT_TRACERECORD* pInsertTrace = m_pAutoManager->AllocInsertTraceRecordPkt(this);
+		if (pInsertTrace == NULL)
+			return STOCK_TRACE_WORK_BUSY;
+
+		memcpy(&pInsertTrace->traceLog, pTraceNode->pTraceLog, sizeof(pInsertTrace->traceLog));
+
+		m_pAutoManager->PostInsertTraceRecordPkt(pInsertTrace);
+		m_jobInsertTraceRecord.jobStep = TASK_EVENT_JOB_STEP_WAITING_RESP;
+		return STOCK_TRACE_WORK_WAIT_RESP;
+	}
+	else if (m_jobInsertTraceRecord.jobStep == TASK_EVENT_JOB_STEP_COMPLETED_OK)
+	{
+		m_jobInsertTraceRecord.jobStep = TASK_EVENT_JOB_STEP_NONE;
+		return STOCK_TRACE_WORK_OK;
+	}
+	else
+	{
+		m_jobInsertTraceRecord.jobStep = TASK_EVENT_JOB_STEP_NONE;
 		return STOCK_TRACE_WORK_FAIL;
 	}
 }

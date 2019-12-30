@@ -31,6 +31,9 @@ public:
 	void OnGetCurKLineResp(STOCK_CALC_GET_CUR_HISKLINE_RESP* pGetCurKLineResp);
 	BOOL OnGetCurKLineComplete(int result, void* param, int paramLen);
 
+	void OnInsertTraceRecordResp(STOCK_CALC_INSERT_TRACERECORD_RESP* pInsertTraceReocrdResp);
+	BOOL OnInsertTraceRecordComplete(int result, void* param, int paramLen);
+
 protected:
 	inline STOCK_CALC_TRACE_KLINE const* GetHisKLinePtr(int& counts);
 	inline STOCK_CALC_TRACE_KLINE const* GetCurHisKLinePtr();
@@ -38,7 +41,7 @@ protected:
 	UINT GetHisKLine(STOCK_CALC_TRACE_NODE* pTraceNode, int counts);
 	UINT UpdateTraceLog(STOCK_CALC_TRACE_NODE* pTraceNode);
 	UINT GetCurHisKLine(STOCK_CALC_TRACE_NODE* pTraceNode);
-
+	UINT InsertTraceRecord(STOCK_CALC_TRACE_NODE* pTraceNode);
 	inline BOOL IsJobGetHisKLineNone();
 	inline BOOL IsJobUpdateTraceLogNone();
 
@@ -86,6 +89,7 @@ private:
 	STOCK_TRACE_JOB_HISKLINE_GET m_jobGetHisKine;
 	STOCK_TRACE_JOB_TRACELOG_UPDATE m_jobUpdateTraceLog;
 	STOCK_TRACE_JOB_CURHISKLINE_GET m_jobGetCurHisKLine;
+	STOCK_TRACE_JOB_TRACERECORD_INSERT m_jobInsertTraceRecord;
 	UINT					m_workStep;
 };
 

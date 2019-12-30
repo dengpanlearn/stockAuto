@@ -318,13 +318,13 @@ void CQtStockAgent::OnSellStatQueryTraceInfoResponse(int result, QT_STOCK_TRACEI
 
 void CQtStockAgent::OnGetQueryHisKLine(QString& code)
 {
-	{
-		CSingleLock lock(&m_cs, TRUE);
-		if (m_pHisKLineQueryJob->bInWorking)
-			return;
-		else
-			m_pHisKLineQueryJob->bInWorking = TRUE;
-	}
+	
+	CSingleLock lock(&m_cs, TRUE);
+	if (m_pHisKLineQueryJob->bInWorking)
+		return;
+	else
+		m_pHisKLineQueryJob->bInWorking = TRUE;
+	
 	m_pHisKLineQueryJob->hisCounts = 0;
 	m_pHisKLineQueryJob->jobRsult = 0;
 	QString2Char(code, m_pHisKLineQueryJob->code);
@@ -336,7 +336,6 @@ void CQtStockAgent::OnGetQueryHisKLine(QString& code)
 
 	if (pQueryParam == NULL)
 	{
-		CSingleLock lock(&m_cs, TRUE);
 		m_pHisKLineQueryJob->jobRsult = -1;
 		m_updateCmd |= QT_STOCK_AGENT_QUERY_HISKLINE_RESPONESE;
 	
@@ -388,14 +387,12 @@ void CQtStockAgent::OnGetQueryRealKLine(QString& code, QString& name)
 
 void CQtStockAgent::OnGetQueryTraceInfo(QString& code, QString& name)
 {
-	{
-		CSingleLock lock(&m_cs, TRUE);
-		if (m_traceInfoQueryJob.bInWorking)
-			return;
-		else
-			m_traceInfoQueryJob.bInWorking = TRUE;
-	}
-
+	CSingleLock lock(&m_cs, TRUE);
+	if (m_traceInfoQueryJob.bInWorking)
+		return;
+	else
+		m_traceInfoQueryJob.bInWorking = TRUE;
+	
 
 	m_traceInfoQueryJob.jobResult = 0;
 	memset(&m_traceInfoQueryJob.traceInfo, 0, sizeof(m_traceInfoQueryJob.traceInfo));
@@ -407,7 +404,6 @@ void CQtStockAgent::OnGetQueryTraceInfo(QString& code, QString& name)
 
 	if (pQueryParam == NULL)
 	{
-		CSingleLock lock(&m_cs, TRUE);
 		m_traceInfoQueryJob.jobResult = -1;
 		m_updateCmd |= QT_STOCK_AGENT_QUERY_TRACEINFO_RESPONESE;
 

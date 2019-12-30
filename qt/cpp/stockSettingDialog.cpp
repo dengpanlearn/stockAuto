@@ -150,10 +150,14 @@ void CStockSettingDilaog::InitDataTreeWidget(QTreeWidget* pTreeWidget, STOCKAUTO
 	pItem->setText(1, pCodec->toUnicode(pConfigData->klineFileName));
 	pTreeWidget->addTopLevelItem(pItem);
 
-
 	pItem = new QTreeWidgetItem();
 	pItem->setText(0, pCodec->toUnicode(STOCK_SETTING_DIALOG_EDIT_DATA_TRACELOG_FILENAME_NAME));
 	pItem->setText(1, pCodec->toUnicode(pConfigData->tracelogFileName));
+	pTreeWidget->addTopLevelItem(pItem);
+
+	pItem = new QTreeWidgetItem();
+	pItem->setText(0, pCodec->toUnicode(STOCK_SETTING_DIALOG_EDIT_DATA_TRACERECORD_FILENAME_NAME));
+	pItem->setText(1, pCodec->toUnicode(pConfigData->traceRecordFileName));
 	pTreeWidget->addTopLevelItem(pItem);
 }
 
@@ -273,6 +277,11 @@ void CStockSettingDilaog::GetDataConfig(QTreeWidget* pTreeWidget, STOCKAUTO_CONF
 	pItem = pTreeWidget->topLevelItem(STOCK_SETTING_DIALOG_EDIT_DATA_IDX_TRACELOG_FILENAME);
 	tmpVal = pItem->text(1);
 	QString2Char(tmpVal, pConfigData->tracelogFileName);
+
+
+	pItem = pTreeWidget->topLevelItem(STOCK_SETTING_DIALOG_EDIT_DATA_IDX_TRACERECORD_FILENAME);
+	tmpVal = pItem->text(1);
+	QString2Char(tmpVal, pConfigData->traceRecordFileName);
 }
 
 void CStockSettingDilaog::GetTraceConfig(QTreeWidget* pTreeWidget, STOCKAUTO_CONFIG_TRACE* pConfigTrace)

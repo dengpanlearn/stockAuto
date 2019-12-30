@@ -308,6 +308,7 @@ int CStockAutoManager::OnEventActive(UINT cmd, void* param, int paramLen)
 		STOCK_CALC_RESET_TRACE_CALC*	pResetTraceCalc;
 		STOCK_CALC_CLEAR_TRACE_HISTIME_RESP*	pClearHisTimeResp;
 		QT_STOCK_TRACEINFO_QUERY_PARAM* pQueryTraceInfo;
+		STOCK_CALC_INSERT_TRACERECORD_RESP* pInsertTraceRecordResp;
 	};
 
 	pGetListResp = (STOCK_CALC_GET_LIST_RESP*)param;
@@ -358,6 +359,10 @@ int CStockAutoManager::OnEventActive(UINT cmd, void* param, int paramLen)
 	case STOCK_QT_EVENT_QUERY_STOCK_SELLSTAT_TRACEINFO:
 		result = OnQueryTraceInfo(pQueryTraceInfo);
 		break;
+
+	case STOCK_CALC_EVENT_INSERT_TRACE_RECORD_RESP:
+		OnInsertTraceRecordResp(pInsertTraceRecordResp);
+		break;
 	}
 
 	return result;
@@ -398,6 +403,10 @@ BOOL CStockAutoManager::OnEventComplete(UINT cmd, int result, void* param, int p
 
 	case STOCK_CALC_EVENT_CLEAR_TRACE_HISTIME:
 		re = OnClearTraceHistimeComplete(result, param, paramLen);
+		break;
+
+	case STOCK_CALC_EVENT_INSERT_TRACE_RECORD:
+		re = OnInsertTraceRecordComplete(result, param, paramLen);
 		break;
 	}
 
@@ -597,6 +606,38 @@ STOCK_CALC_UPDATE_TRACELOG_RESP* CStockAutoManager::AllocUpdateTraceLogRespPkt(C
 void CStockAutoManager::PostUpdateTraceLogRespPkt(STOCK_CALC_UPDATE_TRACELOG_RESP* pUpdateTraceLogResp)
 {
 	PostPktByEvent(pUpdateTraceLogResp);
+}
+
+STOCK_CALC_INSERT_TRACERECORD* CStockAutoManager::AllocInsertTraceRecordPkt(CStockTraceBase* pTraceBase)
+{
+	STOCK_CALC_INSERT_TRACERECORD* pInsertTraceRecord = (STOCK_CALC_INSERT_TRACERECORD*)m_pDataTask->AllocPktByEvent(STOCK_CALC_EVENT_INSERT_TRACE_RECORD, sizeof(STOCK_CALC_INSERT_TRACERECORD),
+		MultiTaskEventComplete, this);
+	if (pInsertTraceRecord == NULL)
+		return NULL;
+
+	pInsertTraceRecord->pTraceBase = pTraceBase;
+	return pInsertTraceRecord;
+}
+
+void CStockAutoManager::PostInsertTraceRecordPkt(STOCK_CALC_INSERT_TRACERECORD* pInsertTraceRecord)
+{
+	m_pDataTask->PostPktByEvent(pInsertTraceRecord);
+}
+
+STOCK_CALC_INSERT_TRACERECORD_RESP* CStockAutoManager::AllocInsertTraceRecordRespPkt(CStockTraceBase* pTraceBase)
+{
+	STOCK_CALC_INSERT_TRACERECORD_RESP* pInsertTraceRecordResp = (STOCK_CALC_INSERT_TRACERECORD_RESP*)AllocPktByEvent(STOCK_CALC_EVENT_INSERT_TRACE_RECORD_RESP, sizeof(STOCK_CALC_INSERT_TRACERECORD_RESP),
+		NULL, this);
+	if (pInsertTraceRecordResp == NULL)
+		return NULL;
+
+	pInsertTraceRecordResp->pTraceBase = pTraceBase;
+	return pInsertTraceRecordResp;
+}
+
+void CStockAutoManager::PostInsertTraceLRecordRespPkt(STOCK_CALC_INSERT_TRACERECORD_RESP* pInsertTraceRecordResp)
+{
+	PostPktByEvent(pInsertTraceRecordResp);
 }
 
 void CStockAutoManager::AddTraceList(CStockTraceBase* pTraceBase, STOCK_CALC_TRACE_NODE* pTraceNode)
@@ -971,6 +1012,19 @@ BOOL CStockAutoManager::OnCurHisKLineGetComplete(int result, void* param, int pa
 	STOCK_CALC_GET_CUR_HISKLINE* pGetHisKLine = (STOCK_CALC_GET_CUR_HISKLINE*)param;
 	CStockTraceBase* pTraceBase = pGetHisKLine->pTraceBase;
 	return pTraceBase->OnGetCurKLineComplete(result, param, paramLen);
+}
+
+void CStockAutoManager::OnInsertTraceRecordResp(STOCK_CALC_INSERT_TRACERECORD_RESP* pInsertTraceRecordResp)
+{
+	CStockTraceBase* pTraceBase = pInsertTraceRecordResp->pTraceBase;
+	pTraceBase->OnInsertTraceRecordResp(pInsertTraceRecordResp);
+}
+
+BOOL CStockAutoManager::OnInsertTraceRecordComplete(int result, void* param, int paramLen)
+{
+	STOCK_CALC_INSERT_TRACERECORD* pUpdateTraceLog = (STOCK_CALC_INSERT_TRACERECORD*)param;
+	CStockTraceBase* pTraceBase = pUpdateTraceLog->pTraceBase;
+	return pTraceBase->OnInsertTraceRecordComplete(result, param, paramLen);
 }
 
 void CStockAutoManager::OnUpdateConfigTrace(STOCK_CALC_UPDATE_CONFIG_TRACE* pUpdateConfigTrace)

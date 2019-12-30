@@ -34,12 +34,14 @@ BOOL CStockDataTask::Create(LPCTSTR pNameTask, int stackSize, int priTask, int o
 	do
 	{
 
-		if (!pStockSqlite->Init(m_configData.dataDir, m_configData.listFileName, m_configData.klineFileName, m_configData.tracelogFileName))
+		if (!pStockSqlite->Init(m_configData.dataDir, m_configData.listFileName, m_configData.klineFileName, m_configData.tracelogFileName, m_configData.traceRecordFileName))
 			break;
 
 		if (!CMultiEventsTask::Create(pNameTask, stackSize, priTask, optTask, timeoutMs, maxEvents, maxEventParamSize))
 			break;
 
+		pStockSqlite->TraceLogIsOn();
+		pStockSqlite->TraceRecordIsOn();
 		m_pStockData = pStockSqlite;
 		return TRUE;
 	} while (FALSE);
@@ -89,6 +91,7 @@ int CStockDataTask::OnEventActive(UINT cmd, void* param, int paramLen)
 		STOCK_CALC_GET_HISKLINE* pGetHisKLine;
 		QT_STOCK_HISKLINE_QUERY_PARAM* pQueryHisKLine;
 		STOCK_CALC_UPDATE_CONFIG_DATA* pUpdateConfigData;
+		STOCK_CALC_INSERT_TRACERECORD* pInsertTraceRecord;
 	};
 
 	pGetList = (STOCK_CALC_GET_LIST*)param;
@@ -135,6 +138,10 @@ int CStockDataTask::OnEventActive(UINT cmd, void* param, int paramLen)
 
 	case STOCK_CALC_EVENT_CLEAR_TRACE_HISTIME:
 		result = m_pStockData->ClearTraceLogHisTime();
+		break;
+
+	case STOCK_CALC_EVENT_INSERT_TRACE_RECORD:
+		result = m_pStockData->InsertTraceRecord(&pInsertTraceRecord->traceLog);
 		break;
 
 	default:

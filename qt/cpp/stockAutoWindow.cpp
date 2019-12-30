@@ -42,6 +42,18 @@ CStockAutoWindow::~CStockAutoWindow()
 {
 	if (m_pLoadingDialog != NULL)
 		delete m_pLoadingDialog;
+
+	if (m_pExitAgent != NULL)
+	{
+		delete m_pExitAgent;
+		m_pExitAgent = NULL;
+	}
+
+	if (m_pStockAgent != NULL)
+	{
+		delete m_pStockAgent;
+		m_pStockAgent = NULL;
+	}
 }
 
 void CStockAutoWindow::UpdateAutoManagerStep(UINT traceStep, int loadProgress)
@@ -182,6 +194,7 @@ BOOL CStockAutoWindow:: OnInitQtServerAndAgent()
 void CStockAutoWindow::closeEvent(QCloseEvent * event)
 {
 	GlobalExit();
+
 	if (m_pExitAgent != NULL)
 	{
 		if (m_pServerTask->isRunning())
@@ -200,12 +213,6 @@ void CStockAutoWindow::closeEvent(QCloseEvent * event)
 			if (m_pServerTask->isRunning())
 				m_pServerTask->quit();
 		}
-
-		delete m_pExitAgent;
-		m_pExitAgent = NULL;
-
-		delete m_pStockAgent;
-		m_pStockAgent = NULL;
 	}
 }
 

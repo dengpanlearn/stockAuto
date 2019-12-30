@@ -84,6 +84,7 @@ void CStockConfig::OnInit()
 	strncpy(pConfigData->listFileName, STOCKAUTO_CONFIG_DATA_LIST_FILENAME_DFT, STOCK_CONFIG_NAME_MAX);
 	strncpy(pConfigData->klineFileName, STOCKAUTO_CONFIG_DATA_KLINE_FILENAME_DFT, STOCK_CONFIG_NAME_MAX);
 	strncpy(pConfigData->tracelogFileName, STOCKAUTO_CONFIG_DATA_TRACELOG_FILENAME_DFT, STOCK_CONFIG_NAME_MAX);
+	strncpy(pConfigData->traceRecordFileName, STOCKAUTO_CONFIG_DATA_TRACERECORD_FILENAME_DFT, STOCK_CONFIG_NAME_MAX);
 
 	STOCKAUTO_CONFIG_TRACE* pConfigTrace = &m_stockConfig.configTrace;
 	pConfigTrace->fRaisePercent = STOCKAUTO_CONFIG_TRACE_RAISE_PERCENT_DFT;
@@ -186,6 +187,14 @@ void CStockConfig::LoadConfigData(QSettings* pConfigSettings, STOCKAUTO_CONFIG_D
 		QString val = pConfigSettings->value(tmpKey).toString();
 		memset(pConfigData->tracelogFileName, 0, STOCK_CONFIG_NAME_MAX);
 		QString2Char(val, pConfigData->tracelogFileName);
+	}
+
+	tmpKey = pCodec->toUnicode(STOCKAUTO_CONFIG_DATA_GROUP_TRACERECORD_FILE);
+	if (keys.contains(tmpKey))
+	{
+		QString val = pConfigSettings->value(tmpKey).toString();
+		memset(pConfigData->traceRecordFileName, 0, STOCK_CONFIG_NAME_MAX);
+		QString2Char(val, pConfigData->traceRecordFileName);
 	}
 
 	pConfigSettings->endGroup();
@@ -293,6 +302,7 @@ void CStockConfig::SaveConfigData(QSettings* pConfigSettings, STOCKAUTO_CONFIG_D
 	pConfigSettings->setValue(STOCKAUTO_CONFIG_DATA_GROUP_STOCKLIST_FILE, pCodec->toUnicode(pConfigData->listFileName));
 	pConfigSettings->setValue(STOCKAUTO_CONFIG_DATA_GROUP_STOCKKLINE_FILE, pCodec->toUnicode(pConfigData->klineFileName));
 	pConfigSettings->setValue(STOCKAUTO_CONFIG_DATA_GROUP_TRACELOG_FILE, pCodec->toUnicode(pConfigData->tracelogFileName));
+	pConfigSettings->setValue(STOCKAUTO_CONFIG_DATA_GROUP_TRACERECORD_FILE, pCodec->toUnicode(pConfigData->traceRecordFileName));
 	pConfigSettings->endGroup();
 }
 

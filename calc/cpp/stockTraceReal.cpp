@@ -246,14 +246,10 @@ BOOL CStockTraceReal::DoTraceRealWork(STOCK_CALC_TRACE_NODE* pTraceNode)
 	{
 		if (pCurKLine->fClose < pCurKLine->fMa10)
 		{
-		_TRACE_SELL:
-			pTraceLog->sellTime = time(NULL);
-			pTraceLog->fSellVal = pCurKLine->fClose;
-
-			goto __TRACE_INIT;
+			goto _TRACE_SELL;
 		}
 		
-		if ((pTraceLog->fBuyVal - pCurKLine->fClose) / pTraceLog->fBuyVal >
+		if ((pTraceLog->fBuyVal - pCurKLine->fClose)*100 / pTraceLog->fBuyVal >
 			m_fCutLossPercent)
 			goto _TRACE_SELL;
 
@@ -273,7 +269,12 @@ BOOL CStockTraceReal::DoTraceRealWork(STOCK_CALC_TRACE_NODE* pTraceNode)
 		{
 			float fPercentTop = (pTraceLog->fTopVal - pCurKLine->fClose) * 100 / pTraceLog->fTopVal;
 			if (fPercentTop > m_fCutLossAfterTop)
-				goto _TRACE_SELL;
+			{
+	_TRACE_SELL:
+				pTraceLog->sellTime = time(NULL);
+				pTraceLog->fSellVal = pCurKLine->fClose;
+				pTraceLog->traceStep = CALC_STOCK_TRADE_STEP_WAIT_SELLING;
+			}
 		}
 	}
 
@@ -286,7 +287,31 @@ UINT CStockTraceReal::DoTraceWork(STOCK_CALC_TRACE_NODE* pTraceNode)
 	if (!DoTraceRealWork(pTraceNode))
 		return STOCK_TRACE_STEP_END;
 
-	return CStockTraceBase::DoTraceWork(pTraceNode);
+	UINT nextStep = STOCK_TRACE_STEP_UPDATING;
+	STOCK_MANAGER_TRACE_LOG* pTraceLog = pTraceNode->pTraceLog;
+	if (pTraceLog->traceStep == CALC_STOCK_TRADE_STEP_WAIT_SELLING)
+	{
+		UINT insertStep = InsertTraceRecord(pTraceNode);
+		switch (insertStep)
+		{
+		case STOCK_TRACE_WORK_BUSY:
+		case STOCK_TRACE_WORK_WAIT_RESP:
+			nextStep = STOCK_TRACE_STEP_WORKING;
+			break;
+
+		case STOCK_TRACE_WORK_FAIL:
+		case STOCK_TRACE_WORK_OK:
+		default:
+			pTraceLog->hisTime = pTraceLog->highTime;		// 从创新高的时间开始计算
+			pTraceLog->raiseBalanceCheckTimes = 0;
+			pTraceLog->traceStep = CALC_STOCK_TRADE_STEP_CHECK_HIGH;
+			UpdateStockTraceStat(pTraceNode->stockIdx, pTraceLog->code, QT_STOCK_TRACE_LOG_STAT_DEL);
+			nextStep = STOCK_TRACE_STEP_UPDATING;
+			break;
+		}
+	}
+
+	return nextStep;
 }
 
 UINT CStockTraceReal::DoTraceUpdate(STOCK_CALC_TRACE_NODE* pTraceNode)
