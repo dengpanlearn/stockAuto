@@ -108,8 +108,10 @@ UINT CStockTraceReal::DoPrepareWork(STOCK_CALC_TRACE_NODE* pTraceNode)
 		break;
 
 	case STOCK_TRACE_REAL_PRPARE_STEP_END:
-		DoPreparerEnd(pTraceNode, m_realTraceStep);
-		nextStep = STOCK_TRACE_STEP_WORKING;
+		if (!DoPreparerEnd(pTraceNode, m_realTraceStep))
+			nextStep = STOCK_TRACE_STEP_END;
+		else 
+			nextStep = STOCK_TRACE_STEP_WORKING;
 		break;
 	}
 
@@ -204,7 +206,16 @@ BOOL CStockTraceReal::DoPreparerEnd(STOCK_CALC_TRACE_NODE* pTraceNode, UINT& pre
 	}
 
 	m_realTraceStep = STOCK_TRACE_REAL_PRPARE_STEP_NONE;
-	return TRUE;
+
+	return CheckRealWorkValid(pTraceNode);
+}
+
+BOOL CStockTraceReal::CheckRealWorkValid(STOCK_CALC_TRACE_NODE* pTraceNode)
+{
+	QDate curDate = QDate::currentDate();
+	STOCK_CALC_TRACE_KLINE const* pCurKLine = GetCurHisKLinePtr();
+	QDate curHisDate = QDateTime::fromTime_t(pCurKLine->timeVal).date();
+	return (curHisDate >= curDate);
 }
 
 BOOL CStockTraceReal::DoTraceRealWork(STOCK_CALC_TRACE_NODE* pTraceNode)
