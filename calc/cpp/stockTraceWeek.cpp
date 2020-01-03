@@ -196,7 +196,7 @@ BOOL CStockTraceWeek::DoTraceWeekWork(STOCK_CALC_TRACE_NODE* pTraceNode)
 		pStartTraceKLine++;
 
 	//if (strcmp(pTraceNode->pTraceLog->code, "SZ300416") == 0)
-	//	printf("debug\n");
+		//printf("debug\n");
 	do
 	{
 	_AGAIN:

@@ -242,15 +242,14 @@ BOOL CStockTraceReal::DoTraceRealWork(STOCK_CALC_TRACE_NODE* pTraceNode)
 		}
 		else if (fVolumePercent > m_fVolumePercentBuy)
 		{
-			pTraceLog->traceStep = CALC_STOCK_TRADE_STEP_WAIT_SELL;
+			pTraceLog->traceStep = CALC_STOCK_TRADE_STEP_WAIT_BUYING;
 			pTraceLog->buyTime = time(NULL);
 			pTraceLog->fBuyVal = pCurKLine->fClose;
 			pTraceLog->fTopVal = pCurKLine->fClose;
 			pTraceLog->topTime = pTraceLog->buyTime;
 			UpdateStockTraceStat(pTraceNode->stockIdx, pTraceLog->code, QT_STOCK_TRACE_LOG_STAT_VOLUME_REACHED | QT_STOCK_TRACE_LOG_STAT_MODIFY);
 			// 没有买入接口，
-			UpdateStockTraceStat(pTraceNode->stockIdx, pTraceLog->code, QT_STOCK_TRACE_LOG_STAT_BUYING | QT_STOCK_TRACE_LOG_STAT_MODIFY);
-			UpdateStockTraceStat(pTraceNode->stockIdx, pTraceLog->code, QT_STOCK_TRACE_LOG_STAT_BUYED | QT_STOCK_TRACE_LOG_STAT_MODIFY);
+	
 		}
 	}
 	else if (pTraceLog->traceStep == CALC_STOCK_TRADE_STEP_WAIT_SELL)
@@ -300,7 +299,27 @@ UINT CStockTraceReal::DoTraceWork(STOCK_CALC_TRACE_NODE* pTraceNode)
 
 	UINT nextStep = STOCK_TRACE_STEP_UPDATING;
 	STOCK_MANAGER_TRACE_LOG* pTraceLog = pTraceNode->pTraceLog;
-	if (pTraceLog->traceStep == CALC_STOCK_TRADE_STEP_WAIT_SELLING)
+	if (pTraceLog->traceStep == CALC_STOCK_TRADE_STEP_WAIT_BUYING)
+	{
+		UINT insertStep = InsertTraceRecord(pTraceNode);
+		switch (insertStep)
+		{
+		case STOCK_TRACE_WORK_BUSY:
+		case STOCK_TRACE_WORK_WAIT_RESP:
+			nextStep = STOCK_TRACE_STEP_WORKING;
+			break;
+
+		case STOCK_TRACE_WORK_FAIL:
+		case STOCK_TRACE_WORK_OK:
+		default:
+			pTraceLog->traceStep = CALC_STOCK_TRADE_STEP_WAIT_SELL;
+			UpdateStockTraceStat(pTraceNode->stockIdx, pTraceLog->code, QT_STOCK_TRACE_LOG_STAT_BUYING | QT_STOCK_TRACE_LOG_STAT_MODIFY);
+			UpdateStockTraceStat(pTraceNode->stockIdx, pTraceLog->code, QT_STOCK_TRACE_LOG_STAT_BUYED | QT_STOCK_TRACE_LOG_STAT_MODIFY);
+			nextStep = STOCK_TRACE_STEP_UPDATING;
+			break;
+		}
+	}
+	else if (pTraceLog->traceStep == CALC_STOCK_TRADE_STEP_WAIT_SELLING)
 	{
 		UINT insertStep = InsertTraceRecord(pTraceNode);
 		switch (insertStep)

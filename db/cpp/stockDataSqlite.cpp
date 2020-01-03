@@ -294,8 +294,12 @@ int CStockDataSqlite::InsertTraceRecord(STOCK_MANAGER_TRACE_LOG* pTraceLogBuf)
 	QTextCodec* pTextCode = QTextCodec::codecForLocale();
 	QSqlQuery sqlQuery(m_traceRecordDb);
 
-	QString insertSql = QString("insert into traceRecord values(?, ?, ?, ?, ?, ?,?)");
-	sqlQuery.prepare(insertSql);
+	QString sqlString;
+	if (pTraceLogBuf->traceStep == CALC_STOCK_TRADE_STEP_WAIT_BUYING)
+		sqlString = QString("insert into traceRecord values(?, ?, ?, ?, ?, ?,?)");
+	else
+		sqlString = QString("update traceRecord set code=?, hightime=?, highval=?, buytime=?, buyval=?,  selltime=?, sellval=? where code=\'%1\' and buytime= %2").arg(pTextCode->toUnicode(pTraceLogBuf->code)).arg(pTraceLogBuf->buyTime);
+	sqlQuery.prepare(sqlString);
 
 	sqlQuery.bindValue(0, pTextCode->toUnicode(pTraceLogBuf->code));
 	sqlQuery.bindValue(1, pTraceLogBuf->highTime);
