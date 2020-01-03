@@ -11,7 +11,7 @@ class CStockDataBase
 {
 public:
 	CStockDataBase() {}
-	~CStockDataBase() {}
+	virtual ~CStockDataBase() {}
 
 public:
 	virtual BOOL StockListIsOn()=0;

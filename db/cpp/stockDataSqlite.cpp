@@ -44,10 +44,17 @@ BOOL CStockDataSqlite::Init(const char* dbDir, const char* pListName, const char
 
 void CStockDataSqlite::Close()
 {
-	m_listDb.close();
-	m_klineDb.close();
-	m_traceLogDb.close();
-	m_traceRecordDb.close();
+	if (m_listDb.isOpen())
+		m_listDb.close();
+
+	if (m_klineDb.isOpen())
+		m_klineDb.close();
+
+	if (m_traceLogDb.isOpen())
+		m_traceLogDb.close();
+
+	if (m_traceRecordDb.isOpen())
+		m_traceRecordDb.close();
 }
 
 BOOL CStockDataSqlite::StockListIsOn()

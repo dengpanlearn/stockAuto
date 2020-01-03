@@ -208,10 +208,10 @@ BOOL CStockPython::GetLatestKLine(char const* pStockCode, STOCK_CALC_TRACE_KLINE
 	
 	bResult = TRUE;
 _ITEM_ERROR:
-	Py_DECREF(pItem);
+//	Py_DECREF(pItem);
 _ITEM_NONE:
 _CODE_ERROR:
-	Py_DECREF(pCode);
+//	Py_DECREF(pCode);
 _CODE_NONE:
 	Py_DECREF(pRet);
 	return bResult;

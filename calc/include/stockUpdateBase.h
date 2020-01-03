@@ -14,7 +14,7 @@ class CStockUpdateBase
 {
 public:
 	CStockUpdateBase();
-	~CStockUpdateBase();
+	virtual~CStockUpdateBase();
 
 	BOOL Create(char const* pUpdateDir);
 	void Close();

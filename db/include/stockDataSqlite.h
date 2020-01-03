@@ -14,7 +14,7 @@ class CStockDataSqlite:public CStockDataBase
 {
 public:
 	CStockDataSqlite() {}
-	~CStockDataSqlite() {}
+	virtual~CStockDataSqlite() { Close(); }
 
 	BOOL Init(const char* dbDir, const char* pListName, const char* pKLineName, const char* pTraceName, const char* pRecordName);
 	void Close();

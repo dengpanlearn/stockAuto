@@ -16,7 +16,7 @@ class CStockXiuQiuUpdate: public CStockUpdateBase
 {
 public:
 	CStockXiuQiuUpdate();
-	~CStockXiuQiuUpdate();
+	virtual~CStockXiuQiuUpdate();
 
 	BOOL Create(char const* pUpdateDir, char const* pStockListDb, char const* pStockKLineDb,  char const* pModuleDir, char const* pModule);
 	void Close();

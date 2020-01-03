@@ -39,7 +39,7 @@ BOOL CStockXiuQiuUpdate::Create(char const* pUpdateDir, char const* pStockListDb
 
 void CStockXiuQiuUpdate::Close()
 {
-	if (!pStockPython)
+	if (pStockPython != NULL)
 	{
 		pStockPython->Release();
 		delete pStockPython;
