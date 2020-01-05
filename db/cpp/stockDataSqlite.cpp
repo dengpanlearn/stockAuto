@@ -186,6 +186,7 @@ int CStockDataSqlite::UpdateTraceLog(STOCK_MANAGER_TRACE_LOG* pTraceLogBuf)
 		if (m_traceLogDb.tables().contains("trace"))
 			return -1;
 
+		sqlQuery.clear();
 		QString createTab = QString("create table trace (step int, code varchar(9), hightime int, highval decimal, buytime int, buyval decimal, selltime int, sellval decimal, histime int, updatetime int, realtime int, raisebalances int, toptime int, topval decimal)");
 		if (!sqlQuery.exec(createTab))
 			return -1;
@@ -194,11 +195,13 @@ int CStockDataSqlite::UpdateTraceLog(STOCK_MANAGER_TRACE_LOG* pTraceLogBuf)
 
 	if (!sqlQuery.next())
 	{
+		sqlQuery.clear();
 		QString insertSql = QString("insert into trace values(?, ?, ?, ?, ?, ?,?, ?, ?, ?, ?, ?, ?, ?)");
 		sqlQuery.prepare(insertSql);
 	}
 	else
 	{
+		sqlQuery.clear();
 		QString updateSql = QString("update trace set step=?, code=?, hightime=?, highval=?, buytime=?, buyval=?,  selltime=?, sellval=?, histime=?, updatetime=?, realtime=?, raisebalances=?, toptime=?, topval=? where code=\'%1\'").arg(pTextCode->toUnicode(pTraceLogBuf->code));
 		sqlQuery.prepare(updateSql);
 	}
