@@ -232,7 +232,7 @@ BOOL CStockTraceReal::DoTraceRealWork(STOCK_CALC_TRACE_NODE* pTraceNode)
 		float fVolumePercent = (float)(pCurKLine->volume - pHisKLineEnd->volume)*100 / pHisKLineEnd->volume;
 		float fHighLossPercent = (pTraceLog->fHighVal - pCurKLine->fClose) * 100 / pTraceLog->fHighVal;
 
-		if (fHighLossPercent > m_fHighLossPercent )
+		if ((fHighLossPercent > m_fHighLossPercent ) || (pCurKLine->fClose < pCurKLine->fMa10))
 		{
 		__TRACE_INIT:
 			pTraceLog->hisTime = pTraceLog->highTime;		// 从创新高的时间开始计算

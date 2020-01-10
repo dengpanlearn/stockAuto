@@ -267,7 +267,6 @@ QDialog#Waitting_Dialog QLabel{
   margin: 0px;
 }
 
-
 QDialog#Stock_Setting_Dialog QHeaderView{
     background-color:#000000;
     min-height:40px;
@@ -275,7 +274,7 @@ QDialog#Stock_Setting_Dialog QHeaderView{
     color:#CCFF00;
 }
 
-QDialog#Stock_Setting_Dialog QHeaderView::section:horizontal {
+QDialog#Stock_Setting_Dialog QHeaderView::section {
     background-color:#000000;
     color:#CCFF00;
     font-size: 15px;
@@ -316,7 +315,7 @@ QDialog#Stock_Setting_Dialog QPushButton{
     min-width: 60px;
     min-height:40px;
     border: 1px solid #000000;
-    color:#000000
+    color:#000000;
     background-color: #ffffff;
     border-radius:10px;
 }
@@ -324,4 +323,81 @@ QDialog#Stock_Setting_Dialog QPushButton{
 QDialog#Stock_Setting_Dialog QPushButton:hover{
     border: 1px solid #00FF99;
     background-color: #00FF99;
+}
+
+QDialog#Query_TraceRecord_Dialog{
+    background-color:#000000;
+    min-height:600px;
+    text-align:center;
+    color:#CCFF00;
+    min-width:800px;
+}
+
+QDialog#Query_TraceRecord_Dialog QLabel{
+  color:#CCFF00;
+  min-height:60px;
+  min-width:80px;
+  text-align:center;
+}
+
+QDialog#Query_TraceRecord_Dialog QDateEdit{
+  color:#CCFF00;
+  min-height:60px;
+  min-width:100px;
+  text-align:center;
+}
+
+QDialog#Query_TraceRecord_Dialog QPushButton{
+    min-width: 60px;
+    min-height:60px;
+    border: 1px solid #000000;
+    color:#000000;
+    background-color: #ffffff;
+    border-radius:10px;
+}
+
+QDialog#Query_TraceRecord_Dialog QPushButton:hover{
+    border: 1px solid #00FF99;
+    background-color: #00FF99;
+}
+
+QDialog#Query_TraceRecord_Dialog QHeaderView::section {
+    background-color:#000000;
+    color:#CCFF00;
+    font-size: 15px;
+    border: 1px solid #00FF99;
+    min-height:30px;
+    min-width:100px;
+}
+
+QDialog#Query_TraceRecord_Dialog QTreeWidget{
+    
+    min-width: 800px;
+    min-height:400px;
+    margin-top:10px;
+    margin-left: 0px;
+    margin-right:0px;
+    background-color: #000000;
+    border: 1px solid #00FF99;
+}
+
+
+QWidget#Stock_His_Widget QTreeWidget::item {
+    min-width: 100px;
+    min-height:50px;
+    padding:0px;
+    font-size: 10px;
+    margin:0px;
+    color:#CCFF00;
+    background-color: #000000;
+    border: 1px solid #00FF99;
+    text-align:center;
+}
+
+QWidget#Stock_His_Widget QTreeWidget::item:hover {
+    background-color: #888888;
+}
+
+QWidget#Stock_His_Widget QTreeWidget::item:selected{
+    background-color: #888888;
 }

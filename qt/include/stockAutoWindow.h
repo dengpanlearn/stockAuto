@@ -18,7 +18,7 @@
 
 class QAction;
 class CQtWaitting;
-
+class CQueryTraceRecordDialog;
 
 class CStockAutoWindow : public QMainWindow
 {
@@ -52,6 +52,7 @@ private slots:
 	void OnEnterSettingDialog(bool check);
 	void OnSelectResetTrace(bool check);
 	void OnResetTraceResponese();
+	void OnEnterQueryTraceRecordDialog(bool check);
 
 
 private:
@@ -62,9 +63,11 @@ private:
 	CStockRealWidget*	m_pRealWidget;
 	CStockHisWidget*	m_pHisWidget;
 	CStockLoadingDialog*	m_pLoadingDialog;
+	CQueryTraceRecordDialog*	m_pQueryTraceRecordDialog;
 	BOOL		m_bLoading;
 	QAction*	m_pActSetting;
 	QAction*	m_pActResetTrace;
+	QAction*	m_pActQueryTraceRecord;
 	CQtWaitting*	m_pWaitDialog;
 };
 

@@ -9,6 +9,7 @@
 #include <stockCalcDef.h>
 #include <qtextcodec.h>
 #include <qmenu.h>
+#include <qmessagebox.h>
 #include <qmenubar.h>
 #include <qaction.h>
 #include <stockAutoManager.h>
@@ -21,6 +22,7 @@
 #include "../include/qtStockTraceDef.h"
 #include "../include/qtObjectAgent.h"
 #include "../include/qtStockAgent.h"
+#include "../include/queryTraceRecordDialog.h"
 #include "../include/stockAutoWindow.h"
 
 extern CStockAutoManager g_autoManger;;
@@ -34,6 +36,7 @@ CStockAutoWindow::CStockAutoWindow(QWidget *parent)
 	m_pStockAgent = NULL;
 	m_pWaitDialog = NULL;
 	m_pLoadingDialog = NULL;
+	m_pQueryTraceRecordDialog = NULL;
 	OnInit();
 	RetranlateUi();
 }
@@ -120,6 +123,9 @@ void CStockAutoWindow::OnInit()
 	QMenu* pMenu = pMenuBar->addMenu(pCodec->toUnicode(STOCK_AUTO_WINDOW_MEUNU_FUNC));
 	m_pActSetting = pMenu->addAction(pCodec->toUnicode(STOCK_AUTO_WINDOW_ACTION_SETTING));
 	m_pActResetTrace = pMenu->addAction(pCodec->toUnicode(STOCK_AUTO_WINDOW_ACTION_RESET_TRACE));
+
+	QMenu* pMenuQuery = pMenuBar->addMenu(pCodec->toUnicode(STOCK_AUTO_WINDOW_MEUNU_QUERY));
+	m_pActQueryTraceRecord = pMenuQuery->addAction(pCodec->toUnicode(STOCK_AUTO_WINDOW_ACTION_QUERY_TRACERECORD));
 }
 
 void CStockAutoWindow::RetranlateUi()
@@ -136,6 +142,7 @@ void CStockAutoWindow::RetranlateUi()
 	connect(m_pTraceWidget, SIGNAL(SignalSelectStock(QString&, QString&)), m_pRealWidget, SLOT(OnSelectStock(QString&, QString&)));
 	connect(m_pActSetting, SIGNAL(triggered(bool)), this, SLOT(OnEnterSettingDialog(bool)));
 	connect(m_pActResetTrace, SIGNAL(triggered(bool)), this, SLOT(OnSelectResetTrace(bool)));
+	connect(m_pActQueryTraceRecord, SIGNAL(triggered(bool)), this, SLOT(OnEnterQueryTraceRecordDialog(bool)));
 }
 
 BOOL CStockAutoWindow:: OnInitQtServerAndAgent()
@@ -285,6 +292,13 @@ void CStockAutoWindow::OnSelectResetTrace(bool check)
 	if (m_pWaitDialog)
 		return;
 
+	QTextCodec* pCodec = QTextCodec::codecForLocale();
+
+	QMessageBox::StandardButton resultBtn = QMessageBox::warning(this, pCodec->toUnicode(STOCK_AUTO_WINDOW_RESET_TITLE), pCodec->toUnicode(STOCK_AUTO_WINDOW_RESET_TEXT),
+		QMessageBox::Ok | QMessageBox::Cancel, QMessageBox::Cancel);
+
+	if (resultBtn == QMessageBox::Cancel)
+		return;
 	m_pWaitDialog = new CQtWaitting(NULL);
 	emit SignalResetTrace();
 
@@ -301,3 +315,10 @@ void CStockAutoWindow::OnResetTraceResponese()
 	}
 }
 
+void CStockAutoWindow::OnEnterQueryTraceRecordDialog(bool check)
+{
+	m_pQueryTraceRecordDialog = new CQueryTraceRecordDialog(NULL);
+	m_pQueryTraceRecordDialog->setObjectName("Query_TraceRecord_Dialog");
+	m_pQueryTraceRecordDialog->exec();
+	delete m_pQueryTraceRecordDialog;
+}

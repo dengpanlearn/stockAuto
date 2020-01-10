@@ -928,7 +928,7 @@ UINT CStockAutoManager::OnStockAutoManagerHisKLineUpdate()
 			if (++m_jobHisKLineUpdate.stockIdx >= m_pJobList->stockCounts)
 			{
 				m_jobHisKLineUpdate.stockIdx = 0;
-				InitStockTraceCalc(&m_pJobTraceLog->traceLog[STOCK_AUTO_COUNTS_MAX], m_pJobList->stockCounts);
+			//	InitStockTraceCalc(&m_pJobTraceLog->traceLog[STOCK_AUTO_COUNTS_MAX], m_pJobList->stockCounts);
 				nextStep = STOCK_AUTO_MANAGER_STEP_STOCK_TRACING;
 			}
 		}
