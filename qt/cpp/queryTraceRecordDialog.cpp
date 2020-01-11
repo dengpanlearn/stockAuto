@@ -82,6 +82,7 @@ void CQueryTraceRecordDialog::OnInit()
 
 	pLyt->addLayout(pLytQuery);
 	pLyt->addWidget(m_pTreeRecord);
+	pLyt->setMargin(0);
 	this->setLayout(pLyt);
 }
 

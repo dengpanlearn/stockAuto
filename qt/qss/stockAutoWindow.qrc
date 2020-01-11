@@ -2,5 +2,9 @@
     <qresource prefix="/CStockAutoWindow">
         <file>stockAuto.qss</file>
         <file>waitting.gif</file>
+        <file>downarraw.png</file>
+        <file>downarraw-check.png</file>
+        <file>uparraw.png</file>
+        <file>uparraw-check.png</file>
     </qresource>
 </RCC>

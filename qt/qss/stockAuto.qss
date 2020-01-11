@@ -328,28 +328,65 @@ QDialog#Stock_Setting_Dialog QPushButton:hover{
 QDialog#Query_TraceRecord_Dialog{
     background-color:#000000;
     min-height:600px;
-    text-align:center;
-    color:#CCFF00;
+    margin-left:0px;
+    margin-right:0px;
     min-width:800px;
 }
 
 QDialog#Query_TraceRecord_Dialog QLabel{
   color:#CCFF00;
-  min-height:60px;
+  min-height:50px;
   min-width:80px;
   text-align:center;
+  font-size:25px;
 }
 
 QDialog#Query_TraceRecord_Dialog QDateEdit{
-  color:#CCFF00;
-  min-height:60px;
-  min-width:100px;
+  color:#000000;
+  min-height:50px;
+  min-width:120px;
   text-align:center;
+  font-size:23px;
+  border: 2px solid #00FF99;
+  border-radius:10px;
 }
 
+QDialog#Query_TraceRecord_Dialog QDateEdit::up-button{
+    border-width: 1px;
+    min-height:23px;
+    min-width:23px;
+    border-image:url(:/CStockAutoWindow/uparraw.png);
+}
+
+QDialog#Query_TraceRecord_Dialog QDateEdit::up-button:hover{
+    border-image:url(:/CStockAutoWindow/uparraw-check.png);
+}
+
+QDialog#Query_TraceRecord_Dialog QDateEdit::up-button:pressed{
+    border-image:url(:/CStockAutoWindow/uparraw-check.png);
+}
+
+
+QDialog#Query_TraceRecord_Dialog QDateEdit::down-button{
+    border-width: 1px;
+    min-height:23px;
+    min-width:23px;
+    border-image:url(:/CStockAutoWindow/downarraw.png);
+}
+
+QDialog#Query_TraceRecord_Dialog QDateEdit::down-button:hover{
+    border-image:url(:/CStockAutoWindow/downarraw-check.png);
+}
+
+QDialog#Query_TraceRecord_Dialog QDateEdit::down-button:pressed{
+    border-image:url(:/CStockAutoWindow/downarraw-check.png);
+}
+
+
+
 QDialog#Query_TraceRecord_Dialog QPushButton{
-    min-width: 60px;
-    min-height:60px;
+    min-width: 50px;
+    min-height:50px;
     border: 1px solid #000000;
     color:#000000;
     background-color: #ffffff;
@@ -382,7 +419,7 @@ QDialog#Query_TraceRecord_Dialog QTreeWidget{
 }
 
 
-QWidget#Stock_His_Widget QTreeWidget::item {
+QDialog#Query_TraceRecord_Dialog QTreeWidget::item {
     min-width: 100px;
     min-height:50px;
     padding:0px;
@@ -394,10 +431,10 @@ QWidget#Stock_His_Widget QTreeWidget::item {
     text-align:center;
 }
 
-QWidget#Stock_His_Widget QTreeWidget::item:hover {
+QDialog#Query_TraceRecord_Dialog QTreeWidget::item:hover {
     background-color: #888888;
 }
 
-QWidget#Stock_His_Widget QTreeWidget::item:selected{
+QDialog#Query_TraceRecord_Dialog QTreeWidget::item:selected{
     background-color: #888888;
 }
