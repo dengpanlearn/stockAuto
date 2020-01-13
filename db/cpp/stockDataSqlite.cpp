@@ -9,6 +9,7 @@
 #include <qsqlquery.h>
 #include <qsqlerror.h>
 #include <qstring.h>
+#include <qtStockTraceDef.h>
 #include "../include/stockDataSqlite.h"
 
 
@@ -111,7 +112,7 @@ BOOL CStockDataSqlite::TraceRecordIsOn()
 		return TRUE;
 
 	QSqlQuery sqlQuery(m_traceRecordDb);
-	QString createTab = QString("create table traceRecord (code varchar(9), hightime int, highval decimal, buytime int, buyval decimal, selltime int, sellval decimal)");
+	QString createTab = QString("create table traceRecord (code varchar(9), hightime int, highval decimal, buytime int, buyval decimal, selltime int, sellval decimal, toptime int, topval decimal)");
 	return sqlQuery.exec(createTab);
 }
 
@@ -306,9 +307,9 @@ int CStockDataSqlite::InsertTraceRecord(STOCK_MANAGER_TRACE_LOG* pTraceLogBuf)
 
 	QString sqlString;
 	if (pTraceLogBuf->traceStep == CALC_STOCK_TRADE_STEP_WAIT_BUYING)
-		sqlString = QString("insert into traceRecord values(?, ?, ?, ?, ?, ?,?)");
+		sqlString = QString("insert into traceRecord values(?, ?, ?, ?, ?, ?, ?, ?, ?)");
 	else
-		sqlString = QString("update traceRecord set code=?, hightime=?, highval=?, buytime=?, buyval=?,  selltime=?, sellval=? where code=\'%1\' and buytime= %2").arg(pTextCode->toUnicode(pTraceLogBuf->code)).arg(pTraceLogBuf->buyTime);
+		sqlString = QString("update traceRecord set code=?, hightime=?, highval=?, buytime=?, buyval=?,  selltime=?, sellval=?, toptime=?, topval=? where code=\'%1\' and buytime= %2").arg(pTextCode->toUnicode(pTraceLogBuf->code)).arg(pTraceLogBuf->buyTime);
 	sqlQuery.prepare(sqlString);
 
 	sqlQuery.bindValue(0, pTextCode->toUnicode(pTraceLogBuf->code));
@@ -318,6 +319,40 @@ int CStockDataSqlite::InsertTraceRecord(STOCK_MANAGER_TRACE_LOG* pTraceLogBuf)
 	sqlQuery.bindValue(4, pTraceLogBuf->fBuyVal);
 	sqlQuery.bindValue(5, pTraceLogBuf->sellTime);
 	sqlQuery.bindValue(6, pTraceLogBuf->fSellVal);
+	sqlQuery.bindValue(7, pTraceLogBuf->topTime);
+	sqlQuery.bindValue(8, pTraceLogBuf->fTopVal);
 
 	return sqlQuery.exec() ? 0 : -1;
+}
+
+int CStockDataSqlite::GetTraceRecord(QT_STOCK_TRACERECORD_INFO* pTraceRecord, int startTime, int endTime, int counts, int offset)
+{
+	QString sqlString = QString("select code,hightime, highval, buytime,buyval, toptime, topval, selltime,sellval from traceRecord where selltime != 0  and buytime > %1 and selltime < %2 order by buytime desc limit %3, %4").arg(startTime).arg(endTime).arg(offset).arg(counts);
+	QSqlQuery sqlQuery(m_traceRecordDb);
+
+	if (!sqlQuery.exec(sqlString))
+		return -1;
+
+	int recordCounts = 0;
+	while (sqlQuery.next() && counts--)
+	{
+		QString code = sqlQuery.value(0).toString();
+
+		QString2Char(code, pTraceRecord->code);
+		pTraceRecord->highTime = sqlQuery.value(1).toInt();
+		pTraceRecord->fHighVal = sqlQuery.value(2).toFloat();
+
+		pTraceRecord->buyTime = sqlQuery.value(3).toInt();
+		pTraceRecord->fBuyVal = sqlQuery.value(4).toFloat();
+
+		pTraceRecord->topTime = sqlQuery.value(5).toInt();
+		pTraceRecord->fTopVal = sqlQuery.value(6).toFloat();
+
+		pTraceRecord->sellTime = sqlQuery.value(7).toInt();
+		pTraceRecord->fSellVal = sqlQuery.value(8).toFloat();
+		pTraceRecord++;
+		recordCounts++;
+	}
+	sqlQuery.clear();
+	return recordCounts;
 }

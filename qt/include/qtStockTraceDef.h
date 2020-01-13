@@ -155,5 +155,37 @@ struct QT_STOCK_TRACEINFO_QUERY_PARAM
 	float					fSellVal;
 };
 
+struct QT_STOCK_TRACERECORD_INFO
+{
+	char					code[STOCK_CODE_NAME_MAX];
+	long					highTime;
+	float					fHighVal;
+	long					buyTime;
+	float					fBuyVal;
+	long				    topTime;
+	float					fTopVal;
+	long					sellTime;
+	float					fSellVal;
+};
+struct QT_STOCK_TRACERECORD_QUERY_PARAM
+{
+	TASK_EVENT_PARAM		eventParam;
+	CQtStockAgent*			pStockAgent;
+	int						startTime;
+	int						endTime;
+	int						offset;
+	int						counts;
+	QT_STOCK_TRACERECORD_INFO	* pTraceRecordInfo;
+};
+
+#define QT_STOCK_TRACERECORD_QUEY_BUF_COUNT		10
+struct QT_STOCK_TRACERECORD_QUERY_JOB
+{
+	int					jobResult;
+	BOOL				bInWorking;
+	int					recordCnt;
+	QT_STOCK_TRACERECORD_INFO recordBuf[0];
+};
+
 
 #endif // !__QT_STOCK_TRACE_DEF_H__

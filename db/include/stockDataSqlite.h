@@ -30,6 +30,8 @@ public:
 	virtual int GetHisKLine(char const* pStockCode, STOCK_CALC_TRACE_KLINE* pHisKLineBuf, int bufCounts);
 	virtual int GetTraceLog(char const* pStockCode, STOCK_MANAGER_TRACE_LOG* pTrace);
 	virtual int InsertTraceRecord(STOCK_MANAGER_TRACE_LOG* pTraceLogBuf);
+	virtual int GetTraceRecord(QT_STOCK_TRACERECORD_INFO* pTraceRecord, int startTime, int endTime, int counts, int offset);
+
 private:
 	QSqlDatabase	m_listDb;
 	QSqlDatabase	m_klineDb;

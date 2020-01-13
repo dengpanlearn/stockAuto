@@ -46,7 +46,7 @@ signals:
 
 protected:
 	virtual void closeEvent(QCloseEvent * event);
-
+	
 private slots:
 	void OnNotifyAutoManagerLoadingProgress();
 	void OnEnterSettingDialog(bool check);

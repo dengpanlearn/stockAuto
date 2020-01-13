@@ -317,7 +317,7 @@ void CStockAutoWindow::OnResetTraceResponese()
 
 void CStockAutoWindow::OnEnterQueryTraceRecordDialog(bool check)
 {
-	m_pQueryTraceRecordDialog = new CQueryTraceRecordDialog(NULL);
+	m_pQueryTraceRecordDialog = new CQueryTraceRecordDialog(NULL, m_pStockAgent);
 	m_pQueryTraceRecordDialog->setObjectName("Query_TraceRecord_Dialog");
 	m_pQueryTraceRecordDialog->exec();
 	delete m_pQueryTraceRecordDialog;

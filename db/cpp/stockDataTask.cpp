@@ -92,6 +92,7 @@ int CStockDataTask::OnEventActive(UINT cmd, void* param, int paramLen)
 		QT_STOCK_HISKLINE_QUERY_PARAM* pQueryHisKLine;
 		STOCK_CALC_UPDATE_CONFIG_DATA* pUpdateConfigData;
 		STOCK_CALC_INSERT_TRACERECORD* pInsertTraceRecord;
+		QT_STOCK_TRACERECORD_QUERY_PARAM* pQueryTraceRecord;
 	};
 
 	pGetList = (STOCK_CALC_GET_LIST*)param;
@@ -142,6 +143,11 @@ int CStockDataTask::OnEventActive(UINT cmd, void* param, int paramLen)
 
 	case STOCK_CALC_EVENT_INSERT_TRACE_RECORD:
 		result = m_pStockData->InsertTraceRecord(&pInsertTraceRecord->traceLog);
+		break;
+
+	case STOCK_QT_EVENT_QUERY_TRACE_RECORD:
+		result = m_pStockData->GetTraceRecord(pQueryTraceRecord->pTraceRecordInfo, pQueryTraceRecord->startTime, pQueryTraceRecord->endTime,
+			pQueryTraceRecord->counts, pQueryTraceRecord->offset);
 		break;
 
 	default:

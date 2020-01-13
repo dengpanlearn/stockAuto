@@ -327,10 +327,10 @@ QDialog#Stock_Setting_Dialog QPushButton:hover{
 
 QDialog#Query_TraceRecord_Dialog{
     background-color:#000000;
-    min-height:600px;
+    min-height:700px;
     margin-left:0px;
     margin-right:0px;
-    min-width:800px;
+    min-width:900px;
 }
 
 QDialog#Query_TraceRecord_Dialog QLabel{
@@ -398,32 +398,34 @@ QDialog#Query_TraceRecord_Dialog QPushButton:hover{
     background-color: #00FF99;
 }
 
+QDialog#Query_TraceRecord_Dialog  QTreeWidget{
+    min-width: 1000px;
+    min-height:700px;
+    margin-top:10px;
+    background-color: #000000;
+    border: 1px solid #00FF99;
+}
+
+QDialog#Query_TraceRecord_Dialog  QHeaderView{
+    background-color:#000000;
+    min-height:40px;
+    text-align:center;
+}
+
 QDialog#Query_TraceRecord_Dialog QHeaderView::section {
     background-color:#000000;
     color:#CCFF00;
     font-size: 15px;
     border: 1px solid #00FF99;
-    min-height:30px;
-    min-width:100px;
+    min-height:40px;
+    min-width:110px;
 }
-
-QDialog#Query_TraceRecord_Dialog QTreeWidget{
-    
-    min-width: 800px;
-    min-height:400px;
-    margin-top:10px;
-    margin-left: 0px;
-    margin-right:0px;
-    background-color: #000000;
-    border: 1px solid #00FF99;
-}
-
 
 QDialog#Query_TraceRecord_Dialog QTreeWidget::item {
-    min-width: 100px;
+    min-width: 120px;
     min-height:50px;
     padding:0px;
-    font-size: 10px;
+    font-size: 15px;
     margin:0px;
     color:#CCFF00;
     background-color: #000000;

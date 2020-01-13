@@ -247,6 +247,7 @@ BOOL CStockTraceReal::DoTraceRealWork(STOCK_CALC_TRACE_NODE* pTraceNode)
 			pTraceLog->fBuyVal = pCurKLine->fClose;
 			pTraceLog->fTopVal = pCurKLine->fClose;
 			pTraceLog->topTime = pTraceLog->buyTime;
+			pTraceLog->sellTime = 0;
 			UpdateStockTraceStat(pTraceNode->stockIdx, pTraceLog->code, QT_STOCK_TRACE_LOG_STAT_VOLUME_REACHED | QT_STOCK_TRACE_LOG_STAT_MODIFY);
 			// 没有买入接口，
 	
