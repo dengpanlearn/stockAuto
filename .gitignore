@@ -1,4 +1,6 @@
 # Windows
 *.bak
+qt/qss/RC*
+qt/qss/*.aps
 __pycache__
 
