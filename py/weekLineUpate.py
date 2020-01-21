@@ -33,6 +33,8 @@ class WeekKLineUpdate:
             response = self.session.get(self.hostUrl,verify=False, headers= self.headers)
         except (ReadTimeout, ConnectTimeout, ConnectionError):
             return -1
+        except:
+            return -1
         else:
             if (response.status_code == 200):
                 return 0
@@ -57,6 +59,8 @@ class WeekKLineUpdate:
             try:
                 response = self.session.get(url, verify=False, headers = self.headers)
             except (ReadTimeout, ConnectTimeout, ConnectionError, TooManyRedirects):
+                break
+            except:
                 break
             else:
                 if (response.status_code == 200):
@@ -150,7 +154,9 @@ class WeekKLineUpdate:
         try:
             response = self.session.get(url, verify=False, headers = self.headers)
         except (ReadTimeout, ConnectTimeout, ConnectionError, TooManyRedirects):
-            return None;
+            return None
+        except:
+            return None
         else:
             if (response.status_code == 200):
                 return response.json()
