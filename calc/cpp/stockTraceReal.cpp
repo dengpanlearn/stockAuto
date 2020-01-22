@@ -255,7 +255,7 @@ BOOL CStockTraceReal::DoTraceRealWork(STOCK_CALC_TRACE_NODE* pTraceNode)
 	}
 	else if (pTraceLog->traceStep == CALC_STOCK_TRADE_STEP_WAIT_SELL)
 	{
-		if (pCurKLine->fClose < pCurKLine->fMa10)
+		if ((pHisKLineEnd->fClose < pHisKLineEnd->fMa10)&&(pCurKLine->fClose < pCurKLine->fMa10))
 		{
 			goto _TRACE_SELL;
 		}
