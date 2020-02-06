@@ -122,7 +122,7 @@ struct STOCK_CALC_TRACE_KLINE
 	float	fPercent;
 	float	fMa10;
 	float	fRsi7;
-	long    volume;
+	UINT  volume;
 };
 
 enum {

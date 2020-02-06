@@ -101,6 +101,7 @@ class WeekKLineUpdate:
         curSmaGain = 0
         rsiCycle = 7
         lastClose = 0.1
+    
 
         try:
             itemList =  data.get('item')
@@ -130,6 +131,8 @@ class WeekKLineUpdate:
                     itemList[-1][volumeIndex], itemList[-1][-1]]
         except ValueError:
             return None
+        except:
+            return None
 
             
     def getAndUpdateWeekKLine(self, stockNo, beginTime, counts):
@@ -150,7 +153,7 @@ class WeekKLineUpdate:
         orgUrl = 'https://stock.xueqiu.com/v5/stock/chart/kline.json?symbol={stockNo}&begin={beginTime}&period=week&type=before&count={counts}&indicator=kline,ma'
         url = orgUrl.format(stockNo=stockNo, beginTime = beginTime, counts=counts)
         self.headers["Host"] = "stock.xueqiu.com"
-        
+       
         try:
             response = self.session.get(url, verify=False, headers = self.headers)
         except (ReadTimeout, ConnectTimeout, ConnectionError, TooManyRedirects):
@@ -198,6 +201,8 @@ class WeekKLineUpdate:
             return True
         except ValueError:
             return False
+        except:
+            return False
 
 if __name__ == '__main__':
     weekKLine =   WeekKLineUpdate()
@@ -209,4 +214,4 @@ if __name__ == '__main__':
        
         ret = weekKLine.getCurWeekKLine('SZ300001')
         """
-        ret = weekKLine.getCurWeekKLine('SZ002271')
+        ret = weekKLine.getCurWeekKLine('SZ000100')

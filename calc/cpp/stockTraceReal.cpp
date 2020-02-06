@@ -229,7 +229,11 @@ BOOL CStockTraceReal::DoTraceRealWork(STOCK_CALC_TRACE_NODE* pTraceNode)
 
 	if (pTraceLog->traceStep == CALC_STOCK_TRADE_STEP_WAIT_BUY)
 	{
-		float fVolumePercent = (float)(pCurKLine->volume - pHisKLineEnd->volume)*100 / pHisKLineEnd->volume;
+		float fVolumePercent = 0;
+		if (pCurKLine->volume > pHisKLineEnd->volume)
+			fVolumePercent = (float)(pCurKLine->volume - pHisKLineEnd->volume) * 100 / pHisKLineEnd->volume;
+	
+
 		float fHighLossPercent = (pTraceLog->fHighVal - pCurKLine->fClose) * 100 / pTraceLog->fHighVal;
 
 		if ((fHighLossPercent > m_fHighLossPercent ) || (pCurKLine->fClose < pCurKLine->fMa10))

@@ -246,9 +246,12 @@ BOOL CStockTraceWeek::DoTraceWeekWork(STOCK_CALC_TRACE_NODE* pTraceNode)
 		else if (pTraceLog->traceStep == CALC_STOCK_TRADE_STEP_WAIT_BUY)
 		{
 			STOCK_CALC_TRACE_KLINE const* pLastKLine = pStartTraceKLine-1;
-			float fVolumePercent = (float)(pStartTraceKLine->volume - pLastKLine->volume)*100 / pLastKLine->volume;
+			float fVolumePercent = 0;
+			if (pStartTraceKLine->volume > pLastKLine->volume)
+				fVolumePercent = (float)(pStartTraceKLine->volume - pLastKLine->volume) * 100 / pLastKLine->volume;
+
 			float fHighLossPercent = (pTraceLog->fHighVal - pStartTraceKLine->fClose) * 100 / pTraceLog->fHighVal;
-			
+;
 			if ((fHighLossPercent > m_fHighLossPercent) || (fVolumePercent > m_fVolumePercentBuy))
 			{
 				if (pHighKLinePtr == NULL)

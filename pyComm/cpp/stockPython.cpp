@@ -200,7 +200,7 @@ BOOL CStockPython::GetLatestKLine(char const* pStockCode, STOCK_CALC_TRACE_KLINE
 	
 	pItemVal = PyList_GetItem(pItem, STOCK_CALC_TRACE_KLINE_INDEX_VOLUME);
 	if (pItemVal != NULL)
-		PyArg_Parse(pItemVal, "i", &pCurKLine->volume);
+		PyArg_Parse(pItemVal, "I", &pCurKLine->volume);
 	
 	pItemVal = PyList_GetItem(pItem, STOCK_CALC_TRACE_KLINE_INDEX_RSI7);
 	if (pItemVal != NULL)
