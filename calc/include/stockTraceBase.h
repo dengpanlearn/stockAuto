@@ -54,6 +54,7 @@ protected:
 	static BOOL IsRaiseBalance(STOCK_CALC_TRACE_KLINE const* pStart, STOCK_CALC_TRACE_KLINE const* pHighPtr, float fRaiseLimits, int rangesLimit);
 	static BOOL IsEndOfCurTraceWeek();
 	static STOCK_CALC_TRACE_KLINE const* GetHighHisKLinePtr(STOCK_CALC_TRACE_KLINE const* pHisKLineEnd, int findLimits, long time);
+	static BOOL IsInHisKLineRange(STOCK_CALC_TRACE_KLINE const* pHisKLine, int ranges, long time);
 	void TraceStock(STOCK_CALC_TRACE_NODE* pTraceNode);
 	void UpdateStockTraceStat(int stockIdx, char const* pCode, UINT stat);
 

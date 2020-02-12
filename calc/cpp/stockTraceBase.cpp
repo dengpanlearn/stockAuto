@@ -563,3 +563,16 @@ STOCK_CALC_TRACE_KLINE const* CStockTraceBase::GetHighHisKLinePtr(STOCK_CALC_TRA
 
 	return NULL;
 }
+
+BOOL CStockTraceBase::IsInHisKLineRange(STOCK_CALC_TRACE_KLINE const* pHisKLine, int ranges, long time)
+{
+	while (ranges-- >= 0)
+	{
+		if (pHisKLine->timeVal <= time)
+			return TRUE;
+
+		pHisKLine--;
+	}
+
+	return FALSE;
+}

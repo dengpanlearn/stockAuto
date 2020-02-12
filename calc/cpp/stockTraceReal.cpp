@@ -21,6 +21,8 @@ BOOL CStockTraceReal::Init(int hisHighCounts, STOCKAUTO_CONFIG_TRACE const* pCon
 {
 	m_fRsiBuy = pConfigTrace->fRsiBuy;
 	m_fRsiSell = pConfigTrace->fRsiSell;
+	m_iVolumeBuyWaits = pConfigTrace->volumeBuyWaits;
+	m_fPrevVolumePercentLost = pConfigTrace->fPrevVolumePercentLost;
 	m_iRsiBuyWaits = pConfigTrace->rsiBuyWaits;
 	m_iRsiSellWaits = pConfigTrace->rsiSellWaits;
 	m_iReachHighRanges = pConfigTrace->reachHighRanges;
@@ -41,6 +43,8 @@ void CStockTraceReal::UpdateConfigTrace(STOCKAUTO_CONFIG_TRACE const* pConfigTra
 {
 	m_fRsiBuy = pConfigTrace->fRsiBuy;
 	m_fRsiSell = pConfigTrace->fRsiSell;
+	m_iVolumeBuyWaits = pConfigTrace->volumeBuyWaits;
+	m_fPrevVolumePercentLost = pConfigTrace->fPrevVolumePercentLost;
 	m_iRsiBuyWaits = pConfigTrace->rsiBuyWaits;
 	m_iRsiSellWaits = pConfigTrace->rsiSellWaits;
 	m_iReachHighRanges = pConfigTrace->reachHighRanges;
@@ -230,13 +234,23 @@ BOOL CStockTraceReal::DoTraceRealWork(STOCK_CALC_TRACE_NODE* pTraceNode)
 	if (pTraceLog->traceStep == CALC_STOCK_TRADE_STEP_WAIT_BUY)
 	{
 		float fVolumePercent = 0;
+		float fPreVolumePercent = 0;
+		float fPreLastVolumePercent = 0;
+		STOCK_CALC_TRACE_KLINE const* pPrevLastKLine = pHisKLineEnd - 1;
+		STOCK_CALC_TRACE_KLINE const* pPrevLastLastKLine = pPrevLastKLine - 1;
+	
 		if (pCurKLine->volume > pHisKLineEnd->volume)
 			fVolumePercent = (float)(pCurKLine->volume - pHisKLineEnd->volume) * 100 / pHisKLineEnd->volume;
-	
+
+		if (pPrevLastKLine->volume > pHisKLineEnd->volume)
+			fPreVolumePercent = (float)(pPrevLastKLine->volume - pHisKLineEnd->volume) * 100 / pHisKLineEnd->volume;
+
+		if (pPrevLastLastKLine->volume > pHisKLineEnd->volume)
+			fPreLastVolumePercent = (float)(pPrevLastLastKLine->volume - pHisKLineEnd->volume) * 100 / pHisKLineEnd->volume;
 
 		float fHighLossPercent = (pTraceLog->fHighVal - pCurKLine->fClose) * 100 / pTraceLog->fHighVal;
 
-		if ((fHighLossPercent > m_fHighLossPercent ) || (pCurKLine->fClose < pCurKLine->fMa10))
+		if ((fHighLossPercent > m_fHighLossPercent ) || (pCurKLine->fClose < pCurKLine->fMa10) || !IsInHisKLineRange(pHisKLineEnd, m_iVolumeBuyWaits-1, pTraceLog->highTime))
 		{
 		__TRACE_INIT:
 			pTraceLog->hisTime = pTraceLog->highTime;		// 从创新高的时间开始计算
@@ -244,7 +258,8 @@ BOOL CStockTraceReal::DoTraceRealWork(STOCK_CALC_TRACE_NODE* pTraceNode)
 			pTraceLog->traceStep = CALC_STOCK_TRADE_STEP_CHECK_HIGH;
 			UpdateStockTraceStat(pTraceNode->stockIdx, pTraceLog->code, QT_STOCK_TRACE_LOG_STAT_DEL);
 		}
-		else if (fVolumePercent > m_fVolumePercentBuy)
+		else if ((fVolumePercent > m_fVolumePercentBuy) &&((fPreLastVolumePercent > m_fPrevVolumePercentLost) ||
+			(fPreVolumePercent > m_fPrevVolumePercentLost)))
 		{
 			pTraceLog->traceStep = CALC_STOCK_TRADE_STEP_WAIT_BUYING;
 			pTraceLog->buyTime = time(NULL);

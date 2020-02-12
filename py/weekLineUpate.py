@@ -91,6 +91,7 @@ class WeekKLineUpdate:
             if (not stockKLine.get("data")):
                 return {'code':-1,'item':None}
             curKLineVal = self.calcCurWeekKLine(stockKLine.get('data'))
+            print(curKLineVal)
             if curKLineVal:
                 return {'code':0, 'item':curKLineVal}
             else:
@@ -214,4 +215,4 @@ if __name__ == '__main__':
        
         ret = weekKLine.getCurWeekKLine('SZ300001')
         """
-        ret = weekKLine.getCurWeekKLine('SZ000100')
+        ret = weekKLine.getCurWeekKLine('SZ000725')

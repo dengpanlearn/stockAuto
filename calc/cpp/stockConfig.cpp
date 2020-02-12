@@ -92,7 +92,9 @@ void CStockConfig::OnInit()
 	pConfigTrace->reachHighRanges = STOCKAUTO_CONFIG_TRACE_REAHHIGH_RANGES_DFT;
 	pConfigTrace->fHighLostPercent = STOCKAUTO_CONFIG_TRACE_HIGH_LOSTPERCENT_DFT;
 	pConfigTrace->raiseBalanceWaits = STOCKAUTO_CONFIG_TRACE_RAISEBALANCE_WAITS_DFT;
+	pConfigTrace->fPrevVolumePercentLost = STOCKAUTO_CONFIG_TRACE_PREV_VOLUME_PERCENT_LOST_DFT;
 	pConfigTrace->fVolumePercentBuy = STOCKAUTO_CONFIG_TRACE_VOLUME_PERCENT_BUY_DFT;
+	pConfigTrace->volumeBuyWaits = STOCKAUTO_CONFIG_TRACE_VOLUME_BUY_WAIT_DFT;
 	pConfigTrace->rsiBuyWaits = STOCKAUTO_CONFIG_TRACE_RSI_BUY_WAIT_DFT;
 	pConfigTrace->fRsiBuy = STOCKAUTO_CONFIG_TRACE_RSI_BUY_DFT;
 	pConfigTrace->fRsiSell = STOCKAUTO_CONFIG_TRACE_RSI_SELL_DFT;
@@ -236,10 +238,22 @@ void CStockConfig::LoadConfigTrace(QSettings* pConfigSettings, STOCKAUTO_CONFIG_
 		pConfigTrace->raiseBalanceWaits = pConfigSettings->value(tmpKey).toInt();
 	}
 
+	tmpKey = pCodec->toUnicode(STOCKAUTO_CONFIG_TRACE_GROUP_PREV_VOLUME_PERCENT_LOST);
+	if (keys.contains(tmpKey))
+	{
+		pConfigTrace->fPrevVolumePercentLost = pConfigSettings->value(tmpKey).toFloat();
+	}
+
 	tmpKey = pCodec->toUnicode(STOCKAUTO_CONFIG_TRACE_GROUP_VOLUME_PERCENT_BUY);
 	if (keys.contains(tmpKey))
 	{
 		pConfigTrace->fVolumePercentBuy = pConfigSettings->value(tmpKey).toFloat();
+	}
+
+	tmpKey = pCodec->toUnicode(STOCKAUTO_CONFIG_TRACE_GROUP_VOLUME_BUYWAITS);
+	if (keys.contains(tmpKey))
+	{
+		pConfigTrace->volumeBuyWaits = pConfigSettings->value(tmpKey).toInt();
 	}
 
 	tmpKey = pCodec->toUnicode(STOCKAUTO_CONFIG_TRACE_GROUP_RSI_BUYWAITS);
@@ -315,7 +329,9 @@ void CStockConfig::SaveConfigTrace(QSettings* pConfigSettings, STOCKAUTO_CONFIG_
 	pConfigSettings->setValue(STOCKAUTO_CONFIG_TRACE_GROUP_HIGH_RANGES, QString::number(pConfigTrace->reachHighRanges));
 	pConfigSettings->setValue(STOCKAUTO_CONFIG_TRACE_GROUP_HIGH_LOSTPERCENT, QString::number(pConfigTrace->fHighLostPercent, 'g', 4));
 	pConfigSettings->setValue(STOCKAUTO_CONFIG_TRACE_GROUP_RAISEBALANCE_WAITS, QString::number(pConfigTrace->raiseBalanceWaits));
+	pConfigSettings->setValue(STOCKAUTO_CONFIG_TRACE_GROUP_PREV_VOLUME_PERCENT_LOST, QString::number(pConfigTrace->fPrevVolumePercentLost, 'g', 4));
 	pConfigSettings->setValue(STOCKAUTO_CONFIG_TRACE_GROUP_VOLUME_PERCENT_BUY, QString::number(pConfigTrace->fVolumePercentBuy, 'g', 4));
+	pConfigSettings->setValue(STOCKAUTO_CONFIG_TRACE_GROUP_VOLUME_BUYWAITS, QString::number(pConfigTrace->volumeBuyWaits));
 	pConfigSettings->setValue(STOCKAUTO_CONFIG_TRACE_GROUP_RSI_BUYWAITS, QString::number(pConfigTrace->rsiBuyWaits));
 	pConfigSettings->setValue(STOCKAUTO_CONFIG_TRACE_GROUP_RSI_BUY, QString::number(pConfigTrace->fRsiBuy,'g', 4));
 	pConfigSettings->setValue(STOCKAUTO_CONFIG_TRACE_GROUP_RSI_SELL, QString::number(pConfigTrace->fRsiSell,'g', 4));

@@ -200,8 +200,18 @@ void CStockSettingDilaog::InitTraceTreeWidget(QTreeWidget* pTreeWidget, STOCKAUT
 	pTreeWidget->addTopLevelItem(pItem);
 
 	pItem = new QTreeWidgetItem();
+	pItem->setText(0, pCodec->toUnicode(STOCK_SETTING_DIALOG_EDIT_TRACE_PREVVOLUME_PERCENT_LOST_NAME));
+	pItem->setText(1, QString::number(pConfigTrace->fPrevVolumePercentLost, 'g', 4));
+	pTreeWidget->addTopLevelItem(pItem);
+
+	pItem = new QTreeWidgetItem();
 	pItem->setText(0, pCodec->toUnicode(STOCK_SETTING_DIALOG_EDIT_TRACE_VOLUME_PERCENT_BUY_NAME));
 	pItem->setText(1, QString::number(pConfigTrace->fVolumePercentBuy, 'g', 4));
+	pTreeWidget->addTopLevelItem(pItem);
+
+	pItem = new QTreeWidgetItem();
+	pItem->setText(0, pCodec->toUnicode(STOCK_SETTING_DIALOG_EDIT_TRACE_VOLUMEBUY_WAITS_NAME));
+	pItem->setText(1, QString::number(pConfigTrace->volumeBuyWaits));
 	pTreeWidget->addTopLevelItem(pItem);
 
 	pItem = new QTreeWidgetItem();
@@ -307,9 +317,17 @@ void CStockSettingDilaog::GetTraceConfig(QTreeWidget* pTreeWidget, STOCKAUTO_CON
 	tmpVal = pItem->text(1);
 	pConfigTrace->raiseBalanceWaits = tmpVal.toInt();
 
+	pItem = pTreeWidget->topLevelItem(STOCK_SETTING_DIALOG_EDIT_TRACE_IDX_PREVVOLUMEPERCENT_LOST);
+	tmpVal = pItem->text(1);
+	pConfigTrace->fPrevVolumePercentLost = tmpVal.toFloat();
+
 	pItem = pTreeWidget->topLevelItem(STOCK_SETTING_DIALOG_EDIT_TRACE_IDX_VOLUMEPERCENT_BUY);
 	tmpVal = pItem->text(1);
 	pConfigTrace->fVolumePercentBuy = tmpVal.toFloat();
+
+	pItem = pTreeWidget->topLevelItem(STOCK_SETTING_DIALOG_EDIT_TRACE_IDX_VOLUMEBUY_WAITS);
+	tmpVal = pItem->text(1);
+	pConfigTrace->volumeBuyWaits = tmpVal.toInt();
 
 	pItem = pTreeWidget->topLevelItem(STOCK_SETTING_DIALOG_EDIT_TRACE_IDX_RSIBUY_WAITS);
 	tmpVal = pItem->text(1);
