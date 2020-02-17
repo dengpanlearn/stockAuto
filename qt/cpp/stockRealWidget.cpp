@@ -302,7 +302,7 @@ void CStockRealWidget::OnUpdateStockRealKLine()
 				long long curVol = prevVolBuf[idx--];
 
 				long long diff = curVol - prevVol;
-				tmp += QString::number((double)(diff * 100) / prevVol, 'f', 2);
+				tmp += QString::number((double)(diff * 100) / prevVol, 'f', 1);
 			}
 			else
 				tmp += pCodec->toUnicode(STOCK_REAL_WIDGET_TEXT_DFT);
