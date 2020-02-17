@@ -18,7 +18,7 @@ public:
 
 	virtual void UpdateConfigTrace(STOCKAUTO_CONFIG_TRACE const* pConfigTrace);
 protected:
-	static BOOL IsHisKLineRsiContinueLow(STOCK_CALC_TRACE_KLINE const* pHisKLineEnd, int times, float fRsiLimit);
+	static BOOL IsHisKLineRsiContinueLow(STOCK_CALC_TRACE_KLINE const* pHisKLineEnd, int times, float fRsiLimit, long buyTime);
 
 	virtual void InitStockTrace(STOCK_CALC_TRACE_NODE* pTraceNode);
 	virtual void ResetStockTrace(STOCK_CALC_TRACE_NODE* pTraceNode);

@@ -55,10 +55,13 @@ void CStockTraceReal::UpdateConfigTrace(STOCKAUTO_CONFIG_TRACE const* pConfigTra
 	m_fCutLossAfterTop = pConfigTrace->fCutLossAfterTop;
 }
 
-BOOL CStockTraceReal::IsHisKLineRsiContinueLow(STOCK_CALC_TRACE_KLINE const* pHisKLineEnd, int times, float fRsiLimit)
+BOOL CStockTraceReal::IsHisKLineRsiContinueLow(STOCK_CALC_TRACE_KLINE const* pHisKLineEnd, int times, float fRsiLimit, long buyTime)
 {
 	for (int i = 0; i < times; pHisKLineEnd--)
 	{
+		if (pHisKLineEnd->timeVal <= buyTime)
+			return FALSE;
+
 		if (pHisKLineEnd->fRsi7 > fRsiLimit)
 			return FALSE;
 	}
@@ -283,7 +286,7 @@ BOOL CStockTraceReal::DoTraceRealWork(STOCK_CALC_TRACE_NODE* pTraceNode)
 			m_fCutLossPercent)
 			goto _TRACE_SELL;
 
-		if (IsHisKLineRsiContinueLow(pHisKLineEnd, m_iRsiSellWaits - 1, m_fRsiSell))
+		if (IsHisKLineRsiContinueLow(pHisKLineEnd, m_iRsiSellWaits - 1, m_fRsiSell, pTraceLog->buyTime))
 		{
 			if (pCurKLine->fRsi7 < m_fRsiSell)
 				goto _TRACE_SELL;
