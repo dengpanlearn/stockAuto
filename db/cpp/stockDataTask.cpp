@@ -129,6 +129,7 @@ int CStockDataTask::OnEventActive(UINT cmd, void* param, int paramLen)
 		result = m_pStockData->GetHisKLine(pGetHisKLine->code, pGetHisKLine->pKLineBuf, pGetHisKLine->getCnt);
 		break;
 
+	case STOCK_QT_EVENT_QUERY_STOCK_REALKLINE_PREVKLINE:
 	case STOCK_QT_EVENT_QUERY_STOCK_HISKLINE:
 		result = m_pStockData->GetHisKLine(pQueryHisKLine->code, pQueryHisKLine->pHisKLineBuf, pQueryHisKLine->hisCounts);
 		break;

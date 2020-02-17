@@ -32,7 +32,7 @@ public:
 	void GetAutoManagerLoading(QT_STOCK_LOADING_MANAGER* pLoadingInfo);
 	int GetAckStockTrace(QT_STOCK_TRACE_LOG* pTraceLog, int counts);
 	int	GetStockHisKLine(int count, int offset, STOCK_CALC_TRACE_KLINE* pKLine);
-	BOOL GetStockRealKLine(QT_STOCK_REALKLINE_INFO* pKLineInfo);
+	BOOL GetStockRealKLine(QT_STOCK_REALKLINE_INFO* pKLineInfo, long long* pPrevVolBuf, int& volCounts);
 	BOOL GetStockTraceInfo(QT_STOCK_TRACE_INFO* pTraceInfo);
 	BOOL GetStockSellStat(QT_STOCK_SELLSTAT_INFO_EXE* pSellStat);
 	int	 GetStockTraceRecord(QT_STOCK_TRACERECORD_INFO* pBuf, int offset, int counts);
@@ -53,6 +53,7 @@ private:
 
 	void OnHisKLineQueryResponse(int result, QT_STOCK_HISKLINE_QUERY_PARAM* pHisKLine);
 	void OnRealKLineQueryResponse(int result, QT_STOCK_REALKLINE_QUERY_PARAM* pRealKLine);
+	void OnRealKLinePrevKLineQueryResponse(int result, QT_STOCK_HISKLINE_QUERY_PARAM* pRealKLine);
 	void OnTraceInfoQueryResponse(int result, QT_STOCK_TRACEINFO_QUERY_PARAM* pTraceInfo);
 	void OnSellStatQueryRealKLineResponse(int result, QT_STOCK_REALKLINE_QUERY_PARAM* pRealKLine);
 	void OnSellStatQueryTraceInfoResponse(int result, QT_STOCK_TRACEINFO_QUERY_PARAM* pTraceInfo);

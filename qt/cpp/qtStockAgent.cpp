@@ -135,13 +135,24 @@ int	CQtStockAgent:: GetStockHisKLine(int count, int offset, STOCK_CALC_TRACE_KLI
 	return left;
 }
 
-BOOL CQtStockAgent::GetStockRealKLine(QT_STOCK_REALKLINE_INFO* pKLineInfo)
+BOOL CQtStockAgent::GetStockRealKLine(QT_STOCK_REALKLINE_INFO* pKLineInfo, long long* pPrevVolBuf, int& volCounts)
 {
 	CSingleLock lock(&m_cs, TRUE);
 	if (m_realKLineQueryJob.jobResult < 0)
 		return FALSE;
 
 	memcpy(pKLineInfo, &m_realKLineQueryJob.realKLine, sizeof(QT_STOCK_REALKLINE_INFO));
+
+	int prevCounts = m_realKLineQueryJob.realKLine.hisCounts;
+	int counts = 0;
+	while (counts < prevCounts)
+	{
+		*pPrevVolBuf = m_realKLineQueryJob.realKLine.prevKLine[counts].volume;
+		counts++;
+		pPrevVolBuf++;
+	}
+
+	volCounts = counts;
 	return TRUE;
 }
 
@@ -256,6 +267,10 @@ BOOL CQtStockAgent::QtTaskEventComplete(UINT cmd, int result, void* param, int p
 		pQueryRealKLine->pStockAgent->OnRealKLineQueryResponse(result, pQueryRealKLine);
 		break;
 
+	case STOCK_QT_EVENT_QUERY_STOCK_REALKLINE_PREVKLINE:
+		pQueryHisKLine->pStockAgent->OnRealKLinePrevKLineQueryResponse(result, pQueryHisKLine);
+		break;
+
 	case STOCK_QT_EVENT_QUERY_STOCK_TRACEINFO:
 		pQueryTraceInfo->pStockAgent->OnTraceInfoQueryResponse(result, pQueryTraceInfo);
 		break;
@@ -287,8 +302,37 @@ void CQtStockAgent::OnHisKLineQueryResponse(int result, QT_STOCK_HISKLINE_QUERY_
 
 void CQtStockAgent::OnRealKLineQueryResponse(int result, QT_STOCK_REALKLINE_QUERY_PARAM* pRealKLine)
 {
+	if (result < 0)
+	{
+	_JOB_ERROR:
+		CSingleLock lock(&m_cs, TRUE);
+		m_realKLineQueryJob.jobResult = result;
+		m_updateCmd |= QT_STOCK_AGENT_QUERY_REALKLINE_RESPONESE;
+		return;
+	}
+	if (m_pDataTask == NULL)
+		m_pDataTask = ((CStockAutoManager*)m_pManager)->GetTaskData();
+
+	QT_STOCK_HISKLINE_QUERY_PARAM* pQueryParam = (QT_STOCK_HISKLINE_QUERY_PARAM*)m_pDataTask->AllocPktByEvent(STOCK_QT_EVENT_QUERY_STOCK_REALKLINE_PREVKLINE, sizeof(QT_STOCK_HISKLINE_QUERY_PARAM),
+		QtTaskEventComplete, NULL);
+
+	if (pQueryParam == NULL)
+	{
+		goto _JOB_ERROR;
+	}
+
+	memcpy(pQueryParam->code, pRealKLine->code, sizeof(pRealKLine->code));
+	pQueryParam->hisCounts = QT_STOCK_REALKLINE_INFO_HISKLINES;
+	pQueryParam->pHisKLineBuf = m_realKLineQueryJob.realKLine.prevKLine;
+	pQueryParam->pStockAgent = this;
+	
+	m_pDataTask->PostPktByEvent(pQueryParam);
+}
+
+void CQtStockAgent::OnRealKLinePrevKLineQueryResponse(int result, QT_STOCK_HISKLINE_QUERY_PARAM* pRealKLine)
+{
 	CSingleLock lock(&m_cs, TRUE);
-	m_realKLineQueryJob.jobResult = result;
+	m_realKLineQueryJob.realKLine.hisCounts = result;
 	m_updateCmd |= QT_STOCK_AGENT_QUERY_REALKLINE_RESPONESE;
 }
 

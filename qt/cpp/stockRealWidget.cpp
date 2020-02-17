@@ -65,6 +65,7 @@ void CStockRealWidget::OnInitRealWidget(QWidget* pWidget)
 	QLabel* pLabMA10 = new QLabel(pCodec->toUnicode(STOCK_REAL_WIDGET_LAB_MA10));
 	QLabel* pLabRSI7 = new QLabel(pCodec->toUnicode(STOCK_REAL_WIDGET_LAB_RSI7));
 	QLabel* pLabVol = new QLabel(pCodec->toUnicode(STOCK_REAL_WIDGET_LAB_VOLUME));
+	QLabel* pLabVolPercent = new QLabel(pCodec->toUnicode(STOCK_REAL_WIDGET_LAB_VOLUME_PERCENT));
 	QLabel* pLabData = new QLabel(pCodec->toUnicode(STOCK_REAL_WIDGET_LAB_DATE));
 	QHBoxLayout* pLytCode = new QHBoxLayout();
 	pLytCode->setAlignment(Qt::AlignHCenter);
@@ -101,6 +102,10 @@ void CStockRealWidget::OnInitRealWidget(QWidget* pWidget)
 	pLytVol->addWidget(pLabVol);
 	pLytVol->addWidget(m_pLabCode[STOCK_REAL_WIDGET_INDEX_VOLUME]);
 
+	QHBoxLayout* pLytVolPercent = new QHBoxLayout();
+	pLytVolPercent->addWidget(pLabVolPercent);
+	pLytVolPercent->addWidget(m_pLabCode[STOCK_REAL_WIDGET_INDEX_VOLUME_PERCENT]);
+
 	QHBoxLayout* pLytData = new QHBoxLayout();
 	pLytData->addWidget(pLabData);
 	pLytData->addWidget(m_pLabCode[STOCK_REAL_WIDGET_INDEX_DATE]);
@@ -118,6 +123,7 @@ void CStockRealWidget::OnInitRealWidget(QWidget* pWidget)
 	pLytMain->addLayout(pLytMA10);
 	pLytMain->addLayout(pLytRSI7);
 	pLytMain->addLayout(pLytVol);
+	pLytMain->addLayout(pLytVolPercent);
 	pLytMain->addLayout(pLytData);
 	pLytMain->setMargin(0);
 	pWidget->setLayout(pLytMain);
@@ -240,7 +246,9 @@ void CStockRealWidget::OnUpdateStockRealKLine()
 	QTextCodec* pCodec = QTextCodec::codecForLocale();
 
 	QT_STOCK_REALKLINE_INFO realKLineInfo;
-	if (!pStockAgent->GetStockRealKLine(&realKLineInfo))
+	long long prevVolBuf[QT_STOCK_REALKLINE_INFO_HISKLINES] = {0};
+	int volCounts = 0;
+	if (!pStockAgent->GetStockRealKLine(&realKLineInfo, prevVolBuf, volCounts))
 	{
 		for (int i = 0; i < STOCK_REAL_WIDGET_INDEX_NUM; i++)
 		{
@@ -274,6 +282,39 @@ void CStockRealWidget::OnUpdateStockRealKLine()
 	QString volume = QString::number(((double)(realKLineInfo.realKLine.volume))/100, 'f', 2);
 	m_pLabCode[STOCK_REAL_WIDGET_INDEX_VOLUME]->setText(volume);
 
+	
+	if (volCounts > 0)
+	{
+		QString volPercent;
+		int idx = volCounts - 1;
+		long long prevVol = prevVolBuf[idx];
+
+		long long diff = realKLineInfo.realKLine.volume - prevVol;
+		volPercent = QString::number((double)(diff*100) / prevVol, 'f', 2);
+
+		idx--;
+		int offset = 1;
+		while (offset++ < QT_STOCK_REALKLINE_INFO_HISKLINES)
+		{
+			QString tmp = pCodec->toUnicode("/");
+			if (idx >= 0)
+			{
+				long long curVol = prevVolBuf[idx--];
+
+				long long diff = curVol - prevVol;
+				tmp += QString::number((double)(diff * 100) / prevVol, 'f', 2);
+			}
+			else
+				tmp += pCodec->toUnicode(STOCK_REAL_WIDGET_TEXT_DFT);
+
+			
+			volPercent += tmp;
+		}
+
+		m_pLabCode[STOCK_REAL_WIDGET_INDEX_VOLUME_PERCENT]->setText(volPercent);
+	}
+
+	
 	QDateTime dateVal = QDateTime::fromTime_t(realKLineInfo.realKLine.timeVal);
 	QString date = dateVal.toString("yyyy-MM-d");
 	m_pLabCode[STOCK_REAL_WIDGET_INDEX_DATE]->setText(date);
