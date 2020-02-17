@@ -290,7 +290,7 @@ void CStockRealWidget::OnUpdateStockRealKLine()
 		long long prevVol = prevVolBuf[idx];
 
 		long long diff = realKLineInfo.realKLine.volume - prevVol;
-		volPercent = QString::number((double)(diff*100) / prevVol, 'f', 2);
+		volPercent = QString::number((double)(diff*100) / prevVol, 'f', 1);
 
 		idx--;
 		int offset = 1;
