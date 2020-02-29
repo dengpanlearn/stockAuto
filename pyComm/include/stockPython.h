@@ -7,6 +7,8 @@
 
 #include <dp.h>
 #include <Python.h>
+#include <frameobject.h>
+#include <traceback.h>
 #include <stockCalcDef.h>
 class CStockPython
 {
@@ -24,6 +26,9 @@ public:
 	BOOL UpdateLatestKLineByTime(char const* pStockCode, time_t endTime, int counts);
 
 	BOOL GetLatestKLine(char const* pStockCode, STOCK_CALC_TRACE_KLINE* pCurKLine);
+
+private:
+	static void PrintPythonError();
 
 private:
 	PyObject*	m_pModuleKLine;

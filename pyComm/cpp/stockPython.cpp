@@ -144,10 +144,16 @@ BOOL CStockPython::GetLatestKLine(char const* pStockCode, STOCK_CALC_TRACE_KLINE
 	
 	PyObject* pCode = NULL;
 	PyObject* pItem = NULL;
-	
+
 	PyObject* pRet = PyObject_CallMethod(m_pInstanceKLine, PYTHON_CLASS_WEEK_KLINE_METHOD_LATEST_STOCK_KLINE, "s", pStockCode);
 	if (pRet == NULL)
+	{
+#ifdef _DEBUG
+		PrintPythonError();
+#endif // _DEBUG
+
 		return FALSE;
+	}
 
 	int parseResult  = -1;
 	BOOL bResult = FALSE;
@@ -165,7 +171,7 @@ BOOL CStockPython::GetLatestKLine(char const* pStockCode, STOCK_CALC_TRACE_KLINE
 
 	if (!PyList_Check(pItem))
 		goto _ITEM_ERROR;
-
+	
 	itemSize = PyList_Size(pItem);
 	if (itemSize != STOCK_CALC_TRACE_KLINE_INDEX_NUM)
 		goto _ITEM_ERROR;
@@ -205,7 +211,7 @@ BOOL CStockPython::GetLatestKLine(char const* pStockCode, STOCK_CALC_TRACE_KLINE
 	pItemVal = PyList_GetItem(pItem, STOCK_CALC_TRACE_KLINE_INDEX_RSI7);
 	if (pItemVal != NULL)
 		PyArg_Parse(pItemVal, "f", &pCurKLine->fRsi7);
-	
+
 	bResult = TRUE;
 _ITEM_ERROR:
 //	Py_DECREF(pItem);
@@ -215,4 +221,38 @@ _CODE_ERROR:
 _CODE_NONE:
 	Py_DECREF(pRet);
 	return bResult;
+}
+
+void CStockPython::PrintPythonError()
+{
+	PyObject *type = NULL, *value = NULL, *traceback = NULL;
+
+
+	PyErr_Fetch(&type, &value, &traceback);
+
+	if (type)
+	{
+		printf("%s\n",PyExceptionClass_Name(type));
+	}
+
+	if (value)
+	{
+		PyObject *line = PyObject_Str(value);
+		if (line && (PyUnicode_Check(line)))
+		{
+			printf("%s\n", (char* )PyUnicode_1BYTE_DATA(line));
+		}
+	}
+
+	if (traceback)
+	{
+		for (PyTracebackObject *tb = (PyTracebackObject *)traceback;NULL != tb; tb = tb->tb_next)
+		{
+			PyObject *line = PyUnicode_FromFormat("File \"%U\", line %d, in %U\n",
+				tb->tb_frame->f_code->co_filename,
+				tb->tb_lineno,
+				tb->tb_frame->f_code->co_name);
+			printf("%s\n", (char* )PyUnicode_1BYTE_DATA(line));
+		}
+	}
 }
