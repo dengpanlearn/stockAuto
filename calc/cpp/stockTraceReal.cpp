@@ -57,7 +57,7 @@ void CStockTraceReal::UpdateConfigTrace(STOCKAUTO_CONFIG_TRACE const* pConfigTra
 
 BOOL CStockTraceReal::IsHisKLineRsiContinueLow(STOCK_CALC_TRACE_KLINE const* pHisKLineEnd, int times, float fRsiLimit, long buyTime)
 {
-	for (int i = 0; i < times; pHisKLineEnd--)
+	for (int i = 0; i < times; pHisKLineEnd--, i++)
 	{
 		if (pHisKLineEnd->timeVal <= buyTime)
 			return FALSE;
