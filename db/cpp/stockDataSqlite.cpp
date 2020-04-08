@@ -327,7 +327,7 @@ int CStockDataSqlite::InsertTraceRecord(STOCK_MANAGER_TRACE_LOG* pTraceLogBuf)
 
 int CStockDataSqlite::GetTraceRecord(QT_STOCK_TRACERECORD_INFO* pTraceRecord, int startTime, int endTime, int counts, int offset)
 {
-	QString sqlString = QString("select code,hightime, highval, buytime,buyval, toptime, topval, selltime,sellval from traceRecord where selltime != 0  and buytime > %1 and selltime < %2 order by buytime desc limit %3, %4").arg(startTime).arg(endTime).arg(offset).arg(counts);
+	QString sqlString = QString("select code,hightime, highval, buytime,buyval, toptime, topval, selltime,sellval from traceRecord where selltime != 0  and selltime > %1 and selltime < %2 order by selltime desc limit %3, %4").arg(startTime).arg(endTime).arg(offset).arg(counts);
 	QSqlQuery sqlQuery(m_traceRecordDb);
 
 	if (!sqlQuery.exec(sqlString))
