@@ -199,8 +199,8 @@ BOOL CStockTraceWeek::DoTraceWeekWork(STOCK_CALC_TRACE_NODE* pTraceNode)
 	if (pTraceLog->traceStep <= CALC_STOCK_TRADE_STEP_CHECK_BALANCE_RAISE)
 		pStartTraceKLine++;
 
-	//if (strcmp(pTraceNode->pTraceLog->code, "SZ300416") == 0)
-		//printf("debug\n");
+	if (strcmp(pTraceNode->pTraceLog->code, "SZ002601") == 0)
+		printf("debug\n");
 	do
 	{
 	_AGAIN:

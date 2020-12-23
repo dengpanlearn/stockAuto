@@ -3,4 +3,4 @@
 qt/qss/RC*
 qt/qss/*.aps
 __pycache__
-
+/winprj/

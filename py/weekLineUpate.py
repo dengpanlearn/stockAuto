@@ -53,7 +53,7 @@ class WeekKLineUpdate:
         outDf = DataFrame(columns=['symbol','name'])
         self.headers["Host"] = "xueqiu.com"
         orgUrl = 'https://xueqiu.com/service/v5/stock/screener/quote/list?page={pageNo}&size=90&order=asc&orderby=code&order_by=symbol&market=CN&type=sh_sz&_={curTime}'
-        
+    
         for k in range(1, 50):
             url = orgUrl.format(pageNo=k, curTime = curTime)
             try:
@@ -65,10 +65,16 @@ class WeekKLineUpdate:
             else:
                 if (response.status_code == 200):
                     orgList = response.json().get('data').get('list')
+        
                     if (orgList):
-                        dfPage = DataFrame(orgList)
-                        dfPageExract = dfPage[['symbol','name']]
-                        outDf = outDf.append(dfPageExract, ignore_index = True)
+                        columns = ['symbol', 'name']
+                        selectList = []
+                        for stockInfo in orgList:
+                            if stockInfo['net_profit_cagr']:
+                                tmpItem = {'symbol':stockInfo.get('symbol'),'name': stockInfo.get('name')}
+                                selectList.append(tmpItem);
+                        if selectList:
+                           outDf = outDf.append(selectList, ignore_index = True)
                     else:
                         break
                 else:
@@ -106,7 +112,7 @@ class WeekKLineUpdate:
         curSmaGain = 0
         rsiCycle = 7
         lastClose = 0.1
-    
+        lastMa2 = 0.1
 
         try:
             itemList =  data.get('item')
@@ -121,8 +127,10 @@ class WeekKLineUpdate:
             volumeIndex = columns.index('volume')
          
             for kline in itemList :
+                curMa2 = (kline[closeIndex]+lastClose)/2
+                difMa2Close = curMa2-lastMa2
                 difClose = kline[closeIndex]-lastClose
-                kline[percentIndex]=(difClose*100)/lastClose
+                kline[percentIndex]=(difMa2Close*100)/curMa2
                 curSmaAbs += (math.fabs(difClose)-curSmaAbs)/rsiCycle
                 if (difClose > 0) :
                     curSmaGain += (difClose-curSmaGain)/rsiCycle
@@ -130,6 +138,7 @@ class WeekKLineUpdate:
                     curSmaGain += (0-curSmaGain)/rsiCycle
                 kline.append(curSmaGain*100/curSmaAbs)
                 lastClose = kline[closeIndex]
+                lastMa2 = curMa2
                 
            
             return [itemList[-1][openIndex], itemList[-1][closeIndex], itemList[-1][highIndex], itemList[-1][lowIndex],itemList[-1][percentIndex],itemList[-1][ma10Index], itemList[-1][timestampIndex]//1000,
@@ -162,7 +171,6 @@ class WeekKLineUpdate:
         orgUrl = 'https://stock.xueqiu.com/v5/stock/chart/kline.json?symbol={stockNo}&begin={beginTime}&period=week&type=before&count={counts}&indicator=kline,ma'
         url = orgUrl.format(stockNo=stockNo, beginTime = beginTime, counts=counts)
         self.headers["Host"] = "stock.xueqiu.com"
-     
         try:
             response = self.session.get(url, verify=False, headers = self.headers)
         except (ReadTimeout, ConnectTimeout, ConnectionError, TooManyRedirects):
@@ -180,6 +188,7 @@ class WeekKLineUpdate:
         curSmaGain = 0
         rsiCycle = 7
         lastClose = 0.1
+        lastMa2 = 0.1
         itemList =  data.get('item')
         columns = data.get('column')
 
@@ -190,7 +199,10 @@ class WeekKLineUpdate:
             columns.append('rsi')
             columns.append('time')
             for kline in itemList :
+                curMa2 = (kline[closeIndex]+lastClose)/2
+                difMa2Close = curMa2-lastMa2
                 difClose = kline[closeIndex]-lastClose
+                kline[percentIndex]=(difMa2Close*100)/curMa2
                 curSmaAbs += (math.fabs(difClose)-curSmaAbs)/rsiCycle
                 if (difClose > 0) :
                     curSmaGain += (difClose-curSmaGain)/rsiCycle
@@ -199,9 +211,9 @@ class WeekKLineUpdate:
                 kline.append(curSmaGain*100/curSmaAbs)
                 kline[timestampIndex] =  kline[timestampIndex]//1000
                 timeVal = time.asctime(time.localtime(kline[timestampIndex]))
-                kline[percentIndex] = difClose*100/lastClose
                 kline.append(timeVal)
                 lastClose = kline[closeIndex]
+                lastMa2 = curMa2
                 
             df = DataFrame(itemList, columns=columns)
             stockCode = data.get('symbol')
@@ -216,11 +228,13 @@ class WeekKLineUpdate:
 if __name__ == '__main__':
     weekKLine =   WeekKLineUpdate()
     if (not weekKLine.prepareUpdate('E:\\self\\stock\\data', 'stockList.db', 'kline.db')):
-        """
-        ret = weekKLine.getAndUpdateStockList(int(time.time()))
         
+        ret = weekKLine.getStockList(int(time.time()))
+        print(ret)
+        """
         ret = weekKLine.getAndUpdateWeekKLine('SZ300599', int(time.time()), -1)
        
         ret = weekKLine.getCurWeekKLine('SZ300001')
         """
-        ret = weekKLine.getCurWeekKLine('SZ000724')
+        ret = weekKLine.getCurWeekKLine('SZ000720')
+        
